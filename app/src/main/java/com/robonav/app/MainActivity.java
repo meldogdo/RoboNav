@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                     intent.putExtra("username", username); // Pass username to the next activity
                     startActivity(intent);
+                    finish();
                 }
             }
         });

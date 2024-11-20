@@ -13,4 +13,8 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="email">Email</string>
     <string name="already_have_an_account_login">Already have an account? Login</string>
+    <string name="welcome_to_home">Welcome to Home</string>
+    <string name="home">Home</string>
+    <string name="map">Map</string>
+    <string name="navigation">Navigation</string>
 </resources>
