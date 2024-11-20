@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">RoboNav</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="username_icon">Username Icon</string>
+    <string name="app_logo">App Logo</string>
+    <string name="enter_your_password">Enter your password</string>
+    <string name="password_icon">Password Icon</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="enter_your_username">Enter your username</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="email">Email</string>
+    <string name="already_have_an_account_login">Already have an account? Login</string>
 </resources>
