@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
             Intent homeIntent = new Intent(MainActivity.this, HomeActivity.class);
             homeIntent.putExtra("username", username); // Pass username to the next activity
+            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(homeIntent);
             finish(); // Close MainActivity to prevent going back to login
         });
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Validate username (10–30 alphanumeric characters)
         if (!isValidUsername(username)) {
-            Toast.makeText(this, "Username must be 10-30 alphanumeric characters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Username must be 6-32 alphanumeric characters", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -94,6 +95,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Validate the username
     private boolean isValidUsername(String username) {
-        return username.matches("^[a-zA-Z0-9]{10,30}$");
+        return username.matches("^[a-zA-Z0-9]{6,32}$");
     }
 }

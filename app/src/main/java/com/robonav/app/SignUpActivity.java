@@ -79,7 +79,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Validate username (10–30 alphanumeric characters)
         if (!isValidUsername(username)) {
-            Toast.makeText(this, "Username must be 10-30 alphanumeric characters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Username must be 6-32 alphanumeric characters", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -106,6 +106,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     // Validate the username
     private boolean isValidUsername(String username) {
-        return username.matches("^[a-zA-Z0-9]{10,30}$");
+        return username.matches("^[a-zA-Z0-9]{6,32}$");
     }
 }
