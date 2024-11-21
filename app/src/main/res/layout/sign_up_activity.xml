@@ -12,9 +12,11 @@
         android:id="@+id/logoImageView"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginBottom="25dp"
         android:contentDescription="@string/app_logo"
         android:src="@drawable/logo"
+        app:layout_constraintBottom_toTopOf="@+id/cardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,122 +25,292 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="325dp"
-        android:layout_height="400dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
         app:cardBackgroundColor="@color/gray_medium"
-        app:layout_constraintTop_toBottomOf="@id/logoImageView"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/logoImageView"
+        tools:ignore="VisualLintBounds">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="552dp"
+            tools:ignore="TextSizeCheck">
 
-            <!-- Username Field -->
-            <EditText
-                android:id="@+id/usernameEditText"
+            <!-- Username Field with Icon -->
+            <TextView
+                android:id="@+id/usernameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/username"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/usernameField"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/usernameField"
                 android:layout_width="279dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="16dp"
-                android:hint="@string/username"
-                android:autofillHints="username"
-                android:backgroundTint="@color/white"
-                android:inputType="text"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_light"
-                android:padding="16dp"
-                android:textSize="16sp"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/edittext_background"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/usernameLabel">
 
-            <!-- Email Field -->
-            <EditText
-                android:id="@+id/emailEditText"
+                <ImageView
+                    android:id="@+id/usernameIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="12dp"
+                    android:contentDescription="@string/username_icon"
+                    android:src="@drawable/ic_account"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ImageContrastCheck" />
+
+                <EditText
+                    android:id="@+id/usernameEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp"
+                    android:autofillHints="username"
+                    android:backgroundTint="#00000000"
+                    android:hint="@string/enter_your_username"
+                    android:inputType="text"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="#9E9E9E"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/usernameIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Email Field with Icon -->
+            <TextView
+                android:id="@+id/emailLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/email"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/emailField"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/usernameField" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/emailField"
                 android:layout_width="279dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="16dp"
-                android:hint="@string/email"
-                android:autofillHints="emailAddress"
-                android:backgroundTint="@color/white"
-                android:inputType="textEmailAddress"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_light"
-                android:padding="16dp"
-                android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/usernameEditText"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/edittext_background"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/emailLabel">
 
-            <!-- Password Field -->
-            <EditText
-                android:id="@+id/passwordEditText"
+                <ImageView
+                    android:id="@+id/emailIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="12dp"
+                    android:contentDescription="@string/email_icon"
+                    android:src="@drawable/ic_email"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ImageContrastCheck" />
+
+                <EditText
+                    android:id="@+id/emailEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp"
+                    android:autofillHints="emailAddress"
+                    android:backgroundTint="#00000000"
+                    android:hint="@string/enter_your_email"
+                    android:inputType="textEmailAddress"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="#9E9E9E"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/emailIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Password Field with Icon -->
+            <TextView
+                android:id="@+id/passwordLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/password"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/passwordField"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/emailField" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/passwordField"
                 android:layout_width="279dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="16dp"
-                android:hint="@string/password"
-                android:autofillHints="password"
-                android:backgroundTint="@color/white"
-                android:inputType="textPassword"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_light"
-                android:padding="16dp"
-                android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/emailEditText"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/edittext_background"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/passwordLabel">
 
-            <!-- Confirm Password Field -->
-            <EditText
-                android:id="@+id/confirmPasswordEditText"
+                <ImageView
+                    android:id="@+id/passwordIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="12dp"
+                    android:contentDescription="@string/password_icon"
+                    android:src="@drawable/ic_lock"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ImageContrastCheck" />
+
+                <EditText
+                    android:id="@+id/passwordEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp"
+                    android:autofillHints="password"
+                    android:backgroundTint="#00000000"
+                    android:hint="@string/enter_your_password"
+                    android:inputType="textPassword"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="#9E9E9E"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/passwordIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Add Password and Confirm Password Fields with similar structure -->
+            <TextView
+                android:id="@+id/confirmPasswordLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/confirm_password"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/confirmPasswordField"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/passwordField" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/confirmPasswordField"
                 android:layout_width="279dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="16dp"
-                android:hint="@string/confirm_password"
-                android:autofillHints="password"
-                android:backgroundTint="@color/white"
-                android:inputType="textPassword"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_light"
-                android:padding="16dp"
-                android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/edittext_background"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/confirmPasswordLabel">
 
+                <ImageView
+                    android:id="@+id/confirmPasswordIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="12dp"
+                    android:contentDescription="@string/confirm_password_icon"
+                    android:src="@drawable/ic_lock"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ImageContrastCheck" />
+
+                <EditText
+                    android:id="@+id/confirmPasswordEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp"
+                    android:autofillHints="password"
+                    android:backgroundTint="#00000000"
+                    android:hint="@string/re_enter_your_password"
+                    android:inputType="textPassword"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="#9E9E9E"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/confirmPasswordIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
             <!-- Sign Up Button -->
+
             <Button
                 android:id="@+id/signUpButton"
                 android:layout_width="279dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="125dp"
                 android:backgroundTint="@color/blue_dark"
                 android:text="@string/sign_up"
                 android:textColor="@color/white"
-                android:textSize="16sp"
-                app:cornerRadius="4dp"
-                app:layout_constraintTop_toBottomOf="@id/confirmPasswordEditText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/passwordField"
+                app:layout_constraintVertical_bias="0.0" />
 
+            <TextView
+                android:id="@+id/loginTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="27dp"
+                android:layout_marginEnd="64dp"
+                android:layout_marginBottom="27dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:minHeight="48dp"
+                android:text="@string/already_have_an_account_login"
+                android:textColor="@color/gray_light"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/signUpButton"
+                app:layout_constraintVertical_bias="1.0"
+                tools:ignore="TextContrastCheck" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Login Text -->
-    <TextView
-        android:id="@+id/loginTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/already_have_an_account_login"
-        android:textColor="@color/gray_light"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/cardView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+    <!-- Already Have an Account -->
 </androidx.constraintlayout.widget.ConstraintLayout>

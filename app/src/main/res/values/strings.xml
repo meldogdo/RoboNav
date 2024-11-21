@@ -17,4 +17,10 @@
     <string name="home">Home</string>
     <string name="map">Map</string>
     <string name="navigation">Navigation</string>
+    <string name="re_enter_your_password">Re-enter your password</string>
+    <string name="confirm_password_icon">Confirm Password Icon</string>
+    <string name="email_icon">Email Icon</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="submit">Submit</string>
+
 </resources>
