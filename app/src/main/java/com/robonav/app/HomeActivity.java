@@ -1,13 +1,18 @@
 package com.robonav.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import java.util.Objects;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -18,15 +23,35 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // Get the username from the Intent
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("username");
+
         // Initialize the ViewPager2
         viewPager = findViewById(R.id.view_pager);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        // Set up the toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar); // Connect the toolbar to the activity
+        Objects.requireNonNull(getSupportActionBar()).setTitle("RoboNav Dashboard");
+        Objects.requireNonNull(getSupportActionBar()).setSubtitle("Welcome to RoboNav, " + username + "!");
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
+        toolbar.setSubtitleTextColor(ContextCompat.getColor(this, R.color.gray_high_contrast));
+
+        // Ensure the changes are visible as soon as the window is in focus
+        toolbar.post(() -> {
+            // Update the title and subtitle immediately after the layout is drawn
+            Objects.requireNonNull(getSupportActionBar()).setTitle("RoboNav Dashboard");
+            Objects.requireNonNull(getSupportActionBar()).setSubtitle("Welcome to RoboNav, " + username + "!");
+        });
+
         // Set the adapter for ViewPager2
-        FragmentStateAdapter adapter = new FragmentStateAdapter(getSupportFragmentManager(), getLifecycle()) {
+        viewPager.setAdapter(new FragmentStateAdapter(getSupportFragmentManager(), getLifecycle()) {
             @NonNull
             @Override
             public Fragment createFragment(int position) {
+                // Use if-else to select the correct fragment
                 if (position == 0) {
                     return new HomeFragment(); // Fragment 1: Home
                 } else if (position == 1) {
@@ -42,16 +67,14 @@ public class HomeActivity extends AppCompatActivity {
             public int getItemCount() {
                 return 3; // Number of fragments you want to swipe between
             }
-        };
+        });
 
-        // Set the adapter on ViewPager2
-        viewPager.setAdapter(adapter);
-
-        // Sync ViewPager2 with BottomNavigationView
+        // Sync ViewPager2 with BottomNavigationView using if-else
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                // Switch fragments using if-else
                 if (position == 0) {
                     bottomNavigationView.setSelectedItemId(R.id.nav_home);
                 } else if (position == 1) {
@@ -62,10 +85,11 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        // Sync BottomNavigationView with ViewPager2
+        // Sync BottomNavigationView with ViewPager2 using if-else
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId(); // Get the ID of the clicked item
 
+            // Use if-else for checking navigation items
             if (itemId == R.id.nav_home) {
                 viewPager.setCurrentItem(0); // Navigate to HomeFragment
                 return true;
@@ -79,5 +103,29 @@ public class HomeActivity extends AppCompatActivity {
                 return false; // Return false if no matching ID
             }
         });
+
+        // Set OnClickListener for the logout button (use if-else)
+        findViewById(R.id.signOutIcon).setOnClickListener(v -> showLogoutConfirmationDialog());
+    }
+
+    // Method to show the logout confirmation dialog
+    private void showLogoutConfirmationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm Logout")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Yes", (dialog, which) -> logout())  // If user clicks "Yes", log them out
+                .setNegativeButton("No", null)  // If user clicks "No", just dismiss the dialog
+                .show();
+    }
+
+    // Method to log the user out and navigate to MainActivity
+    private void logout() {
+        // Optionally, clear any saved session or user data (e.g., SharedPreferences or clearing user session)
+
+        // Navigate to MainActivity
+        Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the back stack so the user cannot go back to HomeActivity
+        startActivity(intent);
+        finish(); // Finish HomeActivity so the user cannot return to it
     }
 }

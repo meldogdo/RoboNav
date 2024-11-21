@@ -13,5 +13,16 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
         <item name="android:navigationBarColor">@color/gray_medium</item>
+
+        <!-- Dialog customization -->
+        <item name="alertDialogTheme">@style/CustomAlertDialog</item>
+    </style>
+
+    !-- Custom theme for AlertDialog -->
+    <style name="CustomAlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="colorPrimary">@color/black</item>  <!-- Use your primary color -->
+        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorAccent">@color/black   </item>
+        <item name="android:textColorPrimary">@color/black</item>  <!-- Text color -->
     </style>
 </resources>
