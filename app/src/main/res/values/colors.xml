@@ -6,6 +6,7 @@
     <color name="blue_dark_dark">#1b1956</color>
     <color name="blue_light">#03A9F4</color>
     <color name="teal">#88F4FD</color>
+    <color name="highlight_color">#88F4FD</color>
 
     <!-- Shades of Gray -->
     <color name="gray_dark">#2B2A31</color>

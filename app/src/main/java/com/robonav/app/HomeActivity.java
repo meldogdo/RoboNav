@@ -47,19 +47,36 @@ public class HomeActivity extends AppCompatActivity {
         // Set the adapter on ViewPager2
         viewPager.setAdapter(adapter);
 
-        // Optional: Sync BottomNavigation with ViewPager2 using if-else
+        // Sync ViewPager2 with BottomNavigationView
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 0) {
+                    bottomNavigationView.setSelectedItemId(R.id.nav_home);
+                } else if (position == 1) {
+                    bottomNavigationView.setSelectedItemId(R.id.nav_map);
+                } else if (position == 2) {
+                    bottomNavigationView.setSelectedItemId(R.id.nav_navigation);
+                }
+            }
+        });
+
+        // Sync BottomNavigationView with ViewPager2
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_home) {
+            int itemId = item.getItemId(); // Get the ID of the clicked item
+
+            if (itemId == R.id.nav_home) {
                 viewPager.setCurrentItem(0); // Navigate to HomeFragment
                 return true;
-            } else if (item.getItemId() == R.id.nav_map) {
+            } else if (itemId == R.id.nav_map) {
                 viewPager.setCurrentItem(1); // Navigate to MapFragment
                 return true;
-            } else if (item.getItemId() == R.id.nav_navigation) {
+            } else if (itemId == R.id.nav_navigation) {
                 viewPager.setCurrentItem(2); // Navigate to NavigationFragment
                 return true;
             } else {
-                return false;
+                return false; // Return false if no matching ID
             }
         });
     }
