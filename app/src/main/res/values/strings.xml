@@ -22,5 +22,6 @@
     <string name="email_icon">Email Icon</string>
     <string name="enter_your_email">Enter your email</string>
     <string name="submit">Submit</string>
+    <string name="back_to_login">Back to Login</string>
 
 </resources>
