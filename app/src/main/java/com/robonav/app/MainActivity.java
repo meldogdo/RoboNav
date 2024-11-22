@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.Window;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,6 +17,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // Setting window navbar colour
+        Window window = getWindow();
+        window.setNavigationBarColor(getColor(R.color.gray_dark));
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
