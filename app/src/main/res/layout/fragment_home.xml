@@ -78,32 +78,89 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:text="Ping: 35ms"
                     android:textColor="@color/gray_high_contrast"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Battery: 47%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
 
-                <TextView
+                    <!-- ImageView for Battery Icon -->
+                    <ImageView
+                        android:id="@+id/battery_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_battery"
+                        android:contentDescription="Battery Icon"
+                        android:layout_marginEnd="8dp"
+                    />
+
+                    <!-- TextView for Battery -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Battery: 47%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Task: Moving"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
 
-                <TextView
+                    <!-- Icon for Task -->
+                    <ImageView
+                        android:id="@+id/task_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_navigation"
+                        android:contentDescription="Task Icon"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- TextView for Task -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Moving"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Location: Right Atrium"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Icon for Location -->
+                    <ImageView
+                        android:id="@+id/location_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_location"
+                        android:contentDescription="Location Icon"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- TextView for Location -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Location: Right Atrium"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Robot 2 -->
@@ -127,32 +184,89 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:text="Ping: 50ms"
                     android:textColor="@color/gray_high_contrast"
                     android:textSize="16sp" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Battery: 82%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Task: Scanning"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    <!-- ImageView for Battery Icon -->
+                    <ImageView
+                        android:id="@+id/battery_icon2"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_battery"
+                        android:contentDescription="Battery Icon"
+                        android:layout_marginEnd="8dp"
+                        />
 
-                <TextView
+                    <!-- TextView for Battery -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Battery: 82%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Location: Hallway"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Icon for Task -->
+                    <ImageView
+                        android:id="@+id/task_icon2"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_navigation"
+                        android:contentDescription="Task Icon"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- TextView for Task -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Scanning"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Icon for Location -->
+                    <ImageView
+                        android:id="@+id/location_icon2"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_location"
+                        android:contentDescription="Location Icon"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- TextView for Location -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Location: Left Atrium"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Robot 3 -->
@@ -176,32 +290,89 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:text="Ping: 42ms"
                     android:textColor="@color/gray_high_contrast"
                     android:textSize="16sp" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Battery: 65%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Task: Delivering"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    <!-- ImageView for Battery Icon -->
+                    <ImageView
+                        android:id="@+id/battery_icon3"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_battery"
+                        android:contentDescription="Battery Icon"
+                        android:layout_marginEnd="8dp"
+                        />
 
-                <TextView
+                    <!-- TextView for Battery -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Battery: 65%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Location: Main Lab"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Icon for Task -->
+                    <ImageView
+                        android:id="@+id/task_icon3"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_navigation"
+                        android:contentDescription="Task Icon"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- TextView for Task -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Delivering"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Icon for Location -->
+                    <ImageView
+                        android:id="@+id/location_icon3"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_location"
+                        android:contentDescription="Location Icon"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- TextView for Location -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Location: Main Lab"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Add more robot boxes as needed -->
@@ -217,7 +388,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title_robot_tasks"
-        tools:ignore="ExtraText">>
+        tools:ignore="ExtraText">
 
         <LinearLayout
             android:id="@+id/task_container"
@@ -226,139 +397,216 @@
             android:background="@color/gray_medium"
             android:elevation="8dp"
             android:orientation="vertical"
-            android:padding="8dp">>
+            android:padding="8dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="8dp"
-                android:background="@color/gray_dark"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Task: Deliver Supplies"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Robot: Robot #3"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Progress: 30%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
+            <!-- Task 1 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Task: Transport Package"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/gray_dark"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Deliver Supplies"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Robot: Robot #3"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Progress: 30%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Image at bottom-right without expanding the layout -->
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="end|bottom"
                     android:layout_marginTop="8dp"
-                    android:text="Robot: Robot #1"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Progress: 50%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:contentDescription="Robot Icon"
+                    android:src="@drawable/ic_home" />
             </LinearLayout>
 
+            <!-- Task 2 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Task: Map Area"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/gray_dark"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Transport Package"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Robot: Robot #1"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Progress: 50%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Image at bottom-right -->
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="end|bottom"
                     android:layout_marginTop="8dp"
-                    android:text="Robot: Robot #2"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Progress: 75%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:contentDescription="Robot Icon"
+                    android:src="@drawable/ic_home" />
             </LinearLayout>
 
+            <!-- Task 3 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Task: Deliver Supplies"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/gray_dark"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Map Area"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Robot: Robot #2"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Progress: 75%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Image at bottom-right -->
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="end|bottom"
                     android:layout_marginTop="8dp"
-                    android:text="Robot: Robot #3"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Progress: 30%"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
+                    android:contentDescription="Robot Icon"
+                    android:src="@drawable/ic_home" />
             </LinearLayout>
+
+            <!-- Task 4 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@color/gray_dark"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/gray_dark"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task: Deliver Supplies"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Robot: Robot #3"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Progress: 30%"
+                        android:textColor="#CCCCCC"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Image at bottom-right -->
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="end|bottom"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="Robot Icon"
+                    android:src="@drawable/ic_home" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
