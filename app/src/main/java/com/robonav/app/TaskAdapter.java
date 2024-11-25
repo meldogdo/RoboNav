@@ -34,7 +34,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         View view = LayoutInflater.from(context).inflate(R.layout.task_item, parent, false);
         return new TaskViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = taskList.get(position);
@@ -42,9 +41,29 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Bind data to the task card
         holder.taskNameTextView.setText(task.getName());
         holder.taskRobotTextView.setText("Robot: " + task.getRobot());
-        holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
 
-        // Handle click to show task popup
+        if (task.getProgress() >= 0) {
+            // Show progress bar and set progress
+            holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
+            holder.taskProgressBar.setIndeterminate(false);
+            holder.taskProgressBar.setVisibility(View.VISIBLE);
+            holder.taskProgressBar.setProgress(task.getProgress());
+            holder.taskIconImageView.setVisibility(View.GONE);
+        } else {
+            holder.taskProgressBar.setVisibility(View.GONE);
+
+            if (task.getProgress() == -1) {
+                holder.taskProgressTextView.setText("Status: Stopped");
+                holder.taskIconImageView.setVisibility(View.VISIBLE);
+                holder.taskIconImageView.setImageResource(R.drawable.ic_error);
+            } else if (task.getProgress() == -2) {
+                holder.taskProgressTextView.setText("Status: Queued");
+                holder.taskIconImageView.setVisibility(View.VISIBLE);
+                holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
+            }
+        }
+
+        // Set click listener to show popup
         holder.itemView.setOnClickListener(view -> showTaskPopup(view, task));
     }
 
@@ -56,6 +75,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     // ViewHolder class
     static class TaskViewHolder extends RecyclerView.ViewHolder {
         TextView taskNameTextView, taskRobotTextView, taskProgressTextView;
+        ProgressBar taskProgressBar;
         ImageView taskIconImageView;
 
         public TaskViewHolder(@NonNull View itemView) {
@@ -63,9 +83,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             taskNameTextView = itemView.findViewById(R.id.task_name);
             taskRobotTextView = itemView.findViewById(R.id.task_robot);
             taskProgressTextView = itemView.findViewById(R.id.task_progress);
+            taskProgressBar = itemView.findViewById(R.id.task_progress_bar);
             taskIconImageView = itemView.findViewById(R.id.task_icon);
         }
     }
+
 
     // Show popup method with animations
     private void showTaskPopup(View anchorView, Task task) {
@@ -80,11 +102,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView titleView = popupView.findViewById(R.id.popup_title);
         ProgressBar progressBar = popupView.findViewById(R.id.progress_bar);
         TextView progressStatus = popupView.findViewById(R.id.progress_status);
+        TextView expectedEndTimeView = popupView.findViewById(R.id.expected_end_time);
+        TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
 
+        // Bind data
         titleView.setText(task.getName());
         progressBar.setProgress(task.getProgress());
         progressStatus.setText("Progress: " + task.getProgress() + "%");
+        expectedEndTimeView.setText("Expected End Time: " + task.getExpectedEndTime());
+        responsibleRobotView.setText("Completed By: " + task.getResponsibleRobot());
 
         // Handle swipe-down icon click
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));
@@ -106,7 +133,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Show the popup
         popupWindow.showAtLocation(anchorView, Gravity.BOTTOM, 0, 0);
     }
-
     // Dismiss popup with slide-down animation
     private void dismissWithAnimation(View popupView, PopupWindow popupWindow) {
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);

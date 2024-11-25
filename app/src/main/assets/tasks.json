@@ -3,13 +3,13 @@
     "id": "task_1",
     "name": "Deliver Supplies",
     "robot": "Robot #3",
-    "progress": 50
+    "progress": -2
   },
   {
     "id": "task_2",
     "name": "Transport Package",
     "robot": "Robot #1",
-    "progress": 30
+    "progress": -1
   },
   {
     "id": "task_3",
