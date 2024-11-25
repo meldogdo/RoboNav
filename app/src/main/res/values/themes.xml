@@ -12,7 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-        <item name="android:navigationBarColor">@color/gray_medium</item>
+        <item name="android:navigationBarColor">@color/gray_dark</item>
 
         <!-- Dialog customization -->
         <item name="alertDialogTheme">@style/CustomAlertDialog</item>

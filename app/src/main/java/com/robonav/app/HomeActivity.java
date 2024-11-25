@@ -2,6 +2,7 @@ package com.robonav.app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +21,9 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Setting window navbar colour
+        Window window = getWindow();
+        window.setNavigationBarColor(getColor(R.color.gray_medium));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 

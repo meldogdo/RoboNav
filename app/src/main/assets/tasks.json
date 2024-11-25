@@ -1,0 +1,32 @@
+[
+  {
+    "id": "task_1",
+    "name": "Deliver Supplies",
+    "robot": "Robot #3",
+    "progress": 50
+  },
+  {
+    "id": "task_2",
+    "name": "Transport Package",
+    "robot": "Robot #1",
+    "progress": 30
+  },
+  {
+    "id": "task_3",
+    "name": "Map Area",
+    "robot": "Robot #2",
+    "progress": 75
+  },
+  {
+    "id": "task_4",
+    "name": "Grab toys",
+    "robot": "Robot #3",
+    "progress": 80
+  },
+  {
+    "id": "task_5",
+    "name": "Get me coffee",
+    "robot": "Robot #1",
+    "progress": 90
+  }
+]
