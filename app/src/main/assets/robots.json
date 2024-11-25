@@ -4,23 +4,23 @@
     "name": "Robot #1",
     "ping": "35ms",
     "battery": 100,
-    "task": "Moving",
-    "location": "Right Atrium"
+    "location": "Right Atrium",
+    "tasks": ["task_2", "task_5"]
   },
   {
     "id": "robot_2",
     "name": "Robot #2",
     "ping": "50ms",
     "battery": 50,
-    "task": "Scanning",
-    "location": "Left Atrium"
+    "location": "Left Atrium",
+    "tasks": ["task_3"]
   },
   {
     "id": "robot_3",
     "name": "Robot #3",
     "ping": "42ms",
     "battery": 15,
-    "task": "Delivering",
-    "location": "Main Lab"
+    "location": "Main Lab",
+    "tasks": ["task_1", "task_4"]
   }
 ]

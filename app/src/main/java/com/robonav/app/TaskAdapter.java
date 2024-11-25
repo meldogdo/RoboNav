@@ -1,5 +1,8 @@
 package com.robonav.app;
 
+import static com.robonav.app.Task.getRobotForTask;
+
+
 import android.content.Context;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,9 +26,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private final Context context;
     private final List<Task> taskList;
 
-    public TaskAdapter(Context context, List<Task> taskList) {
+    private final List<Robot> robotList;
+
+
+    public TaskAdapter(Context context, List<Task> taskList,List<Robot> robotList) {
         this.context = context;
         this.taskList = taskList;
+        this.robotList = robotList;
     }
 
     @NonNull
@@ -34,13 +41,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         View view = LayoutInflater.from(context).inflate(R.layout.task_item, parent, false);
         return new TaskViewHolder(view);
     }
+
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = taskList.get(position);
 
         // Bind data to the task card
         holder.taskNameTextView.setText(task.getName());
-        holder.taskRobotTextView.setText("Robot: " + task.getRobot());
+        holder.taskRobotTextView.setText("Robot: " + getRobotForTask(task, robotList).getName());
+        holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
 
         if (task.getProgress() >= 0) {
             // Show progress bar and set progress
@@ -51,7 +60,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.taskIconImageView.setVisibility(View.GONE);
         } else {
             holder.taskProgressBar.setVisibility(View.GONE);
-
             if (task.getProgress() == -1) {
                 holder.taskProgressTextView.setText("Status: Stopped");
                 holder.taskIconImageView.setVisibility(View.VISIBLE);
@@ -110,8 +118,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         titleView.setText(task.getName());
         progressBar.setProgress(task.getProgress());
         progressStatus.setText("Progress: " + task.getProgress() + "%");
-        expectedEndTimeView.setText("Expected End Time: " + task.getExpectedEndTime());
-        responsibleRobotView.setText("Completed By: " + task.getResponsibleRobot());
+        expectedEndTimeView.setText("Expected End Time: " + "task.getExpectedEndTime()");
+        responsibleRobotView.setText("Completed By: " + "ms ksnsk");
 
         // Handle swipe-down icon click
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));
@@ -133,6 +141,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Show the popup
         popupWindow.showAtLocation(anchorView, Gravity.BOTTOM, 0, 0);
     }
+
     // Dismiss popup with slide-down animation
     private void dismissWithAnimation(View popupView, PopupWindow popupWindow) {
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);
