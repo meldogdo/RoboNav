@@ -25,4 +25,9 @@
         <item name="colorAccent">@color/black   </item>
         <item name="android:textColorPrimary">@color/black</item>  <!-- Text color -->
     </style>
+    <style name="PopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+
 </resources>

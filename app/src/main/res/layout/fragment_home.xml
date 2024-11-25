@@ -47,7 +47,9 @@
         android:elevation="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_robot_info">
+        app:layout_constraintTop_toBottomOf="@+id/title_robot_info"
+        android:focusableInTouchMode="true"
+        android:descendantFocusability="blocksDescendants">
 
         <LinearLayout
             android:id="@+id/robot_container"
@@ -64,7 +66,11 @@
                 android:layout_marginEnd="8dp"
                 android:background="@color/gray_medium"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                >
+
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -170,7 +176,10 @@
                 android:layout_marginEnd="8dp"
                 android:background="@color/gray_medium"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
+
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -276,7 +285,9 @@
                 android:layout_marginEnd="8dp"
                 android:background="@color/gray_medium"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -406,7 +417,9 @@
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -458,7 +471,9 @@
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -510,7 +525,9 @@
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -562,7 +579,9 @@
                 android:layout_marginBottom="8dp"
                 android:background="@color/gray_dark"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <LinearLayout
                     android:layout_width="0dp"
