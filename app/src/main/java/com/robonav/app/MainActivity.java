@@ -81,23 +81,35 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        // Validate username (10–30 alphanumeric characters)
+        // Validate username (4–20 alphanumeric characters)
         if (!isValidUsername(username)) {
-            Toast.makeText(this, "Username must be 6-32 alphanumeric characters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Username must be between 4-20 alphanumeric characters.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         // Validate password length
-        if (password.length() < 8) {
-            Toast.makeText(this, "Password must be at least 8 characters long", Toast.LENGTH_SHORT).show();
+        if (!isValidPassword(password)) {
+            // Check if the password is too short or too long, contains spaces, or invalid characters
+            if (password.length() < 6 || password.length() > 20) {
+                Toast.makeText(this, "Password must be between 6 and 20 characters.", Toast.LENGTH_SHORT).show();
+            } else if (password.contains(" ")) {
+                Toast.makeText(this, "Password cannot contain spaces.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Password contains invalid characters. Only letters, numbers, and special characters (@, #, !, $, %, ^, &, *, etc.) are allowed.", Toast.LENGTH_SHORT).show();
+            }
             return false;
         }
 
         return true; // All validations passed
     }
 
-    // Validate the username
     private boolean isValidUsername(String username) {
-        return username.matches("^[a-zA-Z0-9]{6,32}$");
+        return username.matches("^[a-zA-Z0-9]{4,20}$");
     }
+
+    private boolean isValidPassword(String password) {
+        // Check if password length is between 6 and 20, contains no spaces, or invalid characters
+        return password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$");
+    }
+
 }
