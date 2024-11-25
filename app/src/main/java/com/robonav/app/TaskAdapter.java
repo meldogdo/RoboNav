@@ -1,9 +1,8 @@
 package com.robonav.app;
 
-import static com.robonav.app.Task.getRobotForTask;
-
-
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,11 +24,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     private final Context context;
     private final List<Task> taskList;
-
     private final List<Robot> robotList;
 
-
-    public TaskAdapter(Context context, List<Task> taskList,List<Robot> robotList) {
+    public TaskAdapter(Context context, List<Task> taskList, List<Robot> robotList) {
         this.context = context;
         this.taskList = taskList;
         this.robotList = robotList;
@@ -45,20 +42,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = taskList.get(position);
+        Robot responsibleRobot = getRobotForTask(task);
 
-        // Bind data to the task card
+        // Bind task and robot data
         holder.taskNameTextView.setText(task.getName());
-        holder.taskRobotTextView.setText("Robot: " + getRobotForTask(task, robotList).getName());
+        holder.taskRobotTextView.setText("Robot: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown Robot"));
         holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
 
         if (task.getProgress() >= 0) {
-            // Show progress bar and set progress
-            holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
+            // Show progress bar
             holder.taskProgressBar.setIndeterminate(false);
             holder.taskProgressBar.setVisibility(View.VISIBLE);
             holder.taskProgressBar.setProgress(task.getProgress());
             holder.taskIconImageView.setVisibility(View.GONE);
         } else {
+            // Hide progress bar for non-progress states
             holder.taskProgressBar.setVisibility(View.GONE);
             if (task.getProgress() == -1) {
                 holder.taskProgressTextView.setText("Status: Stopped");
@@ -72,12 +70,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
 
         // Set click listener to show popup
-        holder.itemView.setOnClickListener(view -> showTaskPopup(view, task));
+        holder.itemView.setOnClickListener(view -> showTaskPopup(view, task, responsibleRobot));
     }
 
     @Override
     public int getItemCount() {
         return taskList.size();
+    }
+
+    // Utility function to find the robot responsible for the task
+    private Robot getRobotForTask(Task task) {
+        for (Robot robot : robotList) {
+            if (robot.getId().equals(task.getRobotId())) {
+                return robot;
+            }
+        }
+        return null; // Return null if no robot is found
     }
 
     // ViewHolder class
@@ -96,9 +104,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
     }
 
-
     // Show popup method with animations
-    private void showTaskPopup(View anchorView, Task task) {
+    private void showTaskPopup(View anchorView, Task task, Robot responsibleRobot) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.task_popup_layout, null);
 
         PopupWindow popupWindow = new PopupWindow(popupView,
@@ -114,12 +121,27 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
 
-        // Bind data
+        // Bind task and robot data
         titleView.setText(task.getName());
-        progressBar.setProgress(task.getProgress());
-        progressStatus.setText("Progress: " + task.getProgress() + "%");
-        expectedEndTimeView.setText("Expected End Time: " + "task.getExpectedEndTime()");
-        responsibleRobotView.setText("Completed By: " + "ms ksnsk");
+        expectedEndTimeView.setText("Expected End Time: " + "12:00 PM"); // Replace with actual data if available
+        responsibleRobotView.setText("Completed By: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown"));
+
+        // Customize progress bar based on task progress
+        if (task.getProgress() == -2) {
+            progressBar.setIndeterminate(true); // Optional for animation
+            progressBar.setProgressDrawable(context.getDrawable(R.drawable.dotted_progress_bar));
+            progressStatus.setText("Status: Queued");
+        } else if (task.getProgress() == -1) {
+            progressBar.setIndeterminate(false);
+            progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
+            progressBar.setProgress(100);
+            progressStatus.setText("Status: Stopped");
+
+        } else {
+            progressBar.setIndeterminate(false);
+            progressBar.setProgress(task.getProgress());
+            progressStatus.setText("Progress: " + task.getProgress() + "%");
+        }
 
         // Handle swipe-down icon click
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));
@@ -141,8 +163,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Show the popup
         popupWindow.showAtLocation(anchorView, Gravity.BOTTOM, 0, 0);
     }
-
-    // Dismiss popup with slide-down animation
     private void dismissWithAnimation(View popupView, PopupWindow popupWindow) {
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);
         slideDown.setAnimationListener(new Animation.AnimationListener() {
@@ -162,7 +182,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         popupView.startAnimation(slideDown);
     }
 
-    // Check if touch event is inside popup bounds
     private boolean isInsideViewBounds(View view, MotionEvent event) {
         int[] location = new int[2];
         view.getLocationOnScreen(location);
