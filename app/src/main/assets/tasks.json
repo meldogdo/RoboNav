@@ -2,31 +2,31 @@
   {
     "id": "task_1",
     "name": "Deliver Supplies",
-    "robot": "Robot #3",
+    "robot": "robot_3",
     "progress": 50
   },
   {
     "id": "task_2",
     "name": "Transport Package",
-    "robot": "Robot #1",
+    "robot": "robot_1",
     "progress": 30
   },
   {
     "id": "task_3",
     "name": "Map Area",
-    "robot": "Robot #2",
-    "progress": 75
+    "robot": "robot_2",
+    "progress": 65
   },
   {
     "id": "task_4",
     "name": "Grab toys",
-    "robot": "Robot #3",
-    "progress": 80
+    "robot": "robot_3",
+    "progress": -2
   },
   {
     "id": "task_5",
     "name": "Get me coffee",
-    "robot": "Robot #1",
-    "progress": 90
+    "robot": "robot_1",
+    "progress": -1
   }
 ]

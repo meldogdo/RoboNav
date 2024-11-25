@@ -35,10 +35,6 @@ public class HomeFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        RobotAdapter robotAdapter = new RobotAdapter(getContext(), robotList);
-        robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        robotRecyclerView.setAdapter(robotAdapter);
-
         // Task RecyclerView setup
         RecyclerView taskRecyclerView = rootView.findViewById(R.id.task_recycler_view);
         String taskJson = JsonUtils.loadJSONFromAsset(requireContext(), "tasks.json");
@@ -51,10 +47,13 @@ public class HomeFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        TaskAdapter taskAdapter = new TaskAdapter(getContext(), taskList);
+        TaskAdapter taskAdapter = new TaskAdapter(getContext(), taskList, robotList);
         taskRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         taskRecyclerView.setAdapter(taskAdapter);
 
+        RobotAdapter robotAdapter = new RobotAdapter(getContext(), robotList, taskList);
+        robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        robotRecyclerView.setAdapter(robotAdapter);
         return rootView;
     }
 }

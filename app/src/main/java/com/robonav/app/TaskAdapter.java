@@ -1,5 +1,7 @@
 package com.robonav.app;
 
+import static com.robonav.app.Task.getRobotForTask;
+
 import android.content.Context;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,9 +25,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private final Context context;
     private final List<Task> taskList;
 
-    public TaskAdapter(Context context, List<Task> taskList) {
+    private final List<Robot> robotList;
+
+
+    public TaskAdapter(Context context, List<Task> taskList,List<Robot> robotList) {
         this.context = context;
         this.taskList = taskList;
+        this.robotList = robotList;
     }
 
     @NonNull
@@ -41,7 +47,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         // Bind data to the task card
         holder.taskNameTextView.setText(task.getName());
-        holder.taskRobotTextView.setText("Robot: " + task.getRobot());
+        holder.taskRobotTextView.setText("Robot: " + getRobotForTask(task, robotList).getName());
         holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
 
         // Handle click to show task popup

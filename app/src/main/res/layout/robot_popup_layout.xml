@@ -19,12 +19,12 @@
         android:id="@+id/popup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Robot Info"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
         android:textColor="@color/black"
-        android:layout_marginTop="8dp" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
+    <!-- Progress Bar Section -->
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -39,7 +39,85 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Robot Progress: 50%"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <!-- Robot Task Progress -->
+    <TextView
+        android:id="@+id/task_progress_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Task Progress"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/task_progress_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+    <!-- Current Location Section -->
+    <TextView
+        android:id="@+id/location_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Current Location"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/location_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+    <!-- Map Section -->
+    <TextView
+        android:id="@+id/map_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Current Position"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black" />
+
+    <!-- Connectivity Section -->
+
+    <ImageView
+        android:id="@+id/map_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:contentDescription="Map Image"
+        android:scaleType="centerCrop"
+        android:src="@drawable/map" />
+
+    <TextView
+        android:id="@+id/connectivity_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Connectivity"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/connectivity_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Ping: 25ms | Status: Connected"
         android:textSize="16sp"
         android:textColor="@color/black" />
 
