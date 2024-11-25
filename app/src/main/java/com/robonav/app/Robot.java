@@ -75,29 +75,31 @@ public class Robot {
     }
 
     // Utility function to find the task in progress (progress between 0 and 99)
-    public static Task getTaskInProgress(Robot robot, List<Task> allTasks) {
-        // Get the list of task IDs assigned to this robot
-        List<String> robotTasks = robot.getTasks();
-
-        // Iterate through all tasks and check their progress
-        for (Task task : allTasks) {
-            // Check if this task is assigned to the robot and has progress between 0 and 99
-            if (robotTasks.contains(task.getId()) && task.getProgress() >= 0 && task.getProgress() <= 99) {
-                return task;  // Return the first task in progress
-            }
+    public static Task getTaskInProgress(Robot robot, List<Task> taskList) {
+        List<Task> tasksForRobot = getTasksForRobot(robot, taskList);
+        if (tasksForRobot.isEmpty()) {
+            return null; // No task in progress if the list is empty
         }
-
-        return null; // Return null if no task is in progress
+        // Return the first task as the active task (or your logic)
+        return tasksForRobot.get(0);
     }
+
 
     // Method to get tasks based on robot ID from a list of tasks
-    public static List<Task> getTasksForRobot(Robot robot, List<Task> allTasks) {
-        List<Task> robotTasks = new ArrayList<>();
-        for (Task task : allTasks) {
-            if (task.getRobotId().equals(robot.getId())) {
-                robotTasks.add(task);  // Add task if it belongs to the robot
+    public static List<Task> getTasksForRobot(Robot robot, List<Task> taskList) {
+        if (robot.getTasks().isEmpty()) {
+            return new ArrayList<>(); // Return an empty list if the robot has no tasks
+        }
+        // Existing logic for finding tasks
+        List<Task> tasksForRobot = new ArrayList<>();
+        for (String taskId : robot.getTasks()) {
+            for (Task task : taskList) {
+                if (task.getId().equals(taskId)) {
+                    tasksForRobot.add(task);
+                }
             }
         }
-        return robotTasks; // Return the list of tasks for the robot
+        return tasksForRobot;
     }
+
 }
