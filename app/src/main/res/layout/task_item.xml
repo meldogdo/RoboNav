@@ -48,6 +48,6 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="end|bottom"
-        android:contentDescription="Task Icon"
-        android:src="@drawable/ic_home" />
+        android:contentDescription="Task Icon" />
+
 </LinearLayout>

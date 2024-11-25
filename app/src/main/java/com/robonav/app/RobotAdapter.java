@@ -42,12 +42,22 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         // Bind data to the robot card
         holder.nameTextView.setText(robot.getName());
         holder.pingTextView.setText("Ping: " + robot.getPing());
-        holder.batteryTextView.setText("Battery: " + robot.getBattery());
+        holder.batteryTextView.setText("Battery: " + robot.getBattery()+"%");
         holder.taskTextView.setText("Task: " + robot.getTask());
         holder.locationTextView.setText("Location: " + robot.getLocation());
 
+        // Change the battery icon based on battery percentage
+        int batteryPercentage = robot.getBattery();
+        if (batteryPercentage > 75) {
+            holder.batteryIcon.setImageResource(R.drawable.ic_full_battery);
+        } else if (batteryPercentage > 25) {
+            holder.batteryIcon.setImageResource(R.drawable.ic_half_battery);
+        } else {
+            holder.batteryIcon.setImageResource(R.drawable.ic_empty_battery);
+        }
+
         // Handle click to show popup
-        holder.itemView.setOnClickListener(view -> showRobotPopup(view, robot.getName(), robot.getBatteryPercentage()));
+        holder.itemView.setOnClickListener(view -> showRobotPopup(view, robot.getName(), batteryPercentage));
     }
 
     @Override
@@ -58,6 +68,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
     // ViewHolder class
     static class RobotViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView, pingTextView, batteryTextView, taskTextView, locationTextView;
+        ImageView batteryIcon; // Add reference to the battery icon ImageView
 
         public RobotViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -66,11 +77,11 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             batteryTextView = itemView.findViewById(R.id.robot_battery);
             taskTextView = itemView.findViewById(R.id.robot_task);
             locationTextView = itemView.findViewById(R.id.robot_location);
+            batteryIcon = itemView.findViewById(R.id.robot_battery_icon); // Initialize battery icon
         }
     }
-
     // Show popup method
-    private void showRobotPopup(View anchorView, String title, int progress) {
+    private void showRobotPopup(View anchorView, String title, int battery) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.robot_popup_layout, null);
 
         PopupWindow popupWindow = new PopupWindow(popupView,
@@ -85,8 +96,8 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
 
         titleView.setText(title);
-        progressBar.setProgress(progress);
-        progressStatus.setText("Robot Progress: " + progress + "%");
+        progressBar.setProgress(battery);
+        progressStatus.setText("Battery Percentage: " + battery + "%");
 
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));
 

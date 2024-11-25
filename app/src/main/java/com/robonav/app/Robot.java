@@ -6,14 +6,14 @@ import org.json.JSONObject;
 public class Robot {
     private final String name;
     private final String ping;
-    private final String battery;
+    private final int battery;
     private final String task;
     private final String location;
 
     public Robot(JSONObject jsonObject) throws JSONException {
         this.name = jsonObject.getString("name");
         this.ping = jsonObject.getString("ping");
-        this.battery = jsonObject.getString("battery");
+        this.battery = jsonObject.getInt("battery");
         this.task = jsonObject.getString("task");
         this.location = jsonObject.getString("location");
     }
@@ -26,12 +26,8 @@ public class Robot {
         return ping;
     }
 
-    public String getBattery() {
+    public int getBattery() {
         return battery;
-    }
-
-    public int getBatteryPercentage() {
-        return Integer.parseInt(battery.replace("%", ""));
     }
 
     public String getTask() {

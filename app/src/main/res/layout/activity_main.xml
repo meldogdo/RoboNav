@@ -122,6 +122,7 @@
                     android:paddingEnd="15dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/gray_high_contrast"
+
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/usernameIcon"

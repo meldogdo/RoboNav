@@ -3,7 +3,7 @@
     "id": "robot_1",
     "name": "Robot #1",
     "ping": "35ms",
-    "battery": "47%",
+    "battery": 100,
     "task": "Moving",
     "location": "Right Atrium"
   },
@@ -11,7 +11,7 @@
     "id": "robot_2",
     "name": "Robot #2",
     "ping": "50ms",
-    "battery": "82%",
+    "battery": 50,
     "task": "Scanning",
     "location": "Left Atrium"
   },
@@ -19,7 +19,7 @@
     "id": "robot_3",
     "name": "Robot #3",
     "ping": "42ms",
-    "battery": "65%",
+    "battery": 15,
     "task": "Delivering",
     "location": "Main Lab"
   }
