@@ -19,6 +19,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
@@ -103,7 +107,20 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             taskIconImageView = itemView.findViewById(R.id.task_icon);
         }
     }
+    private String formatDate(String isoDate) {
+        try {
+            // Parse the ISO 8601 date
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+            Date date = isoFormat.parse(isoDate);
 
+            // Format to a more readable format
+            SimpleDateFormat readableFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
+            return readableFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "Unknown Date";
+        }
+    }
     // Show popup method with animations
     private void showTaskPopup(View anchorView, Task task, Robot responsibleRobot) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.task_popup_layout, null);
@@ -119,12 +136,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView progressStatus = popupView.findViewById(R.id.progress_status);
         TextView expectedEndTimeView = popupView.findViewById(R.id.expected_end_time);
         TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
+        TextView createdByView = popupView.findViewById(R.id.created_by);
+        TextView dateCreatedView = popupView.findViewById(R.id.date_created); // New TextView
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
 
         // Bind task and robot data
         titleView.setText(task.getName());
         expectedEndTimeView.setText("Expected End Time: " + "12:00 PM"); // Replace with actual data if available
         responsibleRobotView.setText("Completed By: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown"));
+        createdByView.setText("Created By: " + task.getCreatedBy());
+        dateCreatedView.setText("Date Created: " + formatDate(task.getDateCreated())); // Format and set the date
 
         // Customize progress bar based on task progress
         if (task.getProgress() == -2) {
@@ -136,7 +157,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
             progressBar.setProgress(100);
             progressStatus.setText("Status: Stopped");
-
         } else {
             progressBar.setIndeterminate(false);
             progressBar.setProgress(task.getProgress());

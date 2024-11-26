@@ -60,4 +60,22 @@
         android:text="Completed By: Robot #3"
         android:textSize="16sp"
         android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/created_by"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Created By: Username"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+    <TextView
+        android:id="@+id/date_created"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Date Created: Unknown"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
 </LinearLayout>

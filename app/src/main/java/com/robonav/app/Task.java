@@ -12,6 +12,8 @@ public class Task {
     private final String name;
     private final String robotId;
     private final int progress;
+    private final String createdBy; // New field for createdBy
+    private final String dateCreated; // New field for dateCreated
 
     // Constructor to initialize from JSON object
     public Task(JSONObject jsonObject) throws JSONException {
@@ -19,6 +21,10 @@ public class Task {
         this.name = jsonObject.getString("name");      // Retrieve task name
         this.robotId = jsonObject.getString("robot");    // Retrieve assigned robot
         this.progress = jsonObject.getInt("progress"); // Retrieve task progress
+        this.createdBy = jsonObject.getString("createdBy"); // Retrieve createdBy
+        this.dateCreated = jsonObject.getString("dateCreated"); // Retrieve dateCreated
+
+
     }
 
     // Getters for the class variables
@@ -36,6 +42,12 @@ public class Task {
 
     public int getProgress() {
         return progress;
+    }
+    public String getCreatedBy() {
+        return createdBy;
+    }
+    public String getDateCreated() {
+        return dateCreated;
     }
 
     // Override toString for better debug output
