@@ -3,14 +3,18 @@ pluginManagement {
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("com\\.google.*") // Covers Google's plugins
                 includeGroupByRegex("androidx.*")
             }
         }
         mavenCentral()
-        gradlePluginPortal()
+        gradlePluginPortal() // Keep this to resolve plugins like the secrets-gradle-plugin
+    }
+    plugins {
+        id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version "2.0.1" // Add the plugin here
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
