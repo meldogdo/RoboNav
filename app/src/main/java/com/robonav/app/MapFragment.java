@@ -1,5 +1,6 @@
 package com.robonav.app;
 
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +14,17 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MapFragment extends Fragment {
 
@@ -37,9 +47,11 @@ public class MapFragment extends Fragment {
         // Get reference to the Spinner
         Spinner spinnerBotSelect = view.findViewById(R.id.spinner_bot_select);
 
+        // Load robot names from the JSON file in assets
+        List<String> robotNames = loadRobotNamesFromJson();
+
         // Create and populate the adapter for the Spinner
-        String[] robotOptions = {"Robot 1", "Robot 2", "Robot 3"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_spinner_item, robotOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_spinner_item, robotNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerBotSelect.setAdapter(adapter);
 
@@ -72,65 +84,58 @@ public class MapFragment extends Fragment {
             addTextViewToOutput(outputContentLayout, selectedBot + ':' + " Set Initial Position At Coordinates ___ ___");
         });
 
-        // Set click listeners to toggle visibility for map and output layouts
-        outputTextView.setOnClickListener(v -> {
-            outputContentLayout.setVisibility(outputContentLayout.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-        });
-
-        mapTextView.setOnClickListener(v -> {
-            mapContentLayout.setVisibility(mapContentLayout.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-        });
-
         return view;
     }
 
-    // Method to dynamically add a TextView to the output_content_layout with timestamp
-// Method to dynamically add a TextView to the output_content_layout with timestamp
-    private void addTextViewToOutput(LinearLayout outputContentLayout, String message) {
-        // Create a new TextView
-        TextView newTextView = new TextView(getContext());
+    // Method to read robots.json from the assets folder
+    private List<String> loadRobotNamesFromJson() {
+        List<String> robotNames = new ArrayList<>();
+        try {
+            // Open the file using AssetManager
+            AssetManager assetManager = requireContext().getAssets();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open("robots.json")));
 
-        // Get the current date and time using SimpleDateFormat
+            // Read the file content into a StringBuilder
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+
+            // Parse the JSON content
+            JSONArray jsonArray = new JSONArray(jsonBuilder.toString());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject robotObject = jsonArray.getJSONObject(i);
+                String robotName = robotObject.getString("name");
+                robotNames.add(robotName);
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return robotNames;
+    }
+
+    // Method to dynamically add a TextView to the output_content_layout with timestamp
+    private void addTextViewToOutput(LinearLayout outputContentLayout, String message) {
+        TextView newTextView = new TextView(getContext());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentDateAndTime = sdf.format(new Date());
-
-        // Set the text of the new TextView with the timestamp, message, and newline
         newTextView.setText("[" + currentDateAndTime + "] - " + message);
-
-        // Set text size, color, etc.
         newTextView.setTextSize(16f);
         newTextView.setTextColor(getResources().getColor(android.R.color.white));
 
-        // Set margins programmatically
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-
-        // Set margins (left, top, right, bottom)
         layoutParams.setMargins(0, 15, 0, 15);
         newTextView.setLayoutParams(layoutParams);
 
-        // Add the TextView to the output layout
         outputContentLayout.addView(newTextView);
     }
 
-
-    // Method to clear all TextViews from the output_content_layout
-// Method to clear only the dynamically added TextViews
-// Method to clear only the dynamically added TextViews, keeping the "Clear Output" button intact
+    // Method to clear only the dynamically added TextViews
     private void clearOutputText(LinearLayout outputContentLayout) {
-        // Loop through all the child views in the outputContentLayout
-        for (int i = 0; i < outputContentLayout.getChildCount(); i++) {
-            View child = outputContentLayout.getChildAt(i);
-
-            // Check if the child view is a TextView and not the "Clear Output" button
-            if (child instanceof TextView && child.getId() != R.id.button_clear_output) {
-                outputContentLayout.removeView(child);
-                i--; // Adjust the index to account for the removed view
-            }
-        }
+        outputContentLayout.removeAllViews();
     }
-
-
 }

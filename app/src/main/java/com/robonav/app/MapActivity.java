@@ -6,7 +6,7 @@ import android.view.GestureDetector;
 import android.view.View;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
