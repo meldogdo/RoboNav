@@ -1,210 +1,65 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"> <!-- Ensures the content fills the viewport -->
+    android:fillViewport="true">
 
-
-
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:context=".MapFragment">
-
-
-
-
-
-    <LinearLayout
-        android:id="@+id/robot_selection_layout"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="65dp"
-        android:minWidth="@dimen/output_layout_min_width"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:textColor="@color/white"
+        tools:context=".MapFragment">
 
-        app:layout_constraintTop_toTopOf="parent">
-
-    <TextView
-            android:id="@+id/textView"
-            android:layout_width="155dp"
-            android:layout_height="24dp"
-            android:layout_weight="1"
-            android:textSize="20sp"
-        android:textColor="@color/white"
-
-        android:text="Selected Robot" />
-
+        <!-- Dropdown Menu -->
         <Spinner
-            android:id="@+id/spinner_bot_select"
-            android:layout_width="wrap_content"
+            android:id="@+id/action_spinner"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_margin="16dp"
             android:background="@color/white"
-            />
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/button_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/robot_selection_layout">
-
-        <Button
-            android:id="@+id/button_check_position"
+        <!-- Placeholder for Dynamic Content -->
+        <FrameLayout
+            android:id="@+id/dynamic_content_container"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/rounded_button_background"
-            android:textColor="@color/black"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:layout_constraintTop_toBottomOf="@id/action_spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-            android:layout_marginTop="8dp"
-            android:text="Check Position" />
+        <!-- Output TextView -->
 
-        <Button
-            android:id="@+id/button_save_current_location"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/map_view"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/rounded_button_background"
-            android:textColor="@color/black"
-            android:layout_marginTop="8dp"
-            android:text="Save Current Location" />
-
-        <Button
-            android:id="@+id/button_set_initial_position"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:textColor="@color/black"
-
-            android:background="@drawable/rounded_button_background"
-
-            android:layout_marginTop="8dp"
-            android:text="Set Initial Position" />
-    </LinearLayout>
-
-
-
-
-
-
-
-    <LinearLayout
-        android:id="@+id/output_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/gray_light"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_layout">
+            android:layout_height="300dp"
+            android:layout_marginTop="232dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/action_spinner" />
 
         <TextView
             android:id="@+id/output_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Output" />
+            android:background="@color/gray_light"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:scrollbars="vertical"
+            android:text="Output Messages"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/map_view"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Wrap the ScrollView inside a LinearLayout with maxHeight -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="200dp"
-            android:orientation="vertical">
-
-            <!-- Add a ScrollView to make the content scrollable -->
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/gray_medium">
-
-                <LinearLayout
-                    android:id="@+id/output_content_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="8dp">
-
-                    <!-- Add content here -->
-                    <Button
-                        android:id="@+id/button_clear_output"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Clear Output"
-                        android:textColor="@color/black" />
-                </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
-    </LinearLayout>
-
-
-
-
-
-
-
-
-    <LinearLayout
-        android:id="@+id/map_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="500dp"
-        android:minWidth="@dimen/output_layout_min_width"
-        android:orientation="vertical"
-        android:background="@color/gray_light"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/output_layout"
-        app:layout_constraintHeight_max="500dp">
-
-        <TextView
-            android:id="@+id/map_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Bot Locations" />
-
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="500dp"
-            app:layout_constraintHeight_max="500dp">
-            <!-- Use FragmentContainerView instead of <fragment> -->
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/map_view"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:layout="@layout/fragment_map" /> <!-- Optional preview -->
-        </FrameLayout>
-    </LinearLayout>
-
-
-
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

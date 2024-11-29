@@ -4,7 +4,7 @@
     "name": "Robot #1",
     "ping": "35ms",
     "battery": 100,
-    "location": "Right Atrium",
+    "location": "35.6895,139.6917",
     "tasks": ["task_2", "task_5"]
   },
   {
@@ -12,7 +12,7 @@
     "name": "Robot #2",
     "ping": "50ms",
     "battery": 50,
-    "location": "Left Atrium",
+    "location": "34.0522,-118.2437",
     "tasks": ["task_3"]
   },
   {
@@ -20,7 +20,7 @@
     "name": "Robot #3",
     "ping": "42ms",
     "battery": 15,
-    "location": "Main Lab",
+    "location": "35.6895,139.6917",
     "tasks": ["task_1", "task_4"]
   },
   {
@@ -28,7 +28,7 @@
     "name": "Robot #4",
     "ping": "232ms",
     "battery": 100,
-    "location": "Charging Station",
+    "location": "",
     "tasks": []
   }
 ]

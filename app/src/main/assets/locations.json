@@ -1,0 +1,20 @@
+[
+  {
+    "id": "loc_1",
+    "name": "NYC Base",
+    "coordinates": "40.7128,-74.0060",
+    "robots": ["robot_1"]
+  },
+  {
+    "id": "loc_2",
+    "name": "LA Base",
+    "coordinates": "34.0522,-118.2437",
+    "robots": ["robot_2"]
+  },
+  {
+    "id": "loc_3",
+    "name": "Tokyo Base",
+    "coordinates": "35.6895,139.6917",
+    "robots": ["robot_3"]
+  }
+]
