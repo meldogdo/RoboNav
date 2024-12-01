@@ -48,7 +48,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         holder.nameTextView.setText(robot.getName());
         holder.pingTextView.setText("Ping: " + robot.getPing());
         holder.batteryTextView.setText("Battery: " + robot.getBattery() + "%");
-        holder.locationTextView.setText("Location: " + robot.getLocation());
+        holder.locationTextView.setText("Location: " + robot.getLocationName());
 
         // Get active task for the robot
         Task activeTask = getTaskInProgress(robot, taskList);
@@ -114,7 +114,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         TextView locationDetails = popupView.findViewById(R.id.location_details);
 
         // Assuming the Robot object has a method getLocation() that returns the current location
-        locationDetails.setText(robot.getLocation());
+        locationDetails.setText(robot.getLocationName());
         int batteryPercentage = robot.getBattery();
         titleView.setText(robot.getName());
         progressBar.setProgress(batteryPercentage);

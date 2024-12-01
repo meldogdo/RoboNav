@@ -5,18 +5,30 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/btn_show_all_locations"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Map File"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/map_file_dropdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show All Locations"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btn_swap_map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Swap Map"
         android:layout_marginBottom="16dp" />
 
     <TextView
-        android:id="@+id/all_locations_output"
+        android:id="@+id/swap_map_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Locations will appear here."
+        android:text="Select a file and click Swap Map to change the map."
         android:textSize="16sp"
         android:textStyle="italic"
         android:padding="8dp" />

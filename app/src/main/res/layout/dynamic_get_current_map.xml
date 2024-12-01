@@ -6,17 +6,17 @@
     android:padding="16dp">
 
     <Button
-        android:id="@+id/btn_show_all_locations"
+        android:id="@+id/btn_retrieve_map_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show All Locations"
+        android:text="Retrieve Map File"
         android:layout_marginBottom="16dp" />
 
     <TextView
-        android:id="@+id/all_locations_output"
+        android:id="@+id/map_file_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Locations will appear here."
+        android:text="Click the button to retrieve the current map file."
         android:textSize="16sp"
         android:textStyle="italic"
         android:padding="8dp" />

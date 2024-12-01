@@ -5,32 +5,38 @@ import androidx.annotation.NonNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.List;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class Robot {
-    private final String id;            // Added robot ID
-    private final String name;
-    private final String ping;
-    private final int battery;
-    private final List<String> tasks;  // Changed to List<String> to hold multiple task IDs
-    private final String location;
 
-    // Constructor to initialize from JSON object
+    private final String id;                   // Unique ID for the robot
+    private final String name;                 // Robot's name
+    private final String ping;                 // Robot's network latency
+    private final int battery;                 // Battery percentage
+    private final List<String> tasks;          // List of task IDs assigned to the robot
+    private final String locationName;         // Location name (human-readable)
+    private final String locationCoordinates;  // Location coordinates (x, y)
+
+    // Constructor to initialize Robot object from a JSON object
     public Robot(JSONObject jsonObject) throws JSONException {
-        this.id = jsonObject.getString("id");               // Retrieve robot ID
-        this.name = jsonObject.getString("name");           // Retrieve robot name
-        this.ping = jsonObject.getString("ping");           // Retrieve ping
-        this.battery = jsonObject.getInt("battery");        // Retrieve battery level
-        this.location = jsonObject.getString("location");  // Retrieve robot location
-        this.tasks = jsonArrayToList(jsonObject.getJSONArray("tasks")); // Convert tasks array to List
+        this.id = jsonObject.getString("id");                              // Retrieve robot ID
+        this.name = jsonObject.getString("name");                          // Retrieve robot name
+        this.ping = jsonObject.optString("ping", "Unknown");               // Retrieve ping, default to "Unknown"
+        this.battery = jsonObject.optInt("battery", -1);                   // Retrieve battery level, default to -1
+        this.locationName = jsonObject.optString("location_name", "");     // Retrieve location name, default to empty
+        this.locationCoordinates = jsonObject.optString("location_coordinates", ""); // Retrieve location coordinates
+        this.tasks = jsonArrayToList(jsonObject.optJSONArray("tasks"));    // Convert tasks array to List
     }
 
     // Helper method to convert JSON array of tasks to List<String>
     private List<String> jsonArrayToList(JSONArray jsonArray) throws JSONException {
         List<String> taskList = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            taskList.add(jsonArray.getString(i));
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                taskList.add(jsonArray.getString(i));
+            }
         }
         return taskList;
     }
@@ -56,11 +62,15 @@ public class Robot {
         return tasks;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLocationName() {
+        return locationName;
     }
 
-    // Override toString for better debug output
+    public String getLocationCoordinates() {
+        return locationCoordinates;
+    }
+
+    // Override toString for better debugging output
     @NonNull
     @Override
     public String toString() {
@@ -70,7 +80,8 @@ public class Robot {
                 ", ping='" + ping + '\'' +
                 ", battery=" + battery +
                 ", tasks=" + tasks +
-                ", location='" + location + '\'' +
+                ", locationName='" + locationName + '\'' +
+                ", locationCoordinates='" + locationCoordinates + '\'' +
                 '}';
     }
 
@@ -84,13 +95,12 @@ public class Robot {
         return tasksForRobot.get(0);
     }
 
-
     // Method to get tasks based on robot ID from a list of tasks
     public static List<Task> getTasksForRobot(Robot robot, List<Task> taskList) {
         if (robot.getTasks().isEmpty()) {
             return new ArrayList<>(); // Return an empty list if the robot has no tasks
         }
-        // Existing logic for finding tasks
+
         List<Task> tasksForRobot = new ArrayList<>();
         for (String taskId : robot.getTasks()) {
             for (Task task : taskList) {
@@ -101,5 +111,4 @@ public class Robot {
         }
         return tasksForRobot;
     }
-
 }
