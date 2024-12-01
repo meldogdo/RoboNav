@@ -29,8 +29,7 @@ The RoboNav Mobile App is developed as part of SE4450 Software Engineering Desig
 
 - **Android SDK**: For building a native Android application.
 - **OrionStar SDK**: Integrates robot control and monitoring functionalities.
-- **Java/Kotlin**: Primary programming languages for the Android app.
-- **Firebase (Optional)**: Used for logging and analytics.
+- **Java**: Primary programming languages for the Android app.
 
 ### Installation
 
