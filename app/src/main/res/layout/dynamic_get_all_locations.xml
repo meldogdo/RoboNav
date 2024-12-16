@@ -3,21 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/gray_medium"> <!-- Gray background -->
 
     <Button
         android:id="@+id/btn_show_all_locations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Show All Locations"
-        android:layout_marginBottom="16dp" />
+        android:backgroundTint="@color/blue_dark"
+        android:textColor="@android:color/white" /> <!-- Blue button with white text -->
 
-    <TextView
-        android:id="@+id/all_locations_output"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Locations will appear here."
-        android:textSize="16sp"
-        android:textStyle="italic"
-        android:padding="8dp" />
+    <!-- White text -->
 </LinearLayout>

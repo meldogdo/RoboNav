@@ -3,33 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/gray_medium"> <!-- Gray background -->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select Map File"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="4dp"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" /> <!-- White text -->
 
     <Spinner
         android:id="@+id/map_file_dropdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/white" /> <!-- White background -->
 
     <Button
         android:id="@+id/btn_swap_map"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Swap Map"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/blue_dark"
+        android:textColor="@android:color/white" /> <!-- Blue button with white text -->
 
-    <TextView
-        android:id="@+id/swap_map_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select a file and click Swap Map to change the map."
-        android:textSize="16sp"
-        android:textStyle="italic"
-        android:padding="8dp" />
+    <!-- White text -->
 </LinearLayout>

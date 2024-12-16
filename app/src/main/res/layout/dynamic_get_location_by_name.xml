@@ -3,34 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/gray_medium"> <!-- Added black background -->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select Location"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="4dp"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" /> <!-- White text -->
 
-    <Spinner
+      <Spinner
         android:id="@+id/location_dropdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:minHeight="48dp" />
+        android:background="@android:color/white" /> <!-- White background -->
 
     <Button
         android:id="@+id/btn_get_coordinates"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Get Coordinates" />
+        android:text="Get Coordinates"
+        android:backgroundTint="@color/blue_dark"
+        android:textColor="@android:color/white" /> <!-- Blue button with white text -->
 
-    <TextView
-        android:id="@+id/coordinates_output"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Coordinates will appear here."
-        android:textSize="16sp"
-        android:textStyle="italic"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp" />
+    <!-- White text -->
 </LinearLayout>
