@@ -30,7 +30,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MapFragment extends Fragment {
@@ -459,16 +461,18 @@ public class MapFragment extends Fragment {
     }
 
     private void appendOutput(String message) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentTime = formatter.format(new Date());
         // Assuming an output box exists in your layout
         View rootView = getView();
         if (rootView != null) {
             TextView outputBox = rootView.findViewById(R.id.output_text_view);
             String currentOutput = outputBox.getText().toString();
             if (currentOutput.isEmpty()) {
-                outputBox.setText(currentOutput + message);
+                outputBox.setText(currentOutput + currentTime +"\n" + message);
             }
             else {
-                outputBox.setText(currentOutput + "\n\n" + message );
+                outputBox.setText(currentOutput + "\n\n" + currentTime + "\n" + message );
 
             }
         }
