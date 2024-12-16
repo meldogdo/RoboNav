@@ -212,7 +212,7 @@ public class MapFragment extends Fragment {
 
                 // Initialize components
                 robotDropdown = dynamicContentContainer.findViewById(R.id.robot_dropdown);
-                TextView robotLocationName = dynamicContentContainer.findViewById(R.id.robot_location_name);
+                EditText inputLocationName = dynamicContentContainer.findViewById(R.id.input_location_name);
                 Button btnSaveLocation = dynamicContentContainer.findViewById(R.id.btn_save_location);
 
                 // Load robots with non-empty location fields
@@ -235,19 +235,20 @@ public class MapFragment extends Fragment {
                         Robot selectedRobotObj = findRobotByName(selectedRobot, robotsWithLocations);
 
                         if (selectedRobotObj != null) {
-                            // Update the location name dynamically
+                            // Prefill the EditText with the current location name (if exists)
                             String location = selectedRobotObj.getLocationName();
                             if (!location.isEmpty()) {
-                                robotLocationName.setText("Location Name: " + location);
+                                inputLocationName.setText(location);
                             } else {
-                                robotLocationName.setText("No location found for this robot.");
+                                inputLocationName.setHint("Enter location name");
                             }
                         }
                     }
 
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {
-                        robotLocationName.setText("");
+                        inputLocationName.setText("");
+                        inputLocationName.setHint("Enter location name");
                     }
                 });
 
@@ -260,14 +261,24 @@ public class MapFragment extends Fragment {
                         return;
                     }
 
+                    String newLocationName = inputLocationName.getText().toString().trim();
+                    if (newLocationName.isEmpty()) {
+                        showMessage("Please enter a location name.");
+                        return;
+                    }
+
+                    // Find the robot and save the new location name
                     Robot selectedRobotObj = findRobotByName(selectedRobot, robotsWithLocations);
-                    if (selectedRobotObj != null && !selectedRobotObj.getLocationName().isEmpty()) {
-                        saveLocation(selectedRobotObj);
+                    if (selectedRobotObj != null) {
+                        selectedRobotObj.setLocationName(newLocationName);
+                        saveLocation(selectedRobotObj); // Your method to save or update the robot location
+                        showMessage("Location saved successfully for " + selectedRobot);
                     } else {
-                        showMessage("No valid location found for the selected robot.");
+                        showMessage("Unable to find the selected robot.");
                     }
                 });
                 break;
+
             case "Get All Locations":
                 inflateContent(R.layout.dynamic_get_all_locations);
 

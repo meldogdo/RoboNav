@@ -16,7 +16,7 @@ public class Robot {
     private final String ping;                 // Robot's network latency
     private final int battery;                 // Battery percentage
     private final List<String> tasks;          // List of task IDs assigned to the robot
-    private final String locationName;         // Location name (human-readable)
+    private String locationName;         // Location name (human-readable)
     private final String locationCoordinates;  // Location coordinates (x, y)
 
     // Constructor to initialize Robot object from a JSON object
@@ -65,7 +65,9 @@ public class Robot {
     public String getLocationName() {
         return locationName;
     }
-
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
     public String getLocationCoordinates() {
         return locationCoordinates;
     }
@@ -111,4 +113,5 @@ public class Robot {
         }
         return tasksForRobot;
     }
+
 }
