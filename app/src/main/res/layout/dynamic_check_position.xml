@@ -15,12 +15,14 @@
         android:layout_marginBottom="4dp"
         android:textSize="16sp"
         android:textColor="@color/white" />
+
     <Spinner
         android:id="@+id/robot_dropdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:background="@color/white" />
+        android:background="@color/white"
+        android:minHeight="48dp" />
 
     <!-- Robot Location Information -->
     <TextView

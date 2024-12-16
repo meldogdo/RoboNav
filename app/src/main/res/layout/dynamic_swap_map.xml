@@ -19,7 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:background="@android:color/white" /> <!-- White background -->
+        android:background="@android:color/white"
+        android:minHeight="48dp" /> <!-- White background -->
 
     <Button
         android:id="@+id/btn_swap_map"

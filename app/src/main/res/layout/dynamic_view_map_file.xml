@@ -17,10 +17,11 @@
         android:id="@+id/map_file_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No file selected"
         android:layout_marginBottom="16dp"
         android:background="@color/gray_light"
-        android:padding="8dp" />
+        android:padding="8dp"
+        android:text="No file selected"
+        android:textColor="#000000" />
 
     <Button
         android:id="@+id/btn_choose_file"
