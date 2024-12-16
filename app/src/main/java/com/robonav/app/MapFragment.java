@@ -483,6 +483,7 @@ public class MapFragment extends Fragment {
             TextView outputBox = rootView.findViewById(R.id.output_text_view);
             String currentOutput = outputBox.getText().toString();
             if (currentOutput.isEmpty()) {
+                scrollView.setVisibility(View.VISIBLE);
                 outputBox.setText(currentOutput + currentTime +"\n" + message);
             }
             else {
