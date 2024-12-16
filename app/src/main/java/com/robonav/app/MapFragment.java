@@ -282,8 +282,14 @@ public class MapFragment extends Fragment {
                     } else {
 
                         StringBuilder output = new StringBuilder();
-                        for (String location : allLocations) {
-                            output.append(location).append("\n");
+                        for (int i = 0; i < allLocations.size(); i++) {
+                            // Append location
+                            output.append(allLocations.get(i));
+
+                            // If it's not the last location, add a newline
+                            if (i < allLocations.size() - 1) {
+                                output.append("\n");
+                            }
                         }
                         appendOutput(String.valueOf(output));
                     }
