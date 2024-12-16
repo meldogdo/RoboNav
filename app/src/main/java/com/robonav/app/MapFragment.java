@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,6 +40,8 @@ public class MapFragment extends Fragment {
 
     private Spinner actionSpinner;
     private View dynamicContentContainer;
+
+    private NestedScrollView scrollView;
     private GoogleMap googleMap;
 
     @Nullable
@@ -46,6 +49,7 @@ public class MapFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
+        scrollView = view.findViewById(R.id.output_scroll_view);
         actionSpinner = view.findViewById(R.id.action_spinner);
         dynamicContentContainer = view.findViewById(R.id.dynamic_content_container);
 
@@ -284,19 +288,25 @@ public class MapFragment extends Fragment {
 
                 // Initialize components
                 Button btnShowAllLocations = dynamicContentContainer.findViewById(R.id.btn_show_all_locations);
-                TextView allLocationsOutput = dynamicContentContainer.findViewById(R.id.all_locations_output);
 
                 // Handle button click
                 btnShowAllLocations.setOnClickListener(v -> {
                     List<String> allLocations = getAllLocations();
                     if (allLocations.isEmpty()) {
-                        allLocationsOutput.setText("No locations found.");
+                        appendOutput("No locations found.");
                     } else {
-                        StringBuilder output = new StringBuilder("All Locations:\n");
-                        for (String location : allLocations) {
-                            output.append(location).append("\n");
+
+                        StringBuilder output = new StringBuilder();
+                        for (int i = 0; i < allLocations.size(); i++) {
+                            // Append location
+                            output.append(allLocations.get(i));
+
+                            // If it's not the last location, add a newline
+                            if (i < allLocations.size() - 1) {
+                                output.append("\n");
+                            }
                         }
-                        allLocationsOutput.setText(output.toString());
+                        appendOutput(String.valueOf(output));
                     }
                 });
                 break;
@@ -337,7 +347,6 @@ public class MapFragment extends Fragment {
                 // Initialize components
                 Spinner locationDropdown = dynamicContentContainer.findViewById(R.id.location_dropdown);
                 Button btnGetCoordinates = dynamicContentContainer.findViewById(R.id.btn_get_coordinates);
-                TextView coordinatesOutput = dynamicContentContainer.findViewById(R.id.coordinates_output);
 
                 // Load location names into dropdown
                 locationNames = loadLocationNames();
@@ -357,9 +366,9 @@ public class MapFragment extends Fragment {
                     // Retrieve and display coordinates for the selected location
                     String coordinates = getCoordinatesForLocation(selectedLocation);
                     if (!coordinates.isEmpty()) {
-                        coordinatesOutput.setText("Coordinates: " + coordinates);
+                        appendOutput("Coordinates: " + coordinates);
                     } else {
-                        coordinatesOutput.setText("Coordinates not found for the selected location.");
+                        appendOutput("Coordinates not found for the selected location.");
                     }
                 });
                 break;
@@ -368,16 +377,13 @@ public class MapFragment extends Fragment {
 
                 // Initialize components
                 Button btnRetrieveMapFile = dynamicContentContainer.findViewById(R.id.btn_retrieve_map_file);
-                TextView mapFileStatus = dynamicContentContainer.findViewById(R.id.map_file_status);
 
                 // Simulate map file retrieval
                 btnRetrieveMapFile.setOnClickListener(v -> {
                     String simulatedMapFileName = "current_map.json"; // Simulated map file name
                     String simulatedMapDetails = "Map Size: 5MB, Updated: 2024-11-28"; // Simulated metadata
 
-                    // Update the output TextView with a simulated response
-                    mapFileStatus.setText("Map file retrieved successfully:\n" +
-                            "File Name: " + simulatedMapFileName + "\n" +
+                    appendOutput("File Name: " + simulatedMapFileName + "\n" +
                             simulatedMapDetails);
                 });
                 break;
@@ -387,7 +393,6 @@ public class MapFragment extends Fragment {
                 // Initialize components
                 Spinner mapFileDropdown = dynamicContentContainer.findViewById(R.id.map_file_dropdown);
                 Button btnSwapMap = dynamicContentContainer.findViewById(R.id.btn_swap_map);
-                TextView swapMapStatus = dynamicContentContainer.findViewById(R.id.swap_map_status);
 
                 // Simulate available map files (you could replace this with actual file browsing logic)
                 List<String> availableMapFiles = getAvailableMapFiles();
@@ -400,12 +405,10 @@ public class MapFragment extends Fragment {
                     String selectedMapFile = mapFileDropdown.getSelectedItem() != null ? mapFileDropdown.getSelectedItem().toString() : "";
 
                     if (selectedMapFile.isEmpty()) {
-                        swapMapStatus.setText("No map file selected. Please choose a map file.");
+                        appendOutput("No map file selected. Please choose a map file.");
                         return;
                     }
-
-                    // Simulate swapping map files
-                    swapMapStatus.setText("Map file swapped successfully to: " + selectedMapFile);
+                    appendOutput("Map file swapped successfully to: " + selectedMapFile);
                 });
                 break;
             default:
@@ -486,6 +489,10 @@ public class MapFragment extends Fragment {
                 outputBox.setText(currentOutput + "\n\n" + currentTime + "\n" + message );
 
             }
+            // Scroll to the bottom after updating the content
+
+            scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+
         }
     }
     private List<Robot> loadRobotsWithLocations() {
