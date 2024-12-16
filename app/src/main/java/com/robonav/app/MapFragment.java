@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,6 +40,8 @@ public class MapFragment extends Fragment {
 
     private Spinner actionSpinner;
     private View dynamicContentContainer;
+
+    private NestedScrollView scrollView;
     private GoogleMap googleMap;
 
     @Nullable
@@ -46,6 +49,7 @@ public class MapFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
+        scrollView = view.findViewById(R.id.output_scroll_view);
         actionSpinner = view.findViewById(R.id.action_spinner);
         dynamicContentContainer = view.findViewById(R.id.dynamic_content_container);
 
@@ -468,6 +472,10 @@ public class MapFragment extends Fragment {
                 outputBox.setText(currentOutput + "\n\n" + currentTime + "\n" + message );
 
             }
+            // Scroll to the bottom after updating the content
+
+            scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+
         }
     }
     private List<Robot> loadRobotsWithLocations() {
