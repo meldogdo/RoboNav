@@ -6,20 +6,15 @@
     android:padding="16dp">
 
     <!-- Title -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Check Position"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
 
     <!-- Robot Dropdown -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select Robot"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/white" />
     <Spinner
         android:id="@+id/robot_dropdown"
         android:layout_width="match_parent"
@@ -35,7 +30,7 @@
         android:layout_marginBottom="8dp"
         android:text="Location Name: "
         android:textSize="16sp"
-        android:textColor="@color/black" />
+        android:textColor="@android:color/white" />
 
     <TextView
         android:id="@+id/robot_location_coordinates"
@@ -44,12 +39,13 @@
         android:layout_marginBottom="16dp"
         android:text="Coordinates: "
         android:textSize="16sp"
-        android:textColor="@color/black" />
+        android:textColor="@android:color/white" />
 
     <!-- Check Position Button -->
     <Button
         android:id="@+id/btn_check_position"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Check Position" />
+        android:text="Check Position"
+        android:backgroundTint="@color/blue_dark" />
 </LinearLayout>

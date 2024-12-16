@@ -464,7 +464,13 @@ public class MapFragment extends Fragment {
         if (rootView != null) {
             TextView outputBox = rootView.findViewById(R.id.output_text_view);
             String currentOutput = outputBox.getText().toString();
-            outputBox.setText(currentOutput + "\n" + message);
+            if (currentOutput.isEmpty()) {
+                outputBox.setText(currentOutput + message);
+            }
+            else {
+                outputBox.setText(currentOutput + "\n\n" + message );
+
+            }
         }
     }
     private List<Robot> loadRobotsWithLocations() {
