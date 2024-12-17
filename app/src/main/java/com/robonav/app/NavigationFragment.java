@@ -65,7 +65,7 @@ public class NavigationFragment extends Fragment {
         btnNavigate.setOnClickListener(v -> {
             String selectedRobot = robotDropdown.getSelectedItem().toString();
             String selectedLocation = locationDropdown.getSelectedItem().toString();
-            String coordinates = locationCoordinatesTextView.getText().toString();
+            String coordinates = locationCoordinatesTextView.getText().toString().trim();  // Get the coordinates entered
 
             // Check if "Use Coordinates" is selected and coordinates are empty
             if (selectedLocation.equals("[Use Coordinates]") && coordinates.isEmpty()) {
@@ -74,6 +74,14 @@ public class NavigationFragment extends Fragment {
                 return;  // Exit the method to prevent further action
             }
 
+            // Validate coordinates if "[Use Coordinates]" is selected
+            if (selectedLocation.equals("[Use Coordinates]") && !isValidCoordinates(coordinates)) {
+                // Show a toast message if coordinates are invalid
+                showMessage("Invalid coordinates. Enter as 'latitude, longitude' within valid ranges.");
+                return;  // Exit the method to prevent further action
+            }
+
+            // Build the message based on the location choice
             String message;
             if (selectedLocation.equals("[Use Coordinates]")) {
                 // Use the coordinates entered by the user if no location is selected
@@ -208,6 +216,26 @@ public class NavigationFragment extends Fragment {
 
             scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
 
+        }
+    }
+
+    // Helper method to validate coordinates format and range
+    private boolean isValidCoordinates(String coordinates) {
+        // Split coordinates by comma
+        String[] parts = coordinates.split(",");
+        if (parts.length != 2) {
+            return false; // Invalid format (must have exactly 2 parts)
+        }
+
+        try {
+            // Parse latitude and longitude
+            float latitude = Float.parseFloat(parts[0].trim());
+            float longitude = Float.parseFloat(parts[1].trim());
+
+            // Check if latitude is within range -90 to 90 and longitude is within range -180 to 180
+            return (latitude >= -90 && latitude <= 90) && (longitude >= -180 && longitude <= 180);
+        } catch (NumberFormatException e) {
+            return false; // Invalid number format
         }
     }
 }
