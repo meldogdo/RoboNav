@@ -33,6 +33,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // Initialize the ViewPager2
         viewPager = findViewById(R.id.view_pager);
+        viewPager.setOffscreenPageLimit(2);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Set up the toolbar

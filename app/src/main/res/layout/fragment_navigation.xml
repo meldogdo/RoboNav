@@ -1,20 +1,172 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NavigationFragment">
+    android:fillViewport="true">
 
-    <!-- Map Fragment Content -->
-    <TextView
-        android:id="@+id/text_map"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="This is the Navigation screen"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        tools:context=".MapFragment">
+
+        <!-- Title Section -->
+        <TextView
+            android:id="@+id/title_map_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Navigation"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.074" />
+
+        <!-- Dynamic Content Container -->
+        <FrameLayout
+            android:id="@+id/dynamic_content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@color/gray_medium"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/title_map_info"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Content inside the FrameLayout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <!-- Text: Select Robot -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select Robot"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="16sp"
+                    android:textColor="@color/white" />
+
+                <!-- Spinner: Robot Dropdown -->
+                <Spinner
+                    android:id="@+id/robot_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/white"
+                    android:minHeight="48dp" />
+
+                <!-- Text: Select Pre-existing Location -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select Pre-existing Location"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/white" />
+
+                <!-- Spinner: Pre-existing Location Dropdown -->
+                <Spinner
+                    android:id="@+id/pre_existing_location_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/white"
+                    android:minHeight="48dp" />
+
+                <!-- Text: Enter Coordinates -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enter Coordinates"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/white" />
+
+                <!-- EditText: Coordinates Input -->
+                <EditText
+                    android:id="@+id/input_coordinates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Latitude, Longitude"
+                    android:textColorHint="@color/gray_high_contrast"
+                    android:textColor="@android:color/white"
+                    android:minHeight="48dp" />
+
+                <!-- Button: Set Initial Position -->
+                <Button
+                    android:id="@+id/btn_navigate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Navigate"
+                    android:backgroundTint="@color/blue_dark"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Output TextView -->
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/map_view"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+
+        <TextView
+            android:id="@+id/title_robot_tasks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Output Messages"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.054"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/map_view" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/output_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_robot_tasks"
+            android:visibility="gone"
+            >
+
+            <!-- TextView inside the NestedScrollView -->
+            <TextView
+                android:id="@+id/output_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/gray_medium"
+                android:padding="8dp"
+                android:minHeight="300dp"
+                android:scrollbars="vertical"
+                android:textColor="@color/gray_high_contrast"
+                android:textSize="16sp"
+                />
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
