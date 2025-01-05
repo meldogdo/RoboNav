@@ -17,11 +17,11 @@ import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+//import com.google.android.gms.maps.CameraUpdateFactory;
+//import com.google.android.gms.maps.GoogleMap;
+//import com.google.android.gms.maps.SupportMapFragment;
+//import com.google.android.gms.maps.model.LatLng;
+//import com.google.android.gms.maps.model.MarkerOptions;
 import com.robonav.app.utilities.JsonUtils;
 import com.robonav.app.R;
 import com.robonav.app.models.Robot;
@@ -42,7 +42,7 @@ public class MapFragment extends Fragment {
     private View dynamicContentContainer;
 
     private NestedScrollView scrollView;
-    private GoogleMap googleMap;
+//    private GoogleMap googleMap;
 
     @Nullable
     @Override
@@ -54,10 +54,10 @@ public class MapFragment extends Fragment {
         dynamicContentContainer = view.findViewById(R.id.dynamic_content_container);
 
         // Initialize the map
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_view);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(map -> googleMap = map);
-        }
+//        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_view);
+//        if (mapFragment != null) {
+//            mapFragment.getMapAsync(map -> googleMap = map);
+//        }
 
         setupDropdownMenu();
         return view;
@@ -466,32 +466,32 @@ public class MapFragment extends Fragment {
 
     }
 
-    private void handleSetPosition(String selectedRobot, String coordinates) {
-        String[] latLng = coordinates.split(",");
-        if (latLng.length != 2) {
-            showMessage("Invalid coordinates. Please enter in 'Latitude, Longitude' format.");
-            return;
-        }
-
-        try {
-            double latitude = Double.parseDouble(latLng[0].trim());
-            double longitude = Double.parseDouble(latLng[1].trim());
-            LatLng position = new LatLng(latitude, longitude);
-
-            if (googleMap != null) {
-                googleMap.addMarker(new MarkerOptions()
-                        .position(position)
-                        .title(selectedRobot + "'s Checkpoint")
-                        .snippet("Initial Position Set"));
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 10));
-            }
-
-            appendOutput("Initial position set for " + selectedRobot + " at coordinates: " + coordinates);
-
-        } catch (NumberFormatException e) {
-            showMessage("Invalid coordinates. Please enter numeric values for Latitude and Longitude.");
-        }
-    }
+//    private void handleSetPosition(String selectedRobot, String coordinates) {
+//        String[] latLng = coordinates.split(",");
+//        if (latLng.length != 2) {
+//            showMessage("Invalid coordinates. Please enter in 'Latitude, Longitude' format.");
+//            return;
+//        }
+//
+//        try {
+//            double latitude = Double.parseDouble(latLng[0].trim());
+//            double longitude = Double.parseDouble(latLng[1].trim());
+//            LatLng position = new LatLng(latitude, longitude);
+//
+//            if (googleMap != null) {
+//                googleMap.addMarker(new MarkerOptions()
+//                        .position(position)
+//                        .title(selectedRobot + "'s Checkpoint")
+//                        .snippet("Initial Position Set"));
+//                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 10));
+//            }
+//
+//            appendOutput("Initial position set for " + selectedRobot + " at coordinates: " + coordinates);
+//
+//        } catch (NumberFormatException e) {
+//            showMessage("Invalid coordinates. Please enter numeric values for Latitude and Longitude.");
+//        }
+//    }
 
     private List<String> loadRobotNames() {
         List<String> robotNames = new ArrayList<>();
