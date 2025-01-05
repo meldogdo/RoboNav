@@ -34,5 +34,50 @@
     "location_name": "",
     "location_coordinates": "",
     "tasks": []
+  },
+  {
+    "id": "robot_5",
+    "name": "Robot #5",
+    "ping": "120ms",
+    "battery": 60,
+    "location_name": "Berlin Base",
+    "location_coordinates": "52.5200,13.4050",
+    "tasks": ["task_6"]
+  },
+  {
+    "id": "robot_6",
+    "name": "Robot #6",
+    "ping": "60ms",
+    "battery": 85,
+    "location_name": "Sydney Base",
+    "location_coordinates": "-33.8688,151.2093",
+    "tasks": ["task_7", "task_8"]
+  },
+  {
+    "id": "robot_7",
+    "name": "Robot #7",
+    "ping": "200ms",
+    "battery": 30,
+    "location_name": "Rio Base",
+    "location_coordinates": "-22.9068,-43.1729",
+    "tasks": ["task_9"]
+  },
+  {
+    "id": "robot_8",
+    "name": "Robot #8",
+    "ping": "45ms",
+    "battery": 75,
+    "location_name": "Paris Base",
+    "location_coordinates": "48.8566,2.3522",
+    "tasks": ["task_10", "task_11"]
+  },
+  {
+    "id": "robot_9",
+    "name": "Robot #9",
+    "ping": "90ms",
+    "battery": 90,
+    "location_name": "London Base",
+    "location_coordinates": "51.5074,-0.1278",
+    "tasks": ["task_12"]
   }
 ]
