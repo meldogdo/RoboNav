@@ -1,8 +1,9 @@
 package com.robonav.app.models;
 
+import static com.robonav.app.utilities.JsonUtils.jsonArrayToList;
+
 import androidx.annotation.NonNull;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,16 +31,7 @@ public class Robot {
         this.tasks = jsonArrayToList(jsonObject.optJSONArray("tasks"));    // Convert tasks array to List
     }
 
-    // Helper method to convert JSON array of tasks to List<String>
-    private List<String> jsonArrayToList(JSONArray jsonArray) throws JSONException {
-        List<String> taskList = new ArrayList<>();
-        if (jsonArray != null) {
-            for (int i = 0; i < jsonArray.length(); i++) {
-                taskList.add(jsonArray.getString(i));
-            }
-        }
-        return taskList;
-    }
+
 
     // Getters for the class variables
     public String getId() {
@@ -112,6 +104,14 @@ public class Robot {
             }
         }
         return tasksForRobot;
+    }
+    public static Robot findRobotByName(String name, List<Robot> robots) {
+        for (Robot robot : robots) {
+            if (robot.getName().equals(name)) {
+                return robot;
+            }
+        }
+        return null;
     }
 
 }

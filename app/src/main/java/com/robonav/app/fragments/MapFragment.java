@@ -1,5 +1,18 @@
 package com.robonav.app.fragments;
 
+import static com.robonav.app.models.Robot.findRobotByName;
+import static com.robonav.app.utilities.FragmentUtils.appendOutput;
+import static com.robonav.app.utilities.FragmentUtils.isValidCoordinates;
+import static com.robonav.app.utilities.FragmentUtils.saveLocation;
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
+import static com.robonav.app.utilities.JsonUtils.getAvailableMapFiles;
+import static com.robonav.app.utilities.JsonUtils.loadAllRobots;
+import static com.robonav.app.utilities.JsonUtils.loadRobotNames;
+import static com.robonav.app.utilities.JsonUtils.loadRobotsWithLocations;
+import static com.robonav.app.utilities.JsonUtils.loadLocationNames;
+import static com.robonav.app.utilities.JsonUtils.getCoordinatesForLocation;
+import static com.robonav.app.utilities.JsonUtils.getAllLocations;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,24 +30,22 @@ import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
+
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+
 import com.robonav.app.utilities.JsonUtils;
 import com.robonav.app.R;
 import com.robonav.app.models.Robot;
 
+
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
 
 public class MapFragment extends Fragment {
 
@@ -96,6 +107,10 @@ public class MapFragment extends Fragment {
     private void handleActionSelection(String action) {
         clearDynamicContent();
         Spinner robotDropdown;
+        List<String> robotNames = new ArrayList<>();
+        ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
+        List<String> locationNames = loadLocationNames(requireContext());
+        ArrayAdapter<String> locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
         switch (action) {
 
             case "Check Robot Position":
@@ -108,13 +123,12 @@ public class MapFragment extends Fragment {
                 Button btnCheckPosition = dynamicContentContainer.findViewById(R.id.btn_check_position);
 
                 // Load robot names into the dropdown
-                List<Robot> allRobots = loadAllRobots();
-                List<String> robotNames = new ArrayList<>();
+                List<Robot> allRobots = loadAllRobots(requireContext());
+
                 for (Robot robot : allRobots) {
                     robotNames.add(robot.getName());
                 }
 
-                ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
                 robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 robotDropdown.setAdapter(robotAdapter);
 
@@ -150,9 +164,9 @@ public class MapFragment extends Fragment {
                     if (selectedRobot != null) {
                         appendOutput("Checked Position for " + selectedRobot.getName() +
                                 "\nLocation Name: " + selectedRobot.getLocationName() +
-                                "\nCoordinates: " + selectedRobot.getLocationCoordinates());
+                                "\nCoordinates: " + selectedRobot.getLocationCoordinates(), scrollView, dynamicContentContainer);
                     } else {
-                        showMessage("Please select a robot with a valid location.");
+                        showMessage("Please select a robot with a valid location.", requireContext());
                     }
                 });
                 break;
@@ -168,15 +182,15 @@ public class MapFragment extends Fragment {
                 Button btnSetPosition = dynamicContentContainer.findViewById(R.id.btn_set_initial_position);
 
                 // Load robots into dropdown
-                robotNames = loadRobotNames();
+                robotNames = loadRobotNames(requireContext());
                 robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
                 robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 robotDropdown.setAdapter(robotAdapter);
 
                 // Load pre-existing locations into dropdown
-                List<String> locationNames = loadLocationNames();
+
                 locationNames.add(0, "[Use Coordinates]");
-                ArrayAdapter<String> locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
+
                 locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 preExistingLocationDropdown.setAdapter(locationAdapter);
 
@@ -214,7 +228,7 @@ public class MapFragment extends Fragment {
                             inputCoordinates.setText("");  // Clear any coordinates
                         } else {
                             // If a location is selected, fill coordinates and disable the input
-                            String coordinates = getCoordinatesForLocation(selectedLocation);
+                            String coordinates = getCoordinatesForLocation(selectedLocation, requireContext());
                             inputCoordinates.setText(coordinates);
                             inputCoordinates.setEnabled(false);  // Disable editing
                         }
@@ -252,12 +266,12 @@ public class MapFragment extends Fragment {
                         message = selectedRobot + " set to Coordinates:\n" + coordinates;
                     } else {
                         // If a location is selected, coordinates are fetched and displayed
-                        String locationCoordinates = getCoordinatesForLocation(selectedLocation);
+                        String locationCoordinates = getCoordinatesForLocation(selectedLocation,requireContext());
                         message = selectedRobot + " set to Location:\n" + selectedLocation + " (" + locationCoordinates + ")";
                     }
 
                     // Optionally add logic to handle the robot position setting
-                    appendOutput(message);
+                    appendOutput(message, scrollView, dynamicContentContainer);
                 });
                 break;
             case "Save Current Location":
@@ -269,7 +283,7 @@ public class MapFragment extends Fragment {
                 Button btnSaveLocation = dynamicContentContainer.findViewById(R.id.btn_save_location);
 
                 // Load robots with non-empty location fields
-                List<Robot> robotsWithLocations = loadRobotsWithLocations();
+                List<Robot> robotsWithLocations = loadRobotsWithLocations(requireContext());
                 robotNames = new ArrayList<>();
                 for (Robot robot : robotsWithLocations) {
                     robotNames.add(robot.getName());
@@ -310,13 +324,13 @@ public class MapFragment extends Fragment {
                     String selectedRobot = robotDropdown.getSelectedItem() != null ? robotDropdown.getSelectedItem().toString() : "";
 
                     if (selectedRobot.isEmpty()) {
-                        showMessage("Please select a robot.");
+                        showMessage("Please select a robot.",requireContext());
                         return;
                     }
 
                     String newLocationName = inputLocationName.getText().toString().trim();
                     if (newLocationName.isEmpty()) {
-                        showMessage("Please enter a location name.");
+                        showMessage("Please enter a location name.",requireContext());
                         return;
                     }
 
@@ -324,10 +338,10 @@ public class MapFragment extends Fragment {
                     Robot selectedRobotObj = findRobotByName(selectedRobot, robotsWithLocations);
                     if (selectedRobotObj != null) {
                         selectedRobotObj.setLocationName(newLocationName);
-                        saveLocation(selectedRobotObj); // Your method to save or update the robot location
-                        showMessage("Location saved successfully for " + selectedRobot);
+                        saveLocation(selectedRobotObj,requireContext(), scrollView, dynamicContentContainer); // Your method to save or update the robot location
+                        showMessage("Location saved successfully for " + selectedRobot,requireContext());
                     } else {
-                        showMessage("Unable to find the selected robot.");
+                        showMessage("Unable to find the selected robot.",requireContext());
                     }
                 });
                 break;
@@ -340,9 +354,9 @@ public class MapFragment extends Fragment {
 
                 // Handle button click
                 btnShowAllLocations.setOnClickListener(v -> {
-                    List<String> allLocations = getAllLocations();
+                    List<String> allLocations = getAllLocations(requireContext());
                     if (allLocations.isEmpty()) {
-                        appendOutput("No locations found.");
+                        appendOutput("No locations found.", scrollView, dynamicContentContainer);
                     } else {
 
                         StringBuilder output = new StringBuilder();
@@ -355,7 +369,7 @@ public class MapFragment extends Fragment {
                                 output.append("\n");
                             }
                         }
-                        appendOutput(String.valueOf(output));
+                        appendOutput(String.valueOf(output), scrollView, dynamicContentContainer);
                     }
                 });
                 break;
@@ -382,10 +396,10 @@ public class MapFragment extends Fragment {
                         JsonUtils.saveJSONToFile(requireContext(), "robots.json", robots.toString());
 
                         // Notify user
-                        showMessage("All robot locations have been cleared.");
+                        showMessage("All robot locations have been cleared.",requireContext());
                     } catch (Exception e) {
                         e.printStackTrace();
-                        showMessage("Error clearing locations: " + e.getMessage());
+                        showMessage("Error clearing locations: " + e.getMessage(),requireContext());
                     }
                 });
                 break;
@@ -398,7 +412,7 @@ public class MapFragment extends Fragment {
                 Button btnGetCoordinates = dynamicContentContainer.findViewById(R.id.btn_get_coordinates);
 
                 // Load location names into dropdown
-                locationNames = loadLocationNames();
+                locationNames = loadLocationNames(requireContext());
                 locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
                 locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 locationDropdown.setAdapter(locationAdapter);
@@ -408,16 +422,16 @@ public class MapFragment extends Fragment {
                     String selectedLocation = locationDropdown.getSelectedItem() != null ? locationDropdown.getSelectedItem().toString() : "";
 
                     if (selectedLocation.isEmpty()) {
-                        showMessage("Please select a location.");
+                        showMessage("Please select a location.",requireContext());
                         return;
                     }
 
                     // Retrieve and display coordinates for the selected location
-                    String coordinates = getCoordinatesForLocation(selectedLocation);
+                    String coordinates = getCoordinatesForLocation(selectedLocation, requireContext());
                     if (!coordinates.isEmpty()) {
-                        appendOutput("Coordinates: " + coordinates);
+                        appendOutput("Coordinates: " + coordinates, scrollView, dynamicContentContainer);
                     } else {
-                        appendOutput("Coordinates not found for the selected location.");
+                        appendOutput("Coordinates not found for the selected location.", scrollView, dynamicContentContainer);
                     }
                 });
                 break;
@@ -433,7 +447,7 @@ public class MapFragment extends Fragment {
                     String simulatedMapDetails = "Map Size: 5MB, Updated: 2024-11-28"; // Simulated metadata
 
                     appendOutput("File Name: " + simulatedMapFileName + "\n" +
-                            simulatedMapDetails);
+                            simulatedMapDetails, scrollView, dynamicContentContainer);
                 });
                 break;
             case "Swap Map":
@@ -454,10 +468,10 @@ public class MapFragment extends Fragment {
                     String selectedMapFile = mapFileDropdown.getSelectedItem() != null ? mapFileDropdown.getSelectedItem().toString() : "";
 
                     if (selectedMapFile.isEmpty()) {
-                        appendOutput("No map file selected. Please choose a map file.");
+                        appendOutput("No map file selected. Please choose a map file.", scrollView, dynamicContentContainer);
                         return;
                     }
-                    appendOutput("Map file swapped successfully to: " + selectedMapFile);
+                    appendOutput("Map file swapped successfully to: " + selectedMapFile, scrollView, dynamicContentContainer);
                 });
                 break;
             default:
@@ -465,50 +479,6 @@ public class MapFragment extends Fragment {
         }
 
     }
-
-    private void handleSetPosition(String selectedRobot, String coordinates) {
-        String[] latLng = coordinates.split(",");
-        if (latLng.length != 2) {
-            showMessage("Invalid coordinates. Please enter in 'Latitude, Longitude' format.");
-            return;
-        }
-
-        try {
-            double latitude = Double.parseDouble(latLng[0].trim());
-            double longitude = Double.parseDouble(latLng[1].trim());
-            LatLng position = new LatLng(latitude, longitude);
-
-            if (googleMap != null) {
-                googleMap.addMarker(new MarkerOptions()
-                        .position(position)
-                        .title(selectedRobot + "'s Checkpoint")
-                        .snippet("Initial Position Set"));
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 10));
-            }
-
-            appendOutput("Initial position set for " + selectedRobot + " at coordinates: " + coordinates);
-
-        } catch (NumberFormatException e) {
-            showMessage("Invalid coordinates. Please enter numeric values for Latitude and Longitude.");
-        }
-    }
-
-    private List<String> loadRobotNames() {
-        List<String> robotNames = new ArrayList<>();
-        String robotJson = JsonUtils.loadJSONFromAsset(requireContext(), "robots.json");
-        try {
-            JSONArray robots = new JSONArray(robotJson);
-            for (int i = 0; i < robots.length(); i++) {
-                Robot robot = new Robot(robots.getJSONObject(i));
-                robotNames.add(robot.getName());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showMessage("Error loading robots: " + e.getMessage());
-        }
-        return robotNames;
-    }
-
     private void clearDynamicContent() {
         ((ViewGroup) dynamicContentContainer).removeAllViews();
     }
@@ -517,184 +487,5 @@ public class MapFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View view = inflater.inflate(layoutResId, (ViewGroup) dynamicContentContainer, false);
         ((ViewGroup) dynamicContentContainer).addView(view);
-    }
-
-    private void showMessage(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private void appendOutput(String message) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentTime = formatter.format(new Date());
-        // Assuming an output box exists in your layout
-        View rootView = getView();
-        if (rootView != null) {
-            TextView outputBox = rootView.findViewById(R.id.output_text_view);
-            String currentOutput = outputBox.getText().toString();
-            if (currentOutput.isEmpty()) {
-                scrollView.setVisibility(View.VISIBLE);
-                outputBox.setText(currentOutput + currentTime +"\n" + message);
-            }
-            else {
-                outputBox.setText(currentOutput + "\n\n" + currentTime + "\n" + message );
-
-            }
-            // Scroll to the bottom after updating the content
-
-            scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
-
-        }
-    }
-    private List<Robot> loadRobotsWithLocations() {
-        List<Robot> robotsWithLocations = new ArrayList<>();
-        String robotJson = JsonUtils.loadJSONFromAsset(requireContext(), "robots.json");
-        try {
-            JSONArray robots = new JSONArray(robotJson);
-            for (int i = 0; i < robots.length(); i++) {
-                Robot robot = new Robot(robots.getJSONObject(i));
-                if (!robot.getLocationName().isEmpty()) {
-                    robotsWithLocations.add(robot);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showMessage("Error loading robots: " + e.getMessage());
-        }
-        return robotsWithLocations;
-    }
-    private Robot findRobotByName(String name, List<Robot> robots) {
-        for (Robot robot : robots) {
-            if (robot.getName().equals(name)) {
-                return robot;
-            }
-        }
-        return null;
-    }
-    private void saveLocation(Robot robot) {
-        try {
-            // Step 1: Load existing locations.json
-            String locationJson;
-            File file = new File(requireContext().getFilesDir(), "locations.json");
-            JSONArray locations;
-
-            if (file.exists()) {
-                locationJson = JsonUtils.loadJSONFromFile(requireContext(), "locations.json");
-                locations = new JSONArray(locationJson);
-            } else {
-                locations = new JSONArray();
-            }
-
-            // Step 2: Create new location object
-            JSONObject newLocation = new JSONObject();
-            newLocation.put("name", "Checkpoint for " + robot.getName());
-            newLocation.put("coordinates", robot.getLocationCoordinates());
-            newLocation.put("robots", new JSONArray().put(robot.getId()));
-
-            // Step 3: Add the new location to the array
-            locations.put(newLocation);
-
-            // Step 4: Save updated JSON array back to locations.json
-            JsonUtils.saveJSONToFile(requireContext(), "locations.json", locations.toString());
-
-            // Step 5: Notify user and update UI
-            showMessage("Location saved successfully.");
-            appendOutput("Saved location for " + robot.getName() + " at coordinates: " + robot.getLocationCoordinates());
-        } catch (Exception e) {
-            e.printStackTrace();
-            showMessage("Error saving location: " + e.getMessage());
-        }
-    }
-    private List<Robot> loadAllRobots() {
-        List<Robot> robots = new ArrayList<>();
-        try {
-            String robotsJson = JsonUtils.loadJSONFromAsset(requireContext(), "robots.json");
-            JSONArray robotsArray = new JSONArray(robotsJson);
-            for (int i = 0; i < robotsArray.length(); i++) {
-                robots.add(new Robot(robotsArray.getJSONObject(i)));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showMessage("Error loading robots: " + e.getMessage());
-        }
-        return robots;
-    }
-    private List<String> loadLocationNames() {
-        List<String> locationNames = new ArrayList<>();
-        try {
-            String locationJson = JsonUtils.loadJSONFromAsset(requireContext(), "locations.json");
-            JSONArray locationsArray = new JSONArray(locationJson);
-            for (int i = 0; i < locationsArray.length(); i++) {
-                JSONObject location = locationsArray.getJSONObject(i);
-                locationNames.add(location.getString("name"));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showMessage("Error loading locations: " + e.getMessage());
-        }
-        return locationNames;
-    }
-
-    private String getCoordinatesForLocation(String locationName) {
-        try {
-            String locationJson = JsonUtils.loadJSONFromAsset(requireContext(), "locations.json");
-            JSONArray locationsArray = new JSONArray(locationJson);
-            for (int i = 0; i < locationsArray.length(); i++) {
-                JSONObject location = locationsArray.getJSONObject(i);
-                if (location.getString("name").equals(locationName)) {
-                    return location.getString("coordinates");
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-    private List<String> getAllLocations() {
-        List<String> locations = new ArrayList<>();
-        try {
-            String locationJson = JsonUtils.loadJSONFromAsset(requireContext(), "locations.json");
-            JSONArray locationsArray = new JSONArray(locationJson);
-            for (int i = 0; i < locationsArray.length(); i++) {
-                JSONObject location = locationsArray.getJSONObject(i);
-                String name = location.getString("name");
-                String coordinates = location.getString("coordinates");
-                locations.add(name + " (Coordinates: " + coordinates + ")");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showMessage("Error retrieving locations: " + e.getMessage());
-        }
-        return locations;
-    }
-
-    private List<String> getAvailableMapFiles() {
-        // Simulate a list of map files
-        List<String> mapFiles = new ArrayList<>();
-        mapFiles.add("map_file_1.json");
-        mapFiles.add("map_file_2.json");
-        mapFiles.add("map_file_3.json");
-        return mapFiles;
-
-        // You can replace this with actual file browsing logic if needed
-    }
-
-    // Helper method to validate coordinates format and range
-    private boolean isValidCoordinates(String coordinates) {
-        // Split coordinates by comma
-        String[] parts = coordinates.split(",");
-        if (parts.length != 2) {
-            return false; // Invalid format (must have exactly 2 parts)
-        }
-
-        try {
-            // Parse latitude and longitude
-            float latitude = Float.parseFloat(parts[0].trim());
-            float longitude = Float.parseFloat(parts[1].trim());
-
-            // Check if latitude is within range -90 to 90 and longitude is within range -180 to 180
-            return (latitude >= -90 && latitude <= 90) && (longitude >= -180 && longitude <= 180);
-        } catch (NumberFormatException e) {
-            return false; // Invalid number format
-        }
     }
 }
