@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.adapters;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -17,6 +17,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.robonav.app.R;
+import com.robonav.app.models.Robot;
+import com.robonav.app.models.Task;
 
 import java.util.List;
 import java.text.ParseException;

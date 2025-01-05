@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,11 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.robonav.app.fragments.HomeFragment;
+import com.robonav.app.fragments.NavigationFragment;
+import com.robonav.app.R;
+import com.robonav.app.fragments.MapFragment;
+
 import java.util.Objects;
 
 public class HomeActivity extends AppCompatActivity {

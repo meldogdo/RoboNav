@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.models;
 
 import androidx.annotation.NonNull;
 
@@ -60,15 +60,5 @@ public class Task {
                 ", robot_id='" + robotId + '\'' +
                 ", progress=" + progress +
                 '}';
-    }
-
-    // This method finds the Robot object based on the robot ID assigned to the task
-    public static Robot getRobotForTask(Task task, List<Robot> robots) {
-        for (Robot robot : robots) {
-            if (robot.getId().equals(task.getRobotId())) {
-                return robot;  // Return the robot whose ID matches the task's robotId
-            }
-        }
-        return null; // Return null if no matching robot is found
     }
 }

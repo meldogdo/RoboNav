@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.activities;
 
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -7,15 +7,16 @@ import android.view.View;
 import android.util.Log;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.robonav.app.R;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -47,13 +48,13 @@ public class MapActivity extends AppCompatActivity {
         // Initialize the GestureDetector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
                 // Handle scroll gestures if needed
                 return true;
             }
 
             @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
+            public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
                 // Handle single tap gestures if needed
                 return true;
             }

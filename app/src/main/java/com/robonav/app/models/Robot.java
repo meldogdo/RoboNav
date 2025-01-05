@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.models;
 
 import androidx.annotation.NonNull;
 

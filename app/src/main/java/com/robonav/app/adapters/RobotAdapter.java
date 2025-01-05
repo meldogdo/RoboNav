@@ -1,7 +1,6 @@
-package com.robonav.app;
+package com.robonav.app.adapters;
 
-import static com.robonav.app.Robot.getTaskInProgress;
-import static com.robonav.app.Robot.getTasksForRobot;
+import static com.robonav.app.models.Robot.getTaskInProgress;
 
 import android.content.Context;
 import android.view.Gravity;
@@ -18,6 +17,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.robonav.app.R;
+import com.robonav.app.models.Robot;
+import com.robonav.app.models.Task;
 
 import java.util.List;
 

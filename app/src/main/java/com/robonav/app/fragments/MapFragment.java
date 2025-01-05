@@ -1,6 +1,4 @@
-package com.robonav.app;
-
-import static com.robonav.app.JsonUtils.saveJSONToFile;
+package com.robonav.app.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,10 +19,12 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.robonav.app.utilities.JsonUtils;
+import com.robonav.app.R;
+import com.robonav.app.models.Robot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,12 +56,7 @@ public class MapFragment extends Fragment {
         // Initialize the map
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_view);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(@NonNull GoogleMap map) {
-                    googleMap = map;
-                }
-            });
+            mapFragment.getMapAsync(map -> googleMap = map);
         }
 
         setupDropdownMenu();

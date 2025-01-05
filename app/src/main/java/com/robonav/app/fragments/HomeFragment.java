@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +8,13 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.robonav.app.utilities.JsonUtils;
+import com.robonav.app.R;
+import com.robonav.app.models.Robot;
+import com.robonav.app.adapters.RobotAdapter;
+import com.robonav.app.models.Task;
+import com.robonav.app.adapters.TaskAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -12,4 +12,5 @@
         android:id="@+id/nav_navigation"
         android:icon="@drawable/ic_navigation"
         android:title="@string/navigation" />
+
 </menu>

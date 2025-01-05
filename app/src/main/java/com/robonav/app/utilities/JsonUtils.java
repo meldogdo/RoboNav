@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.utilities;
 
 import android.content.Context;
 

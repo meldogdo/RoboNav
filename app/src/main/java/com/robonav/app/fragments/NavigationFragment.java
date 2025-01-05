@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.fragments;
 
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -10,11 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView;
+
+import com.robonav.app.utilities.JsonUtils;
+import com.robonav.app.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;

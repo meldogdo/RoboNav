@@ -1,4 +1,4 @@
-package com.robonav.app;
+package com.robonav.app.activities;
 
 import android.content.Intent;
 import android.graphics.Paint;
@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.robonav.app.R;
 
 public class MainActivity extends AppCompatActivity {
 

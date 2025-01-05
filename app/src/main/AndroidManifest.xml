@@ -21,7 +21,7 @@
         android:theme="@style/Theme.RoboNav"
         tools:targetApi="31">
         <!-- Declare the MainActivity as the launcher activity -->
-        <activity android:name=".MainActivity"
+        <activity android:name=".activities.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <!-- Sign Up Activity -->
-        <activity android:name=".SignUpActivity"
+        <activity android:name=".activities.SignUpActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
@@ -40,9 +40,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ForgotPasswordActivity" />
+        <activity android:name=".activities.ForgotPasswordActivity" />
         <!-- Declare HomeActivity -->
-        <activity android:name=".HomeActivity"
+        <activity android:name=".activities.HomeActivity"
             android:exported="true"
             >
             <!-- This makes HomeActivity the entry point of the app -->
