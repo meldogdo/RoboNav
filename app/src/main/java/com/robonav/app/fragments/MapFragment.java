@@ -54,11 +54,12 @@ public class MapFragment extends Fragment {
 
     private NestedScrollView scrollView;
     private GoogleMap googleMap;
+    private View view;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        view = inflater.inflate(R.layout.fragment_map, container, false);
 
         scrollView = view.findViewById(R.id.output_scroll_view);
         actionSpinner = view.findViewById(R.id.action_spinner);
@@ -164,7 +165,7 @@ public class MapFragment extends Fragment {
                     if (selectedRobot != null) {
                         appendOutput("Checked Position for " + selectedRobot.getName() +
                                 "\nLocation Name: " + selectedRobot.getLocationName() +
-                                "\nCoordinates: " + selectedRobot.getLocationCoordinates(), scrollView, dynamicContentContainer);
+                                "\nCoordinates: " + selectedRobot.getLocationCoordinates(), scrollView, view);
                     } else {
                         showMessage("Please select a robot with a valid location.", requireContext());
                     }
@@ -271,7 +272,7 @@ public class MapFragment extends Fragment {
                     }
 
                     // Optionally add logic to handle the robot position setting
-                    appendOutput(message, scrollView, dynamicContentContainer);
+                    appendOutput(message, scrollView, view);
                 });
                 break;
             case "Save Current Location":
@@ -338,7 +339,7 @@ public class MapFragment extends Fragment {
                     Robot selectedRobotObj = findRobotByName(selectedRobot, robotsWithLocations);
                     if (selectedRobotObj != null) {
                         selectedRobotObj.setLocationName(newLocationName);
-                        saveLocation(selectedRobotObj,requireContext(), scrollView, dynamicContentContainer); // Your method to save or update the robot location
+                        saveLocation(selectedRobotObj,requireContext(), scrollView, view); // Your method to save or update the robot location
                         showMessage("Location saved successfully for " + selectedRobot,requireContext());
                     } else {
                         showMessage("Unable to find the selected robot.",requireContext());
@@ -356,7 +357,7 @@ public class MapFragment extends Fragment {
                 btnShowAllLocations.setOnClickListener(v -> {
                     List<String> allLocations = getAllLocations(requireContext());
                     if (allLocations.isEmpty()) {
-                        appendOutput("No locations found.", scrollView, dynamicContentContainer);
+                        appendOutput("No locations found.", scrollView, view);
                     } else {
 
                         StringBuilder output = new StringBuilder();
@@ -369,7 +370,7 @@ public class MapFragment extends Fragment {
                                 output.append("\n");
                             }
                         }
-                        appendOutput(String.valueOf(output), scrollView, dynamicContentContainer);
+                        appendOutput(String.valueOf(output), scrollView, view);
                     }
                 });
                 break;
@@ -429,9 +430,9 @@ public class MapFragment extends Fragment {
                     // Retrieve and display coordinates for the selected location
                     String coordinates = getCoordinatesForLocation(selectedLocation, requireContext());
                     if (!coordinates.isEmpty()) {
-                        appendOutput("Coordinates: " + coordinates, scrollView, dynamicContentContainer);
+                        appendOutput("Coordinates: " + coordinates, scrollView, view);
                     } else {
-                        appendOutput("Coordinates not found for the selected location.", scrollView, dynamicContentContainer);
+                        appendOutput("Coordinates not found for the selected location.", scrollView, view);
                     }
                 });
                 break;
@@ -447,7 +448,7 @@ public class MapFragment extends Fragment {
                     String simulatedMapDetails = "Map Size: 5MB, Updated: 2024-11-28"; // Simulated metadata
 
                     appendOutput("File Name: " + simulatedMapFileName + "\n" +
-                            simulatedMapDetails, scrollView, dynamicContentContainer);
+                            simulatedMapDetails, scrollView, view);
                 });
                 break;
             case "Swap Map":
@@ -468,10 +469,10 @@ public class MapFragment extends Fragment {
                     String selectedMapFile = mapFileDropdown.getSelectedItem() != null ? mapFileDropdown.getSelectedItem().toString() : "";
 
                     if (selectedMapFile.isEmpty()) {
-                        appendOutput("No map file selected. Please choose a map file.", scrollView, dynamicContentContainer);
+                        appendOutput("No map file selected. Please choose a map file.", scrollView, view);
                         return;
                     }
-                    appendOutput("Map file swapped successfully to: " + selectedMapFile, scrollView, dynamicContentContainer);
+                    appendOutput("Map file swapped successfully to: " + selectedMapFile, scrollView, view);
                 });
                 break;
             default:

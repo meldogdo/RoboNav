@@ -12,31 +12,35 @@
         tools:context=".fragments.MapFragment">
 
         <!-- Title Section -->
+
+        <!-- Dynamic Content Container -->
+
         <TextView
             android:id="@+id/title_map_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:text="Navigation"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.074" />
+            app:layout_constraintHorizontal_bias="0.054"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Dynamic Content Container -->
         <FrameLayout
             android:id="@+id/dynamic_content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:layout_marginTop="8dp"
             android:background="@color/gray_medium"
             android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/title_map_info"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/title_map_info">
 
             <!-- Content inside the FrameLayout -->
             <LinearLayout
@@ -49,10 +53,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Select Robot"
                     android:layout_marginBottom="8dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/white" />
+                    android:text="Select Robot"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
 
                 <!-- Spinner: Robot Dropdown -->
                 <Spinner
@@ -67,8 +71,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Select Pre-existing Location"
                     android:layout_marginBottom="8dp"
+                    android:text="Select Pre-existing Location"
                     android:textColor="@color/white" />
 
                 <!-- Spinner: Pre-existing Location Dropdown -->
@@ -84,8 +88,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enter Coordinates"
                     android:layout_marginBottom="8dp"
+                    android:text="Enter Coordinates"
                     android:textColor="@color/white" />
 
                 <!-- EditText: Coordinates Input -->
@@ -95,35 +99,35 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:hint="Latitude, Longitude"
-                    android:textColorHint="@color/gray_high_contrast"
+                    android:minHeight="48dp"
                     android:textColor="@android:color/white"
-                    android:minHeight="48dp" />
+                    android:textColorHint="@color/gray_high_contrast" />
 
                 <!-- Button: Set Initial Position -->
                 <Button
                     android:id="@+id/btn_navigate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Navigate"
                     android:backgroundTint="@color/blue_dark"
+                    android:text="Navigate"
                     android:textColor="@android:color/white" />
             </LinearLayout>
         </FrameLayout>
 
         <!-- Output TextView -->
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/map_view"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+<!--        <androidx.fragment.app.FragmentContainerView-->
+<!--            android:id="@+id/map_view"-->
+<!--            android:name="com.google.android.gms.maps.SupportMapFragment"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="300dp"-->
+<!--            android:layout_marginStart="16dp"-->
+<!--            android:layout_marginTop="16dp"-->
+<!--            android:layout_marginEnd="16dp"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintHorizontal_bias="0.0"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />-->
 
         <TextView
             android:id="@+id/title_robot_tasks"
@@ -135,24 +139,24 @@
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.054"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/map_view" />
+            app:layout_constraintTop_toBottomOf="@+id/dynamic_content_container" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/output_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title_robot_tasks"
-            android:visibility="gone"
-            >
+            app:layout_constraintTop_toBottomOf="@+id/title_robot_tasks">
 
             <!-- TextView inside the NestedScrollView -->
             <TextView
@@ -160,12 +164,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/gray_medium"
-                android:padding="8dp"
                 android:minHeight="300dp"
+                android:padding="8dp"
                 android:scrollbars="vertical"
                 android:textColor="@color/gray_high_contrast"
-                android:textSize="16sp"
-                />
+                android:textSize="16sp" />
         </androidx.core.widget.NestedScrollView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

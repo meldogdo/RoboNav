@@ -15,6 +15,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.robonav.app.fragments.HomeFragment;
 import com.robonav.app.fragments.NavigationFragment;
+import com.robonav.app.fragments.GeoVisualizationFragment;
+
+
 import com.robonav.app.R;
 import com.robonav.app.fragments.MapFragment;
 
@@ -68,14 +71,18 @@ public class HomeActivity extends AppCompatActivity {
                     return new MapFragment(); // Fragment 2: Map
                 } else if (position == 2) {
                     return new NavigationFragment(); // Fragment 3: Navigation
-                } else {
+                }
+                else if (position == 3) {
+                    return new GeoVisualizationFragment(); // Fragment 3: Geo Visualization
+                }
+                else {
                     return new HomeFragment(); // Default Fragment
                 }
             }
 
             @Override
             public int getItemCount() {
-                return 3; // Number of fragments you want to swipe between
+                return 4; // Number of fragments you want to swipe between
             }
         });
 
@@ -91,7 +98,10 @@ public class HomeActivity extends AppCompatActivity {
                     bottomNavigationView.setSelectedItemId(R.id.nav_map);
                 } else if (position == 2) {
                     bottomNavigationView.setSelectedItemId(R.id.nav_navigation);
+                } else if (position == 3) {
+                    bottomNavigationView.setSelectedItemId(R.id.geo_visualization);
                 }
+
             }
         });
 
@@ -109,7 +119,11 @@ public class HomeActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_navigation) {
                 viewPager.setCurrentItem(2); // Navigate to NavigationFragment
                 return true;
-            } else {
+            } else if (itemId == R.id.geo_visualization) {
+                viewPager.setCurrentItem(3); // Navigate to Geo-Visualization fragment
+                return true;
+            }
+            else {
                 return false; // Return false if no matching ID
             }
         });

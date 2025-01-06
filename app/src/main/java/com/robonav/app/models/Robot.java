@@ -114,4 +114,16 @@ public class Robot {
         return null;
     }
 
+    public double getLatitude() {
+        String[] coordinates = locationCoordinates.split(",");
+        return coordinates.length == 2 ? Double.parseDouble(coordinates[0]) : 0;
+    }
+
+    public double getLongitude() {
+        String[] coordinates = locationCoordinates.split(",");
+        return coordinates.length == 2 ? Double.parseDouble(coordinates[1]) : 0;
+    }
+
+
+
 }
