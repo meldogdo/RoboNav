@@ -87,16 +87,14 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/output_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="499dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title_robot_tasks">
+            app:layout_constraintTop_toBottomOf="@id/title_robot_tasks">
 
             <!-- TextView inside the NestedScrollView -->
             <TextView
@@ -104,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/gray_medium"
-                android:minHeight="300dp"
+                android:minHeight="499dp"
                 android:padding="8dp"
                 android:scrollbars="vertical"
                 android:textColor="@color/gray_high_contrast"
