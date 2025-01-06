@@ -16,6 +16,35 @@
     "name": "Tokyo Base",
     "coordinates": "35.6895,139.6917",
     "robots": ["robot_3"]
+  },
+  {
+    "id": "loc_4",
+    "name": "Berlin Base",
+    "coordinates": "52.5200,13.4050",
+    "robots": ["robot_5"]
+  },
+  {
+    "id": "loc_5",
+    "name": "Sydney Base",
+    "coordinates": "-33.8688,151.2093",
+    "robots": ["robot_6"]
+  },
+  {
+    "id": "loc_6",
+    "name": "Rio Base",
+    "coordinates": "-22.9068,-43.1729",
+    "robots": ["robot_7"]
+  },
+  {
+    "id": "loc_7",
+    "name": "Paris Base",
+    "coordinates": "48.8566,2.3522",
+    "robots": ["robot_8"]
+  },
+  {
+    "id": "loc_8",
+    "name": "London Base",
+    "coordinates": "51.5074,-0.1278",
+    "robots": ["robot_9"]
   }
 ]
-
