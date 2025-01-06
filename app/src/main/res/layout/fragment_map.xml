@@ -12,6 +12,9 @@
         tools:context=".fragments.MapFragment">
 
         <!-- Dropdown Menu -->
+
+        <!-- Placeholder for Dynamic Content -->
+
         <TextView
             android:id="@+id/title_map_info"
             android:layout_width="wrap_content"
@@ -22,17 +25,17 @@
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.074"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Placeholder for Dynamic Content -->
         <Spinner
             android:id="@+id/action_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginTop="44dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="15dp"
             android:background="@color/white"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -47,6 +50,7 @@
             android:background="@color/gray_medium"
             android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/action_spinner" />
 
@@ -76,7 +80,7 @@
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.054"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dynamic_content_container" />
 
@@ -85,15 +89,14 @@
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title_robot_tasks"
-            android:visibility="gone"
-            >
+            app:layout_constraintTop_toBottomOf="@+id/title_robot_tasks">
 
             <!-- TextView inside the NestedScrollView -->
             <TextView
@@ -101,12 +104,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/gray_medium"
-                android:padding="8dp"
                 android:minHeight="300dp"
+                android:padding="8dp"
                 android:scrollbars="vertical"
                 android:textColor="@color/gray_high_contrast"
-                android:textSize="16sp"
-                />
+                android:textSize="16sp" />
         </androidx.core.widget.NestedScrollView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

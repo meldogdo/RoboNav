@@ -1,38 +1,42 @@
 [
   {
-    "id": "robot_1",
-    "name": "Robot #1",
-    "ping": "35ms",
-    "battery": 100,
-    "location_name": "NYC Base",
-    "location_coordinates": "40.7128,-74.0060",
-    "tasks": ["task_2", "task_5"]
+    "id": "task_1",
+    "name": "Deliver Supplies",
+    "robot": "robot_3",
+    "progress": 50,
+    "createdBy": "Alice",
+    "dateCreated": "2024-11-25T09:00:00Z"
   },
   {
-    "id": "robot_2",
-    "name": "Robot #2",
-    "ping": "50ms",
-    "battery": 50,
-    "location_name": "LA Base",
-    "location_coordinates": "34.0522,-118.2437",
-    "tasks": ["task_3"]
+    "id": "task_2",
+    "name": "Transport Package",
+    "robot": "robot_1",
+    "progress": 30,
+    "createdBy": "Bob",
+    "dateCreated": "2024-11-24T14:30:00Z"
   },
   {
-    "id": "robot_3",
-    "name": "Robot #3",
-    "ping": "42ms",
-    "battery": 15,
-    "location_name": "Tokyo Base",
-    "location_coordinates": "35.6895,139.6917",
-    "tasks": ["task_1", "task_4"]
+    "id": "task_3",
+    "name": "Map Area",
+    "robot": "robot_2",
+    "progress": 65,
+    "createdBy": "Charlie",
+    "dateCreated": "2024-11-23T16:15:00Z"
   },
   {
-    "id": "robot_4",
-    "name": "Robot #4",
-    "ping": "232ms",
-    "battery": 100,
-    "location_name": "",
-    "location_coordinates": "0.0000,0.0000",
-    "tasks": []
+    "id": "task_4",
+    "name": "Grab toys",
+    "robot": "robot_3",
+    "progress": -2,
+    "createdBy": "Dave",
+    "dateCreated": "2024-11-22T11:45:00Z"
+  },
+  {
+    "id": "task_5",
+    "name": "Get me coffee",
+    "robot": "robot_1",
+    "progress": -1,
+    "createdBy": "Eve",
+    "dateCreated": "2024-11-25T07:20:00Z"
   }
 ]
