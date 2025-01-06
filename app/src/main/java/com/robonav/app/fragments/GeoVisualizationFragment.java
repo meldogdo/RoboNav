@@ -76,7 +76,7 @@ public class GeoVisualizationFragment extends Fragment {
             public void run() {
                 // Create a new ImageView for the bot
                 ImageView botView = new ImageView(requireContext());
-                botView.setImageResource(R.mipmap.ic_launcher_round); // Use the correct mipmap resource
+                botView.setImageResource(R.drawable.bot); // Use the correct mipmap resource
                 botView.setContentDescription(robot.getName()); // Set content description for accessibility
 
                 // Get the robot's geographic coordinates (latitude, longitude)
