@@ -53,7 +53,6 @@ public class MapFragment extends Fragment {
     private View dynamicContentContainer;
 
     private NestedScrollView scrollView;
-    private GoogleMap googleMap;
     private View view;
 
     @Nullable
@@ -64,12 +63,6 @@ public class MapFragment extends Fragment {
         scrollView = view.findViewById(R.id.output_scroll_view);
         actionSpinner = view.findViewById(R.id.action_spinner);
         dynamicContentContainer = view.findViewById(R.id.dynamic_content_container);
-
-        // Initialize the map
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_view);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(map -> googleMap = map);
-        }
 
         setupDropdownMenu();
         return view;
