@@ -19,3 +19,6 @@ local.properties
 /gradle/daemon/
 /gradle/native/
 /gradle/wrapper/dists/
+
+*/node_modules
+*.env
