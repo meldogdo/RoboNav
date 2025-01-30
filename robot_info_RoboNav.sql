@@ -456,6 +456,15 @@ CREATE TABLE IF NOT EXISTS `task` (
   `timeStamp` datetime DEFAULT NULL,
   PRIMARY KEY (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table structure for table `users`
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(20) NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    UNIQUE(email)
+);
 SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
