@@ -31,28 +31,13 @@ app.get('/', (req, res) => {
     res.send('Simple Express MySQL API is running...');
 });
 
-// Get All Users
-app.get('/users', (req, res) => {
-    db.query('SELECT * FROM users', (err, results) => {
+// Test Route for callback_rec
+app.get('/test', (req, res) => {
+    db.query('SELECT * FROM callback_rec', (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Database error' });
         }
-        res.json(results);
-    });
-});
-
-// Add User
-app.post('/users', (req, res) => {
-    const { name, email } = req.body;
-    if (!name || !email) {
-        return res.status(400).json({ error: 'Name and email required' });
-    }
-
-    db.query('INSERT INTO users (name, email) VALUES (?, ?)', [name, email], (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: 'Database error' });
-        }
-        res.json({ message: 'User added', id: result.insertId });
+        res.json(results);  // Send the results as a JSON response
     });
 });
 
