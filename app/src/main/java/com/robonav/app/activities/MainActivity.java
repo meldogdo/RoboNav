@@ -1,5 +1,8 @@
 package com.robonav.app.activities;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -9,12 +12,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText usernameEditText;
     private EditText passwordEditText;
+
+    private static final String LOGIN_URL = "http://10.0.2.2:8080/api/open/users/login";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,34 +59,65 @@ public class MainActivity extends AppCompatActivity {
 
         // Set onClickListener for the login button
         loginButton.setOnClickListener(v -> {
-            // Get input values
             String username = usernameEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            // Validate inputs
             if (!areInputsValid(username, password)) return;
 
-            // Simulate successful login and navigate to HomeActivity
-            Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-            Intent homeIntent = new Intent(MainActivity.this, HomeActivity.class);
-            homeIntent.putExtra("username", username); // Pass username to the next activity
-            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(homeIntent);
-            finish(); // Close MainActivity to prevent going back to login
-        });
+            ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Logging in...");
+            progressDialog.show();
 
-        // Set onClickListener for the "Forgot Password?" text
-        forgotPasswordText.setOnClickListener(v -> {
-            // Navigate to Forgot Password screen
-            Intent forgotPasswordIntent = new Intent(MainActivity.this, ForgotPasswordActivity.class);
-            startActivity(forgotPasswordIntent);
-        });
+            // Create JSON request body
+            JSONObject jsonBody = new JSONObject();
+            try {
+                jsonBody.put("username", username);
+                jsonBody.put("password", password);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-        // Set onClickListener for the "Sign Up" text
-        signUpText.setOnClickListener(v -> {
-            // Navigate to Sign Up screen
-            Intent signUpIntent = new Intent(MainActivity.this, SignUpActivity.class);
-            startActivity(signUpIntent);
+            // Send JSON request
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, LOGIN_URL, jsonBody,
+                    response -> {
+                        progressDialog.dismiss();
+                        try {
+                            if (response.has("token")) {
+                                String token = response.getString("token");
+
+                                // Save token (SharedPreferences for later use)
+                                getSharedPreferences("APP_PREFS", MODE_PRIVATE)
+                                        .edit()
+                                        .putString("JWT_TOKEN", token)
+                                        .apply();
+
+                                Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+                                // Navigate to HomeActivity
+                                Intent homeIntent = new Intent(MainActivity.this, HomeActivity.class);
+                                homeIntent.putExtra("username", username);
+                                startActivity(homeIntent);
+                                finish();
+                            } else {
+                                Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            Toast.makeText(MainActivity.this, "Error parsing response", Toast.LENGTH_SHORT).show();
+                        }
+                    },
+                    error -> {
+                        progressDialog.dismiss();
+                    }) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", "application/json"); // Ensure JSON request
+                    return headers;
+                }
+            };
+
+            RequestQueue queue = Volley.newRequestQueue(this);
+            queue.add(request);
         });
     }
 

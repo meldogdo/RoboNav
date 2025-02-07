@@ -4,32 +4,59 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; // Replace with a secure secret
 
 app.use(express.json()); // For parsing JSON body
-app.use(cors()); // Allow cross-origin requests
+
+app.use(cors({
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // MySQL Connection
 const db = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306
+    database: process.env.DB_NAME || 'robot_info',
+    port: process.env.DB_PORT || 3306,
+    multipleStatements: true // Allow running multiple SQL commands
 });
 
+// Connect to MySQL
 db.connect(err => {
     if (err) {
         console.error('Database connection failed:', err);
         return;
     }
     console.log('Connected to MySQL database');
+
+    // Run the SQL dump file
+    initializeDatabase();
 });
+
+// Function to execute SQL dump file
+function initializeDatabase() {
+    const sqlDumpPath = path.join(__dirname, '/SQL_Files/robot_info_RoboNav_dump'); // Path to your SQL file
+    const sqlDump = fs.readFileSync(sqlDumpPath, 'utf8');
+
+    db.query(sqlDump, (err, results) => {
+        if (err) {
+            console.error('Error executing SQL dump:', err);
+        } else {
+            console.log('Database initialized successfully');
+        }
+    });
+}
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -109,7 +136,7 @@ app.get('/', (req, res) => {
     res.send('Simple Express MySQL API with JWT Authentication is running...');
 });
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Start HTTPS Server
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
 });

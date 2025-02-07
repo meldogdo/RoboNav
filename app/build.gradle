@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.constraintlayout)
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation libs.volley
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
