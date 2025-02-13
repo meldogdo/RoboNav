@@ -130,6 +130,69 @@ app.post('/api/open/users/login', (req, res) => {
     });
 });
 
+// Get robot's info
+app.get('/api/robot/:robotId/info', authenticateToken, (req, res) => {
+    const robotId = req.params.robotId;
+    // Query to get the battery level of the robot
+    db.query('SELECT * FROM robot WHERE robot_id = ?', [robotId], (err, results) => {
+        // Error messages
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Robot not found' });
+        }
+        //Retrieving battery level
+        const batteryLevel = results;
+        res.json({ robotId, batteryLevel });
+    });
+});
+
+// Get robot's tasks
+app.get('/api/robot/:robotId/tasks', authenticateToken, (req, res) => {
+    const robotId = req.params.robotId;
+    // Query to get the task for the robot
+    db.query('SELECT * FROM task WHERE robot_id = ?', [robotId], (err, results) => {
+        // Error handling
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No task found for this robot' });
+        }
+        // Retrieving task information
+        const task = results;
+        res.json({ robotId, task });
+    });
+});
+
+// Get most recent robot's location
+app.get('/api/robot/:robotId/location', authenticateToken, (req, res) => {
+    const robotId = req.params.robotId;
+    // Query to get the most recent location of the robot and check if coordinates match any entry in the location table
+    db.query(
+        `SELECT rl.*, l.name 
+         FROM robot_location rl
+         LEFT JOIN location l 
+         ON rl.x = l.x AND rl.y = l.y AND rl.robot_id = l.robot_id
+         WHERE rl.robot_id = ? 
+         ORDER BY rl.r_loc_id DESC LIMIT 1`,
+        [robotId],
+        (err, results) => {
+            // Error handling
+            if (err) {
+                return res.status(500).json({ message: 'Database error', error: err });
+            }
+            if (results.length === 0) {
+                return res.status(404).json({ message: 'No location found for this robot' });
+            }
+            // Retrieving the most recent location information
+            const location = results[0];
+            res.json({ robotId, location });
+        }
+    );
+});
+
 
 // Test Route
 app.get('/', (req, res) => {
