@@ -130,11 +130,11 @@ app.post('/api/open/users/login', (req, res) => {
     });
 });
 
-// Get Robot's Battery Level
-app.get('/api/robot/:robotId/battery', authenticateToken, (req, res) => {
+// Get robot's info
+app.get('/api/robot/:robotId/info', authenticateToken, (req, res) => {
     const robotId = req.params.robotId;
     // Query to get the battery level of the robot
-    db.query('SELECT battery FROM robot WHERE robot_id = ?', [robotId], (err, results) => {
+    db.query('SELECT * FROM robot WHERE robot_id = ?', [robotId], (err, results) => {
         // Error messages
         if (err) {
             return res.status(500).json({ message: 'Database error', error: err });
@@ -143,12 +143,28 @@ app.get('/api/robot/:robotId/battery', authenticateToken, (req, res) => {
             return res.status(404).json({ message: 'Robot not found' });
         }
         //Retrieving battery level
-        const batteryLevel = results[0].battery;
+        const batteryLevel = results;
         res.json({ robotId, batteryLevel });
     });
 });
 
-
+// Get robot's tasks
+app.get('/api/robot/:robotId/tasks', authenticateToken, (req, res) => {
+    const robotId = req.params.robotId;
+    // Query to get the task for the robot
+    db.query('SELECT * FROM task WHERE robot_id = ?', [robotId], (err, results) => {
+        // Error handling
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No task found for this robot' });
+        }
+        // Retrieving task information
+        const task = results;
+        res.json({ robotId, task });
+    });
+});
 
 
 
