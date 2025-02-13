@@ -130,6 +130,31 @@ app.post('/api/open/users/login', (req, res) => {
     });
 });
 
+// Get Robot's Battery Level
+app.get('/api/robot/:robotId/battery', authenticateToken, (req, res) => {
+    const robotId = req.params.robotId;
+    // Query to get the battery level of the robot
+    db.query('SELECT battery FROM robot WHERE robot_id = ?', [robotId], (err, results) => {
+        // Error messages
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Robot not found' });
+        }
+        //Retrieving battery level
+        const batteryLevel = results[0].battery;
+        res.json({ robotId, batteryLevel });
+    });
+});
+
+
+
+
+
+
+
+
 
 // Test Route
 app.get('/', (req, res) => {
