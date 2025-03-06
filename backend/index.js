@@ -132,102 +132,82 @@ app.post('/api/open/users/login', (req, res) => {
 
 // Get robot tasks
 app.get('/api/robot/tasks', authenticateToken, (req, res) => {
-    // Query to get all tasks
     db.query('SELECT * FROM task', (err, results) => {
-        // Error handling
         if (err) {
-            return res.status(500).json({ message: 'Database error', error: err });
+            return res.status(500).json({ message: 'Database error' });
         }
         if (results.length === 0) {
             return res.status(404).json({ message: 'No tasks found' });
         }
 
-        // Prepare the task data with the desired structure
         const tasks = results.map(task => ({
-            id: task.task_id,  // Add task prefix
-            name: task.name,  // Assuming 'name' field is in the task table
-            robot: task.robot_id,  // Add robot prefix
-            progress: 'n/a',  // Assuming 'progress' is in the task table
-            createdBy: 'n/a',  // Assuming 'created_by' field is in the task table
-            dateCreated: task.start  // Assuming 'date_created' field is in the task table
+            id: task.task_id,
+            name: task.name,
+            robot: task.robot_id,
+            progress: 0,
+            createdBy: 'n/a',
+            dateCreated: task.start
         }));
 
-        // Return the tasks array
         res.json(tasks);
     });
 });
 
 // Get info for robot
 app.get('/api/robot/robots', authenticateToken, (req, res) => {
-    const robotQuery = 'SELECT * FROM robot';  // Get all robots
-    const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';  // Get tasks for each robot
+    const robotQuery = 'SELECT * FROM robot';
+    const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';
     const locationQuery = `
         SELECT rl.*, l.name 
         FROM robot_location rl
         LEFT JOIN location l 
         ON rl.x = l.x AND rl.y = l.y AND rl.robot_id = l.robot_id
         WHERE rl.robot_id = ? 
-        ORDER BY rl.r_loc_id DESC LIMIT 1`;  // Get the most recent location for each robot
+        ORDER BY rl.r_loc_id DESC LIMIT 1`;
 
-    console.log(`Running query: ${robotQuery}`);
-    
-    // Retrieve all robot info
     db.query(robotQuery, (err, robotResults) => {
         if (err) {
-            return res.status(500).json({ message: 'Database error', error: err });
+            return res.status(500).json({ message: 'Database error' });
         }
-        
-        console.log('Robot query result:', robotResults);  // Print robot query results
         if (robotResults.length === 0) {
             return res.status(404).json({ message: 'No robots found' });
         }
 
-        // Create an array to store all the robot details with tasks and locations
         const robotsData = [];
-
-        // Loop through each robot and get their tasks and location
         const robotQueries = robotResults.map((robot) => {
             return new Promise((resolve, reject) => {
-                // Fetch tasks for each robot
                 db.query(taskQuery, [robot.robot_id], (err, taskResults) => {
-                    if (err) return reject({ message: 'Database error fetching tasks', error: err });
+                    if (err) return reject({ message: 'Database error' });
 
-                    console.log('Task query result for robot_id', robot.robot_id, taskResults);  // Print task query results
-
-                    // Fetch the most recent location for the robot
                     db.query(locationQuery, [robot.robot_id], (err, locationResults) => {
-                        if (err) return reject({ message: 'Database error fetching location', error: err });
-
-                        console.log('Location query result for robot_id', robot.robot_id, locationResults);  // Print location query results
+                        if (err) return reject({ message: 'Database error' });
 
                         const tasks = taskResults.length > 0 ? taskResults.map(task => task.task_id) : [];
                         const location = locationResults[0] || {};
 
-                        // Format the robot data and modify the id and tasks format
                         const robotData = {
-                            id: robot.robot_id,  // Add 'robot_' prefix to the id
-                            name: `Robot #${robot.robot_id}`,  // Format name like "Robot #1"
+                            id: robot.robot_id,
+                            name: `Robot #${robot.robot_id}`,
                             ping: `${robot.ping || 'N/A'}ms`,
                             battery: robot.battery,
                             location_name: location.name || 'Unknown',
                             location_coordinates: `${location.x || 'N/A'},${location.y || 'N/A'}`,
-                            tasks: tasks  // Return task ids as "task_X"
+                            tasks: tasks
                         };
 
-                        robotsData.push(robotData);  // Add this robot's data to the final array
+                        robotsData.push(robotData);
                         resolve();
                     });
                 });
             });
         });
 
-        // Wait for all queries to complete and then send the final response
         Promise.all(robotQueries)
             .then(() => {
-                res.json(robotsData);  // Return the collected data for all robots
+                res.json(robotsData);
             })
             .catch((error) => {
-                res.status(500).json(error);  // Handle errors in any query
+                res.status(500).json(error);
             });
     });
 });
