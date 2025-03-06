@@ -9,58 +9,92 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.robonav.app.utilities.JsonUtils;
 import com.robonav.app.R;
-import com.robonav.app.models.Robot;
 import com.robonav.app.adapters.RobotAdapter;
-import com.robonav.app.models.Task;
 import com.robonav.app.adapters.TaskAdapter;
+import com.robonav.app.models.Robot;
+import com.robonav.app.models.Task;
 
-import org.json.JSONArray;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/** @noinspection CallToPrintStackTrace*/
 public class HomeFragment extends Fragment {
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Robot RecyclerView setup
         RecyclerView robotRecyclerView = rootView.findViewById(R.id.robot_recycler_view);
-        String robotJson = JsonUtils.loadJSONFromAsset(requireContext(), "robots.json");
-        List<Robot> robotList = new ArrayList<>();
-        try {
-            JSONArray robots = new JSONArray(robotJson);
-            for (int i = 0; i < robots.length(); i++) {
-                robotList.add(new Robot(robots.getJSONObject(i)));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        // Task RecyclerView setup
         RecyclerView taskRecyclerView = rootView.findViewById(R.id.task_recycler_view);
-        String taskJson = JsonUtils.loadJSONFromAsset(requireContext(), "tasks.json");
-        List<Task> taskList = new ArrayList<>();
-        try {
-            JSONArray tasks = new JSONArray(taskJson);
-            for (int i = 0; i < tasks.length(); i++) {
-                taskList.add(new Task(tasks.getJSONObject(i))); // Assuming `ic_home` is the placeholder task icon
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        TaskAdapter taskAdapter = new TaskAdapter(getContext(), taskList, robotList);
-        taskRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        taskRecyclerView.setAdapter(taskAdapter);
 
-        RobotAdapter robotAdapter = new RobotAdapter(getContext(), robotList, taskList);
-        robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        robotRecyclerView.setAdapter(robotAdapter);
+        List<Robot> robotList = new ArrayList<>();
+        List<Task> taskList = new ArrayList<>();
+
+        String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
+        String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzMDAzMjUsImV4cCI6MTc0MTMwMzkyNX0.btxH16pgK31KNPe8-O2CJ5gzwY20cirv-VCXKiJXwvc";
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
+                response -> {
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            Robot robot = new Robot(response.getJSONObject(i));
+                            robotList.add(robot);
+                        }
+                        RobotAdapter robotAdapter = new RobotAdapter(getContext(), robotList, taskList);
+                        robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                        robotRecyclerView.setAdapter(robotAdapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> error.printStackTrace()
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
+                response -> {
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            Task task = new Task(response.getJSONObject(i));
+                            taskList.add(task);
+                        }
+                        TaskAdapter taskAdapter = new TaskAdapter(getContext(), taskList, robotList);
+                        taskRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+                        taskRecyclerView.setAdapter(taskAdapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> error.printStackTrace()
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        queue.add(robotRequest);
+        queue.add(taskRequest);
+
         return rootView;
     }
 }
