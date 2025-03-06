@@ -130,24 +130,6 @@ app.post('/api/open/users/login', (req, res) => {
     });
 });
 
-// Get robot's info
-app.get('/api/robot/:robotId/info', authenticateToken, (req, res) => {
-    const robotId = req.params.robotId;
-    // Query to get the battery level of the robot
-    db.query('SELECT * FROM robot WHERE robot_id = ?', [robotId], (err, results) => {
-        // Error messages
-        if (err) {
-            return res.status(500).json({ message: 'Database error', error: err });
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Robot not found' });
-        }
-        //Retrieving battery level
-        const batteryLevel = results;
-        res.json({ robotId, batteryLevel });
-    });
-});
-
 // Get robot's tasks
 app.get('/api/robot/:robotId/tasks', authenticateToken, (req, res) => {
     const robotId = req.params.robotId;
@@ -166,32 +148,83 @@ app.get('/api/robot/:robotId/tasks', authenticateToken, (req, res) => {
     });
 });
 
-// Get most recent robot's location
-app.get('/api/robot/:robotId/location', authenticateToken, (req, res) => {
-    const robotId = req.params.robotId;
-    // Query to get the most recent location of the robot and check if coordinates match any entry in the location table
-    db.query(
-        `SELECT rl.*, l.name 
-         FROM robot_location rl
-         LEFT JOIN location l 
-         ON rl.x = l.x AND rl.y = l.y AND rl.robot_id = l.robot_id
-         WHERE rl.robot_id = ? 
-         ORDER BY rl.r_loc_id DESC LIMIT 1`,
-        [robotId],
-        (err, results) => {
-            // Error handling
-            if (err) {
-                return res.status(500).json({ message: 'Database error', error: err });
-            }
-            if (results.length === 0) {
-                return res.status(404).json({ message: 'No location found for this robot' });
-            }
-            // Retrieving the most recent location information
-            const location = results[0];
-            res.json({ robotId, location });
+app.get('/api/robot/robots', authenticateToken, (req, res) => {
+    const robotQuery = 'SELECT * FROM robot';  // Get all robots
+    const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';  // Get tasks for each robot
+    const locationQuery = `
+        SELECT rl.*, l.name 
+        FROM robot_location rl
+        LEFT JOIN location l 
+        ON rl.x = l.x AND rl.y = l.y AND rl.robot_id = l.robot_id
+        WHERE rl.robot_id = ? 
+        ORDER BY rl.r_loc_id DESC LIMIT 1`;  // Get the most recent location for each robot
+
+    console.log(`Running query: ${robotQuery}`);
+    
+    // Retrieve all robot info
+    db.query(robotQuery, (err, robotResults) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
         }
-    );
+        
+        console.log('Robot query result:', robotResults);  // Print robot query results
+        if (robotResults.length === 0) {
+            return res.status(404).json({ message: 'No robots found' });
+        }
+
+        // Create an array to store all the robot details with tasks and locations
+        const robotsData = [];
+
+        // Loop through each robot and get their tasks and location
+        const robotQueries = robotResults.map((robot) => {
+            return new Promise((resolve, reject) => {
+                // Fetch tasks for each robot
+                db.query(taskQuery, [robot.robot_id], (err, taskResults) => {
+                    if (err) return reject({ message: 'Database error fetching tasks', error: err });
+
+                    console.log('Task query result for robot_id', robot.robot_id, taskResults);  // Print task query results
+
+                    // Fetch the most recent location for the robot
+                    db.query(locationQuery, [robot.robot_id], (err, locationResults) => {
+                        if (err) return reject({ message: 'Database error fetching location', error: err });
+
+                        console.log('Location query result for robot_id', robot.robot_id, locationResults);  // Print location query results
+
+                        const tasks = taskResults.length > 0 ? taskResults.map(task => task.task_id) : [];
+                        const location = locationResults[0] || {};
+
+                        // Construct response for this robot
+                        const robotData = {
+                            id: robot.robot_id,
+                            name: robot.name,
+                            ping: `${robot.ping || 'N/A'}ms`,
+                            battery: robot.battery,
+                            location_name: location.name || 'Unknown',
+                            location_coordinates: `${location.x || 'N/A'},${location.y || 'N/A'}`,
+                            tasks: tasks
+                        };
+
+                        robotsData.push(robotData);  // Add this robot's data to the final array
+                        resolve();
+                    });
+                });
+            });
+        });
+
+        // Wait for all queries to complete and then send the final response
+        Promise.all(robotQueries)
+            .then(() => {
+                res.json(robotsData);  // Return the collected data for all robots
+            })
+            .catch((error) => {
+                res.status(500).json(error);  // Handle errors in any query
+            });
+    });
 });
+
+
+
+
 
 
 // Test Route
