@@ -193,15 +193,15 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
                         const tasks = taskResults.length > 0 ? taskResults.map(task => task.task_id) : [];
                         const location = locationResults[0] || {};
 
-                        // Construct response for this robot
+                        // Format the robot data and modify the id and tasks format
                         const robotData = {
-                            id: robot.robot_id,
-                            name: robot.name,
+                            id: `robot_${robot.robot_id}`,  // Add 'robot_' prefix to the id
+                            name: `Robot #${robot.robot_id}`,  // Format name like "Robot #1"
                             ping: `${robot.ping || 'N/A'}ms`,
                             battery: robot.battery,
                             location_name: location.name || 'Unknown',
                             location_coordinates: `${location.x || 'N/A'},${location.y || 'N/A'}`,
-                            tasks: tasks
+                            tasks: tasks  // Return task ids as "task_X"
                         };
 
                         robotsData.push(robotData);  // Add this robot's data to the final array
@@ -221,6 +221,7 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
             });
     });
 });
+
 
 
 
