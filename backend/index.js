@@ -130,24 +130,34 @@ app.post('/api/open/users/login', (req, res) => {
     });
 });
 
-// Get robot's tasks
-app.get('/api/robot/:robotId/tasks', authenticateToken, (req, res) => {
-    const robotId = req.params.robotId;
-    // Query to get the task for the robot
-    db.query('SELECT * FROM task WHERE robot_id = ?', [robotId], (err, results) => {
+// Get robot tasks
+app.get('/api/robot/tasks', authenticateToken, (req, res) => {
+    // Query to get all tasks
+    db.query('SELECT * FROM task', (err, results) => {
         // Error handling
         if (err) {
             return res.status(500).json({ message: 'Database error', error: err });
         }
         if (results.length === 0) {
-            return res.status(404).json({ message: 'No task found for this robot' });
+            return res.status(404).json({ message: 'No tasks found' });
         }
-        // Retrieving task information
-        const task = results;
-        res.json({ robotId, task });
+
+        // Prepare the task data with the desired structure
+        const tasks = results.map(task => ({
+            id: task.task_id,  // Add task prefix
+            name: task.name,  // Assuming 'name' field is in the task table
+            robot: task.robot_id,  // Add robot prefix
+            progress: 'n/a',  // Assuming 'progress' is in the task table
+            createdBy: 'n/a',  // Assuming 'created_by' field is in the task table
+            dateCreated: task.start  // Assuming 'date_created' field is in the task table
+        }));
+
+        // Return the tasks array
+        res.json(tasks);
     });
 });
 
+// Get info for robot
 app.get('/api/robot/robots', authenticateToken, (req, res) => {
     const robotQuery = 'SELECT * FROM robot';  // Get all robots
     const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';  // Get tasks for each robot
@@ -193,15 +203,15 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
                         const tasks = taskResults.length > 0 ? taskResults.map(task => task.task_id) : [];
                         const location = locationResults[0] || {};
 
-                        // Construct response for this robot
+                        // Format the robot data and modify the id and tasks format
                         const robotData = {
-                            id: robot.robot_id,
-                            name: robot.name,
+                            id: robot.robot_id,  // Add 'robot_' prefix to the id
+                            name: `Robot #${robot.robot_id}`,  // Format name like "Robot #1"
                             ping: `${robot.ping || 'N/A'}ms`,
                             battery: robot.battery,
                             location_name: location.name || 'Unknown',
                             location_coordinates: `${location.x || 'N/A'},${location.y || 'N/A'}`,
-                            tasks: tasks
+                            tasks: tasks  // Return task ids as "task_X"
                         };
 
                         robotsData.push(robotData);  // Add this robot's data to the final array
@@ -221,11 +231,6 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
             });
     });
 });
-
-
-
-
-
 
 // Test Route
 app.get('/', (req, res) => {
