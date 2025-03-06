@@ -6,7 +6,17 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
+// Configure nodemailer transport
+const transporter = nodemailer.createTransport({
+    service: 'gmail',  // You can use any email service
+    auth: {
+        user: process.env.EMAIL_USER,  // Your email
+        pass: process.env.EMAIL_PASS,  // Your email password
+    }
+});
 
 dotenv.config();
 
@@ -92,14 +102,35 @@ app.post('/api/open/users/register', async (req, res) => {
             // Hash password
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Insert user into database
-            db.query('INSERT INTO users (username, hashed_password, email) VALUES (?, ?, ?)',
+            // Insert user into database with confirmed = 0 (not confirmed)
+            db.query('INSERT INTO users (username, hashed_password, email, confirmed) VALUES (?, ?, ?, 0)',
                 [username, hashedPassword, email],
                 (err, result) => {
                     if (err) {
                         return res.status(500).json({ message: 'Error inserting user', error: err });
                     }
-                    res.status(201).json({ message: 'User registered successfully' });
+
+                    // Send confirmation email
+                    const token = crypto.randomBytes(32).toString('hex');  // Create a random token
+                    const confirmationLink = `http://localhost:8080/api/open/users/confirm-email?token=${token}`;
+
+                    // Save token in database (no expiration for simplicity)
+                    db.query('INSERT INTO email_confirmations (user_id, token) VALUES (?, ?)', [result.insertId, token]);
+
+                    // Send the confirmation email
+                    const mailOptions = {
+                        from: process.env.EMAIL_USER,
+                        to: email,
+                        subject: 'Confirm your email',
+                        text: `Click the link to confirm your email: ${confirmationLink}`
+                    };
+
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            return res.status(500).json({ message: 'Error sending email', error });
+                        }
+                        res.status(201).json({ message: 'User registered successfully. Please check your email to confirm your account.' });
+                    });
                 }
             );
         });
@@ -108,6 +139,37 @@ app.post('/api/open/users/register', async (req, res) => {
     }
 });
 
+// Email Confirmation API
+app.get('/api/open/users/confirm-email', (req, res) => {
+    const { token } = req.query;
+
+    // Check if token exists
+    if (!token) {
+        return res.status(400).json({ message: 'No token provided' });
+    }
+
+    // Check if the token is valid
+    db.query('SELECT * FROM email_confirmations WHERE token = ?', [token], (err, results) => {
+        if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+        if (results.length === 0) {
+            return res.status(400).json({ message: 'Invalid token' });
+        }
+
+        // Get the user ID from the confirmation
+        const userId = results[0].user_id;
+
+        // Update user confirmation status
+        db.query('UPDATE users SET confirmed = 1 WHERE id = ?', [userId], (err, result) => {
+            if (err) return res.status(500).json({ message: 'Error updating user', error: err });
+
+            // Delete the token from the database (one-time use)
+            db.query('DELETE FROM email_confirmations WHERE token = ?', [token]);
+
+            res.status(200).json({ message: 'Email confirmed successfully. You can now log in.' });
+        });
+    });
+});
 
 // User Login (JWT Token Generation)
 app.post('/api/open/users/login', (req, res) => {
@@ -119,6 +181,17 @@ app.post('/api/open/users/login', (req, res) => {
         if (results.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
 
         const user = results[0];
+
+        // Check if account is disabled
+        if (user.confirmed === 2) {
+            return res.status(403).json({ message: 'Your account has been disabled by an administrator' });
+        }
+
+        // Check if email is confirmed
+        if (user.confirmed === 0) {
+            return res.status(401).json({ message: 'Please confirm your email before logging in' });
+        }
+
         const passwordMatch = await bcrypt.compare(password, user.hashed_password);
 
         if (!passwordMatch) return res.status(401).json({ message: 'Invalid credentials' });

@@ -45,6 +45,32 @@ INSERT INTO `callback_rec` VALUES (4752,NULL,6,'Obstacle avoidance timeout, the 
 UNLOCK TABLES;
 
 --
+-- Table structure for table `email_confirmations`
+--
+
+DROP TABLE IF EXISTS `email_confirmations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `email_confirmations` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `email_confirmations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `email_confirmations`
+--
+
+LOCK TABLES `email_confirmations` WRITE;
+/*!40000 ALTER TABLE `email_confirmations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `email_confirmations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ins_send`
 --
 
@@ -403,6 +429,7 @@ CREATE TABLE `users` (
   `username` varchar(20) NOT NULL,
   `hashed_password` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
+  `confirmed` int NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -414,7 +441,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin','$2b$10$49Avw/OC0.oPCHUr4mGPKex2c3OdS57gN8Npu0vViKzOzzpD.1HDC','admin@gmail.com');
+INSERT INTO `users` VALUES (1,'admin','$2b$10$49Avw/OC0.oPCHUr4mGPKex2c3OdS57gN8Npu0vViKzOzzpD.1HDC','admin@gmail.com',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -427,4 +454,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-06 18:30:17
+-- Dump completed on 2025-03-06 18:51:04
