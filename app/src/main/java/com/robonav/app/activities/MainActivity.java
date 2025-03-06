@@ -33,9 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -56,6 +53,18 @@ public class MainActivity extends AppCompatActivity {
         if (prefilledUsername != null && !prefilledUsername.isEmpty()) {
             usernameEditText.setText(prefilledUsername);
         }
+
+        // OnClickListener for "Forgot Password"
+        forgotPasswordText.setOnClickListener(v -> {
+            Intent forgotPasswordIntent = new Intent(MainActivity.this, ForgotPasswordActivity.class);
+            startActivity(forgotPasswordIntent);
+        });
+
+        // OnClickListener for "Sign Up"
+        signUpText.setOnClickListener(v -> {
+            Intent signUpIntent = new Intent(MainActivity.this, SignUpActivity.class);
+            startActivity(signUpIntent);
+        });
 
         // Set onClickListener for the login button
         loginButton.setOnClickListener(v -> {
@@ -107,6 +116,13 @@ public class MainActivity extends AppCompatActivity {
                     },
                     error -> {
                         progressDialog.dismiss();
+                        if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                            // 401 Unauthorized - Invalid credentials
+                            Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Other errors (e.g., server down, 500 error)
+                            Toast.makeText(MainActivity.this, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
+                        }
                     }) {
                 @Override
                 public Map<String, String> getHeaders() {
