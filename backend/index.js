@@ -8,21 +8,75 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-
-// Configure nodemailer transport
-const transporter = nodemailer.createTransport({
-    service: 'gmail',  // You can use any email service
-    auth: {
-        user: process.env.EMAIL_USER,  // Your email
-        pass: process.env.EMAIL_PASS,  // Your email password
-    }
-});
+const { google } = require('googleapis');
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 8080;
-const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; // Replace with a secure secret
+const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; 
+
+// OAuth2 credentials
+const CLIENT_ID = process.env.CLIENT_ID
+const EMAIL_USER = process.env.EMAIL_USER
+const CLIENT_SECRET = process.env.CLIENT_SECRET
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN
+
+// Create an OAuth2 client
+const oauth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+
+// Set credentials with the refresh token
+oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+// Get access token
+async function getAccessToken() {
+  const { token } = await oauth2Client.getAccessToken();
+  return token;
+}
+
+// Create a transporter using OAuth2
+async function createTransporter() {
+  const accessToken = await getAccessToken();
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: EMAIL_USER,
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      refreshToken: REFRESH_TOKEN,
+      accessToken: accessToken,
+    },
+  });
+
+  return transporter;
+}
+
+async function testEmail() {
+    const transporter = await createTransporter();
+
+    const mailOptions = {
+        from: EMAIL_USER, 
+        to: 'sixb0nesgames@gmail.com', 
+        subject: 'Test Email',
+        text: 'This is a test email from Node.js using Gmail API.',
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("Error:", error);
+        } else {
+            console.log("Email sent:", info.response);
+        }
+    });
+}
+
+const app = express();
 
 app.use(express.json()); // For parsing JSON body
 
@@ -105,7 +159,7 @@ app.post('/api/open/users/register', async (req, res) => {
             // Insert user into database with confirmed = 0 (not confirmed)
             db.query('INSERT INTO users (username, hashed_password, email, confirmed) VALUES (?, ?, ?, 0)',
                 [username, hashedPassword, email],
-                (err, result) => {
+                async (err, result) => {
                     if (err) {
                         return res.status(500).json({ message: 'Error inserting user', error: err });
                     }
@@ -124,9 +178,11 @@ app.post('/api/open/users/register', async (req, res) => {
                         subject: 'Confirm your email',
                         text: `Click the link to confirm your email: ${confirmationLink}`
                     };
+                    const transporter = await createTransporter();
 
                     transporter.sendMail(mailOptions, (error, info) => {
                         if (error) {
+                            console.log(error)
                             return res.status(500).json({ message: 'Error sending email', error });
                         }
                         res.status(201).json({ message: 'User registered successfully. Please check your email to confirm your account.' });
@@ -193,6 +249,7 @@ app.post('/api/open/users/login', (req, res) => {
         }
 
         const passwordMatch = await bcrypt.compare(password, user.hashed_password);
+        console.log(passwordMatch)
 
         if (!passwordMatch) return res.status(401).json({ message: 'Invalid credentials' });
 

@@ -113,16 +113,32 @@ public class MainActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             Toast.makeText(MainActivity.this, "Error parsing response", Toast.LENGTH_SHORT).show();
                         }
-                    },
-                    error -> {
+                    },error -> {
                         progressDialog.dismiss();
-                        if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
-                            // 401 Unauthorized - Invalid credentials
-                            Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Other errors (e.g., server down, 500 error)
-                            Toast.makeText(MainActivity.this, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
+
+                        // Default error message
+                        String errorMessage = "An error occurred. Please try again.";
+
+                        // Check if the error has a network response
+                        if (error.networkResponse != null) {
+                            try {
+                                // Get the error response body
+                                String responseBody = new String(error.networkResponse.data, "UTF-8");
+
+                                // Parse the error response body into a JSONObject
+                                JSONObject errorResponse = new JSONObject(responseBody);
+
+                                // Check if there's a "message" field in the error response
+                                if (errorResponse.has("message")) {
+                                    errorMessage = errorResponse.getString("message");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
+
+                        // Show the extracted or default error message
+                        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                     }) {
                 @Override
                 public Map<String, String> getHeaders() {
