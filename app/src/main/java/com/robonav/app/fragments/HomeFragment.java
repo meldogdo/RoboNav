@@ -32,6 +32,10 @@ public class HomeFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView robotRecyclerView, taskRecyclerView;
+    private RobotAdapter robotAdapter;
+    private TaskAdapter taskAdapter;
+    private List<Robot> robotList;
+    private List<Task> taskList;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
@@ -41,27 +45,13 @@ public class HomeFragment extends Fragment {
         robotRecyclerView = rootView.findViewById(R.id.robot_recycler_view);
         taskRecyclerView = rootView.findViewById(R.id.task_recycler_view);
 
-        loadData();
-
-        // Set swipe refresh listener to reload data
-        swipeRefreshLayout.setOnRefreshListener(this::loadData);
-
-        return rootView;
-    }
-
-    private void loadData() {
-        List<Robot> robotList = new ArrayList<>();
-        List<Task> taskList = new ArrayList<>();
-
-        String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
-        String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzODI4MjgsImV4cCI6MTc0MTM4NjQyOH0.tfSNB89xG5I9joUrQeG_EEZPscnflxyUZUwP60BVZwE";
-
-        RequestQueue queue = Volley.newRequestQueue(requireContext());
+        // Initialize lists
+        robotList = new ArrayList<>();
+        taskList = new ArrayList<>();
 
         // Define your adapters upfront
-        RobotAdapter robotAdapter = new RobotAdapter(getContext(), robotList, taskList);
-        TaskAdapter taskAdapter = new TaskAdapter(getContext(), taskList, robotList);
+        robotAdapter = new RobotAdapter(getContext(), robotList, taskList);
+        taskAdapter = new TaskAdapter(getContext(), taskList, robotList);
 
         robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         robotRecyclerView.setAdapter(robotAdapter);
@@ -69,7 +59,32 @@ public class HomeFragment extends Fragment {
         taskRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         taskRecyclerView.setAdapter(taskAdapter);
 
-        // Load robot data
+        // Set swipe refresh listener to reload data
+        swipeRefreshLayout.setOnRefreshListener(this::loadData);
+
+        // Trigger the refresh on initial load
+        swipeRefreshLayout.setRefreshing(true); // Start the refreshing animation
+        loadData(); // Load the data after starting the refresh
+
+        return rootView;
+    }
+
+    private void loadData() {
+        // Clear the lists before loading new data
+        robotList.clear();
+        taskList.clear();
+
+        // Notify adapters that the data is being cleared
+        robotAdapter.notifyDataSetChanged();
+        taskAdapter.notifyDataSetChanged();
+
+        String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
+        String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzODQ1NTIsImV4cCI6MTc0MTM4ODE1Mn0.kv2IGyYUMAiwWED7BqtUl_BW-qUNMVcEQMs5zyI9e8A"; // Ensure this token is up to date
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        // Load robot data first
         JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
                 response -> {
                     try {
@@ -77,13 +92,18 @@ public class HomeFragment extends Fragment {
                             Robot robot = new Robot(response.getJSONObject(i));
                             robotList.add(robot);
                         }
-                        robotAdapter.notifyDataSetChanged(); // Notify adapter after robot data is loaded
-                        loadTasks(taskList, robotList, taskAdapter); // Now load task data after robot data
+
+                        // After loading robots, load tasks
+                        loadTasks(taskList, robotList, taskAdapter);
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
                     }
                 },
-                error -> error.printStackTrace()
+                error -> {
+                    error.printStackTrace();
+                    swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                }
         ) {
             @Override
             public Map<String, String> getHeaders() {
@@ -96,15 +116,15 @@ public class HomeFragment extends Fragment {
         // Add robot request to the queue
         queue.add(robotRequest);
 
-        // Stop refreshing when data is loaded
-        swipeRefreshLayout.setRefreshing(false);
+        // Start swipe refresh and prevent it from stopping until both requests finish
+        swipeRefreshLayout.setRefreshing(true);
     }
 
     private void loadTasks(List<Task> taskList, List<Robot> robotList, TaskAdapter taskAdapter) {
         String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzODI4MjgsImV4cCI6MTc0MTM4NjQyOH0.tfSNB89xG5I9joUrQeG_EEZPscnflxyUZUwP60BVZwE";
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzODQ1NTIsImV4cCI6MTc0MTM4ODE1Mn0.kv2IGyYUMAiwWED7BqtUl_BW-qUNMVcEQMs5zyI9e8A"; // Ensure this token is up to date
 
-        // Load task data
+        // Load task data after robots are loaded
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
                 response -> {
                     try {
@@ -112,12 +132,20 @@ public class HomeFragment extends Fragment {
                             Task task = new Task(response.getJSONObject(i));
                             taskList.add(task);
                         }
-                        taskAdapter.notifyDataSetChanged(); // Notify adapter after task data is loaded
+
+                        // Notify both adapters that the data has been updated
+                        taskAdapter.notifyDataSetChanged();
+                        robotAdapter.notifyDataSetChanged(); // In case robot list size has changed
+                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing after both requests are complete
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
                     }
                 },
-                error -> error.printStackTrace()
+                error -> {
+                    error.printStackTrace();
+                    swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                }
         ) {
             @Override
             public Map<String, String> getHeaders() {
