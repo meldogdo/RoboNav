@@ -62,7 +62,7 @@ async function testEmail() {
 
     const mailOptions = {
         from: EMAIL_USER, 
-        to: 'sixb0nesgames@gmail.com', 
+        to: 'TESTEMAIL',
         subject: 'Test Email',
         text: 'This is a test email from Node.js using Gmail API.',
     };
@@ -75,6 +75,8 @@ async function testEmail() {
         }
     });
 }
+
+//await testEmail();
 
 const app = express();
 
@@ -182,7 +184,6 @@ app.post('/api/open/users/register', async (req, res) => {
 
                     transporter.sendMail(mailOptions, (error, info) => {
                         if (error) {
-                            console.log(error)
                             return res.status(500).json({ message: 'Error sending email', error });
                         }
                         res.status(201).json({ message: 'User registered successfully. Please check your email to confirm your account.' });
@@ -249,7 +250,6 @@ app.post('/api/open/users/login', (req, res) => {
         }
 
         const passwordMatch = await bcrypt.compare(password, user.hashed_password);
-        console.log(passwordMatch)
 
         if (!passwordMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
