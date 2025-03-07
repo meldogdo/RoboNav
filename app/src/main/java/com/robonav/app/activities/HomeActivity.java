@@ -34,15 +34,20 @@ public class HomeActivity extends AppCompatActivity {
         window.setNavigationBarColor(getColor(R.color.gray_medium));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
-        // Get the username from the Intent
+// Get the username from the Intent
         Intent intent = getIntent();
         String username = intent.getStringExtra("username");
 
-        // Initialize the ViewPager2
+// Initialize the ViewPager2
         viewPager = findViewById(R.id.view_pager);
         viewPager.setOffscreenPageLimit(2);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        findViewById(R.id.resetPasswordIcon).setOnClickListener(v -> {
+            Intent resetIntent = new Intent(HomeActivity.this, ResetPasswordActivity.class);
+            startActivity(resetIntent);
+        });
+
 
         // Set up the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);

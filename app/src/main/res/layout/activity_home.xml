@@ -1,4 +1,6 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -16,7 +18,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Sign out Icon with Margin to add space -->
+        <!-- Reset Password Icon -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/resetPasswordIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="64dp"
+            android:contentDescription="@string/reset_password"
+            android:src="@drawable/ic_reset_password"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <!-- Sign out Icon -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/signOutIcon"
             android:layout_width="30dp"
@@ -24,13 +38,13 @@
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/menu"
-            android:src="@drawable/ic_sign_out" />
+            android:src="@drawable/ic_sign_out"
+            android:clickable="true"
+            android:focusable="true"/>
+
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- Fragment container for dynamic fragment switching with ViewPager2 -->
-
-    <!-- Bottom Navigation Bar -->
-
+    <!-- ViewPager2 for fragment switching -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="0dp"
@@ -44,7 +58,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintVertical_bias="0.0" />
 
-
+    <!-- Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="0dp"
@@ -56,6 +70,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

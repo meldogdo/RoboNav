@@ -25,5 +25,6 @@
     <string name="back_to_login">Back to Login</string>
     <string name="menu">Menu</string>
     <string name="sign_out">Sign Out</string>
+    <string name="reset_password">Reset Password</string>
 
 </resources>

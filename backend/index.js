@@ -15,6 +15,11 @@ dotenv.config();
 const PORT = process.env.PORT || 8080;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; 
 
+
+// Generate Random 6-Digit Code
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+
 // OAuth2 credentials
 const CLIENT_ID = process.env.CLIENT_ID
 const EMAIL_USER = process.env.EMAIL_USER
@@ -62,7 +67,7 @@ async function testEmail() {
 
     const mailOptions = {
         from: EMAIL_USER, 
-        to: 'TESTEMAIL',
+        to: 'mohamedeldogdog7@gmail.com',
         subject: 'Test Email',
         text: 'This is a test email from Node.js using Gmail API.',
     };
@@ -76,7 +81,7 @@ async function testEmail() {
     });
 }
 
-//await testEmail();
+//testEmail();
 
 const app = express();
 
@@ -110,6 +115,14 @@ db.connect(err => {
     initializeDatabase();
 });
 
+// Auto-cleanup expired OTPs every hour
+setInterval(() => {
+    db.query('DELETE FROM password_reset_tokens WHERE expires_at < NOW()', (err) => {
+        if (err) console.error('Error clearing expired tokens:', err);
+        else console.log('Expired reset tokens cleared');
+    });
+}, 3600000); // Runs every 1 hour (3600000 ms)
+
 // Function to execute SQL dump file
 function initializeDatabase() {
     const sqlDumpPath = path.join(__dirname, '/SQL_Files/robot_info_RoboNav_dump'); // Path to your SQL file
@@ -122,6 +135,24 @@ function initializeDatabase() {
             console.log('Database initialized successfully');
         }
     });
+    // Create the password_reset_tokens table if it does not exist
+        const createResetTokensTable = `
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                reset_code VARCHAR(6) NOT NULL,
+                expires_at DATETIME NOT NULL,
+                UNIQUE(email)  -- Ensures only one reset request per user at a time
+            );
+        `;
+
+        db.query(createResetTokensTable, (err) => {
+            if (err) {
+                console.error('Error creating password_reset_tokens table:', err);
+            } else {
+                console.log('password_reset_tokens table is ready');
+            }
+        });
 }
 
 // Middleware to verify JWT token
@@ -281,6 +312,114 @@ app.get('/api/robot/tasks', authenticateToken, (req, res) => {
 
         res.json(tasks);
     });
+});
+app.post('/api/open/users/reset-password', (req, res) => {
+    const { new_password } = req.body;
+    const authHeader = req.header('Authorization');
+
+    if (!authHeader) return res.status(401).json({ message: 'Unauthorized' });
+
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, SECRET_KEY, async (err, decoded) => {
+        if (err) return res.status(403).json({ message: 'Invalid or expired token' });
+
+        const email = decoded.email;
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        db.query('UPDATE users SET hashed_password = ? WHERE email = ?', [hashedPassword, email], (err) => {
+            if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+            res.json({ message: 'Password reset successful' });
+        });
+    });
+});
+
+// Request Reset Code
+app.post('/api/open/users/request-reset', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Check if email exists in DB
+    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+        if (err) {
+            console.error('Database query error:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        if (results.length === 0) {
+            console.error('Email not found:', email);
+            return res.status(404).json({ message: 'Email not found' });
+        }
+
+        // Generate a 6-digit OTP and expiration time
+        const resetCode = generateOTP();
+        const expiresAt = new Date(Date.now() + 5 * 60000); // Expires in 5 minutes
+
+        // Save OTP to DB
+        db.query(
+            'INSERT INTO password_reset_tokens (email, reset_code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reset_code = ?, expires_at = ?',
+            [email, resetCode, expiresAt, resetCode, expiresAt],
+            (err) => {
+                if (err) {
+                    console.error('Error inserting OTP:', err);
+                    return res.status(500).json({ message: 'Database error', error: err });
+                }
+
+                // Send email
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL_USER,
+                        pass: process.env.EMAIL_PASS,
+                    },
+                });
+
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: email,
+                    subject: 'Password Reset Code',
+                    text: `Your password reset code is: ${resetCode}. This code expires in 5 minutes.`,
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Error sending email:', error);
+                        return res.status(500).json({ message: 'Error sending email', error });
+                    }
+                    res.json({ message: 'Reset code sent to email' });
+                });
+            }
+        );
+    });
+});
+
+
+app.post('/api/open/users/verify-reset', (req, res) => {
+    const { email, resetCode } = req.body;
+
+    if (!email || !resetCode) {
+        return res.status(400).json({ message: 'Email and reset code are required' });
+    }
+
+    // Check if OTP is valid and not expired
+    db.query(
+        'SELECT * FROM password_reset_tokens WHERE email = ? AND reset_code = ? AND expires_at > NOW()',
+        [email, resetCode],
+        (err, results) => {
+            if (err) return res.status(500).json({ message: 'Database error', error: err });
+            if (results.length === 0) return res.status(400).json({ message: 'Invalid or expired reset code' });
+
+            // Generate JWT token to authenticate reset password request
+            const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '10m' });
+
+            // Delete OTP from DB after verification
+            db.query('DELETE FROM password_reset_tokens WHERE email = ?', [email]);
+
+            res.json({ message: 'Reset code verified', token });
+        }
+    );
 });
 
 // Get info for robot

@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/reset_password"
+        android:icon="@drawable/ic_reset_password"
+        android:title="Reset Password"
+        app:showAsAction="always" />
+</menu>
