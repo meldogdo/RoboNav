@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.robonav.app.R;
 import com.robonav.app.adapters.RobotAdapter;
@@ -32,6 +33,8 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // Find SwipeRefreshLayout and RecyclerViews
+        SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
         RecyclerView robotRecyclerView = rootView.findViewById(R.id.robot_recycler_view);
         RecyclerView taskRecyclerView = rootView.findViewById(R.id.task_recycler_view);
 
@@ -40,13 +43,15 @@ public class HomeFragment extends Fragment {
 
         String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
         String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzMDAzMjUsImV4cCI6MTc0MTMwMzkyNX0.btxH16pgK31KNPe8-O2CJ5gzwY20cirv-VCXKiJXwvc";
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDEzNzkwNTMsImV4cCI6MTc0MTM4MjY1M30.7wL0pMLwwtXESWO7rrC5BZRqyt0z9zdJQQGUABn_MJs";
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
+        // Function to load robot data
         JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
                 response -> {
                     try {
+                        robotList.clear(); // Clear the existing list before adding new data
                         for (int i = 0; i < response.length(); i++) {
                             Robot robot = new Robot(response.getJSONObject(i));
                             robotList.add(robot);
@@ -68,9 +73,11 @@ public class HomeFragment extends Fragment {
             }
         };
 
+        // Function to load task data
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
                 response -> {
                     try {
+                        taskList.clear(); // Clear the existing list before adding new data
                         for (int i = 0; i < response.length(); i++) {
                             Task task = new Task(response.getJSONObject(i));
                             taskList.add(task);
@@ -92,8 +99,23 @@ public class HomeFragment extends Fragment {
             }
         };
 
+        // Add requests to the queue
         queue.add(robotRequest);
         queue.add(taskRequest);
+
+        // Set swipe refresh listener to reload data
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            // Clear existing data
+            robotList.clear();
+            taskList.clear();
+
+            // Re-load data
+            queue.add(robotRequest);
+            queue.add(taskRequest);
+
+            // Stop the refreshing animation once data is loaded
+            swipeRefreshLayout.setRefreshing(false);
+        });
 
         return rootView;
     }
