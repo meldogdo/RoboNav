@@ -22,11 +22,14 @@ import com.robonav.app.R;
 import com.robonav.app.models.Robot;
 import com.robonav.app.models.Task;
 
+import java.text.BreakIterator;
 import java.util.List;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import java.util.Objects;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
@@ -54,26 +57,27 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         // Bind task and robot data
         holder.taskNameTextView.setText(task.getName());
-        holder.taskRobotTextView.setText("Robot: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown Robot"));
-        holder.taskProgressTextView.setText("Progress: " + task.getProgress() + "%");
-
-        if (task.getProgress() >= 0) {
-            // Show progress bar
-            holder.taskProgressBar.setIndeterminate(false);
-            holder.taskProgressBar.setVisibility(View.VISIBLE);
-            holder.taskProgressBar.setProgress(task.getProgress());
+        holder.taskRobotTextView.setText("Fulfilled By: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown Robot"));
+        String dateCreated = !Objects.equals(task.getDateCreated(), "null") ? task.getDateCreated() : "Unknown";
+        holder.taskStartedTextView.setText("Started: " + dateCreated);
+        // Handle task status and icon based on progress
+        if (task.getState().equals("1")) {
+            holder.taskProgressTextView.setText("State: Active");
             holder.taskIconImageView.setVisibility(View.GONE);
         } else {
-            // Hide progress bar for non-progress states
-            holder.taskProgressBar.setVisibility(View.GONE);
-            if (task.getProgress() == -1) {
-                holder.taskProgressTextView.setText("Status: Stopped");
+            if (task.getState().equals("-1")) {
+                holder.taskProgressTextView.setText("Status: Error");
                 holder.taskIconImageView.setVisibility(View.VISIBLE);
                 holder.taskIconImageView.setImageResource(R.drawable.ic_error);
-            } else if (task.getProgress() == -2) {
+            } else if (task.getState().equals("0")) {
                 holder.taskProgressTextView.setText("Status: Queued");
                 holder.taskIconImageView.setVisibility(View.VISIBLE);
                 holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
+            }
+            else if (task.getState().equals("2")){
+                holder.taskProgressTextView.setText("Status: Complete");
+                holder.taskIconImageView.setVisibility(View.VISIBLE);
+                holder.taskIconImageView.setImageResource(R.drawable.ic_task);
             }
         }
 
@@ -98,8 +102,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     // ViewHolder class
     static class TaskViewHolder extends RecyclerView.ViewHolder {
+        TextView taskStartedTextView;
         TextView taskNameTextView, taskRobotTextView, taskProgressTextView;
-        ProgressBar taskProgressBar;
         ImageView taskIconImageView;
 
         public TaskViewHolder(@NonNull View itemView) {
@@ -107,10 +111,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             taskNameTextView = itemView.findViewById(R.id.task_name);
             taskRobotTextView = itemView.findViewById(R.id.task_robot);
             taskProgressTextView = itemView.findViewById(R.id.task_progress);
-            taskProgressBar = itemView.findViewById(R.id.task_progress_bar);
             taskIconImageView = itemView.findViewById(R.id.task_icon);
+            taskStartedTextView = itemView.findViewById(R.id.task_start);
         }
     }
+
     private String formatDate(String isoDate) {
         try {
             // Parse the ISO 8601 date
@@ -125,6 +130,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             return "Unknown Date";
         }
     }
+
     // Show popup method with animations
     private void showTaskPopup(View anchorView, Task task, Robot responsibleRobot) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.task_popup_layout, null);
@@ -136,7 +142,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         // Set content for the popup
         TextView titleView = popupView.findViewById(R.id.popup_title);
-        ProgressBar progressBar = popupView.findViewById(R.id.progress_bar);
         TextView progressStatus = popupView.findViewById(R.id.progress_status);
         TextView expectedEndTimeView = popupView.findViewById(R.id.expected_end_time);
         TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
@@ -151,19 +156,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         createdByView.setText("Created By: " + task.getCreatedBy());
         dateCreatedView.setText("Date Created: " + formatDate(task.getDateCreated())); // Format and set the date
 
-        // Customize progress bar based on task progress
+        // Handle task status and icon based on progress
         if (task.getProgress() == -2) {
-            progressBar.setIndeterminate(true); // Optional for animation
-            progressBar.setProgressDrawable(context.getDrawable(R.drawable.dotted_progress_bar));
             progressStatus.setText("Status: Queued");
         } else if (task.getProgress() == -1) {
-            progressBar.setIndeterminate(false);
-            progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
-            progressBar.setProgress(100);
             progressStatus.setText("Status: Stopped");
         } else {
-            progressBar.setIndeterminate(false);
-            progressBar.setProgress(task.getProgress());
             progressStatus.setText("Progress: " + task.getProgress() + "%");
         }
 
@@ -187,6 +185,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Show the popup
         popupWindow.showAtLocation(anchorView, Gravity.BOTTOM, 0, 0);
     }
+
     private void dismissWithAnimation(View popupView, PopupWindow popupWindow) {
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);
         slideDown.setAnimationListener(new Animation.AnimationListener() {

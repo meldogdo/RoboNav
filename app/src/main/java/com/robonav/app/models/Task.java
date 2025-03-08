@@ -15,6 +15,8 @@ public class Task {
     private final String createdBy; // New field for createdBy
     private final String dateCreated; // New field for dateCreated
 
+    private final String state;
+
     // Constructor to initialize from JSON object
     public Task(JSONObject jsonObject) throws JSONException {
         this.id = jsonObject.getString("id");          // Retrieve task ID
@@ -23,11 +25,13 @@ public class Task {
         this.progress = jsonObject.getInt("progress"); // Retrieve task progress
         this.createdBy = jsonObject.getString("createdBy"); // Retrieve createdBy
         this.dateCreated = jsonObject.getString("dateCreated"); // Retrieve dateCreated
-
+        this.state = jsonObject.getString("state");
 
     }
 
     // Getters for the class variables
+    public String getState(){ return state; }
+
     public String getId() {
         return id;
     }

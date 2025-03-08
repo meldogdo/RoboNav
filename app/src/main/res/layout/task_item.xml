@@ -34,22 +34,23 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/task_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Started: "
+            android:textColor="#CCCCCC"
+            android:textSize="16sp" />
+
+        <TextView
             android:id="@+id/task_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Progress: 30%"
+            android:text="Progress: Unknown"
             android:textColor="#CCCCCC"
             android:textSize="16sp" />
 
-        <ProgressBar
-            android:id="@+id/task_progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:progress="50"
-            android:max="100" />
     </LinearLayout>
 
     <ImageView

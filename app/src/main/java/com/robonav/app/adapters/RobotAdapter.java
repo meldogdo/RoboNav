@@ -136,7 +136,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         if (activeTask != null) {
             taskNameView.setText("Active Task");
             String dateCreated = !Objects.equals(activeTask.getDateCreated(), "null") ? activeTask.getDateCreated() : "Unknown";
-            taskPercentageView.setText("Task: " + activeTask.getName() + "\nStart: " + dateCreated);
+            taskPercentageView.setText("Task: " + activeTask.getName() + "\nStarted: " + dateCreated);
 
         } else {
             taskNameView.setText("Active Task");
