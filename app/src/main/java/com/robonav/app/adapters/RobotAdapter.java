@@ -12,7 +12,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,7 +21,10 @@ import com.robonav.app.R;
 import com.robonav.app.models.Robot;
 import com.robonav.app.models.Task;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
+import java.util.Objects;
 
 public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHolder> {
 
@@ -49,7 +51,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
 
         // Bind data to the robot card
         holder.nameTextView.setText(robot.getName());
-        holder.pingTextView.setText("Ping: " + robot.getPing());
+        holder.pingTextView.setText("IP: " + robot.getIpAdd());
         holder.batteryTextView.setText("Battery: " + robot.getBattery() + "%");
         holder.locationTextView.setText("Location: " + robot.getLocationName());
 
@@ -97,6 +99,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             batteryIcon = itemView.findViewById(R.id.robot_battery_icon); // Initialize battery icon
         }
     }
+
     // Show popup method
     private void showRobotPopup(View anchorView, Robot robot) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.robot_popup_layout, null);
@@ -108,19 +111,20 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
 
         // Initialize UI components
         TextView titleView = popupView.findViewById(R.id.popup_title);
-        ProgressBar taskProgressBar = popupView.findViewById(R.id.task_progress_bar);
-        ProgressBar progressBar = popupView.findViewById(R.id.progress_bar);
-        TextView taskNameView = popupView.findViewById(R.id.task_progress_title);
-        TextView taskPercentageView = popupView.findViewById(R.id.task_percentage);
+        TextView taskNameView = popupView.findViewById(R.id.task_progress_title); // Removed ProgressBar reference
+        TextView taskPercentageView = popupView.findViewById(R.id.task_start);
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
         TextView batteryPercentageText = popupView.findViewById(R.id.battery_percentage_text);
         TextView locationDetails = popupView.findViewById(R.id.location_details);
+        TextView positionDetails = popupView.findViewById(R.id.position_details);
+        TextView ipDetails = popupView.findViewById(R.id.ip_details);
 
         // Assuming the Robot object has a method getLocation() that returns the current location
         locationDetails.setText(robot.getLocationName());
+        positionDetails.setText(robot.getLocationCoordinates());
+        ipDetails.setText(robot.getIpAdd());
         int batteryPercentage = robot.getBattery();
         titleView.setText(robot.getName());
-        progressBar.setProgress(batteryPercentage);
         batteryPercentageText.setText("Battery Percentage: " + batteryPercentage + "%"); // Set battery percentage
 
         // Set robot name
@@ -130,16 +134,16 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         Task activeTask = getTaskInProgress(robot, this.taskList);
 
         if (activeTask != null) {
-            taskProgressBar.setProgress(activeTask.getProgress());
-            taskNameView.setText(activeTask.getName());
-            taskPercentageView.setText("Progress: " + activeTask.getProgress() + "%");
+            taskNameView.setText("Active Task");
+            String dateCreated = !Objects.equals(activeTask.getDateCreated(), "null") ? activeTask.getDateCreated() : "Unknown";
+            taskPercentageView.setText("Task: " + activeTask.getName() + "\nStart: " + dateCreated);
+
         } else {
-            taskProgressBar.setProgress(0);
-            taskProgressBar.setVisibility(View.GONE);
-            taskNameView.setText("No task in progress");
-            taskPercentageView.setText("");
-            taskPercentageView.setVisibility(View.GONE);
+            taskNameView.setText("Active Task");
+            taskPercentageView.setText("No task in progress");
         }
+
+
 
         // Swipe down icon to close the popup
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));

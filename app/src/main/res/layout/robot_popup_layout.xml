@@ -52,16 +52,9 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black" />
-    <ProgressBar
-        android:id="@+id/task_progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:max="100" />
 
     <TextView
-        android:id="@+id/task_percentage"
+        android:id="@+id/task_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -89,7 +82,7 @@
 
     <!-- Map Section -->
     <TextView
-        android:id="@+id/map_title"
+        android:id="@+id/position_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -98,33 +91,31 @@
         android:textStyle="bold"
         android:textColor="@color/black" />
 
-    <!-- Connectivity Section -->
-
-    <ImageView
-        android:id="@+id/map_image"
+    <TextView
+        android:id="@+id/position_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:contentDescription="Map Image"
-        android:scaleType="centerCrop"
-        android:src="@drawable/map" />
+        android:layout_marginTop="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+    <!-- Connectivity Section -->
 
     <TextView
         android:id="@+id/connectivity_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Connectivity"
+        android:text="IP Address"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black" />
 
     <TextView
-        android:id="@+id/connectivity_status"
+        android:id="@+id/ip_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Ping: 25ms | Status: Connected"
         android:textSize="16sp"
         android:textColor="@color/black" />
 
