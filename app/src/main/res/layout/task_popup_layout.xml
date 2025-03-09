@@ -15,67 +15,103 @@
         android:src="@drawable/ic_swipe_down"
         android:contentDescription="Swipe Down" />
 
+    <!-- Title -->
     <TextView
         android:id="@+id/popup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Task Info"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginTop="8dp" />
+        android:textColor="@color/black" />
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
+
+
+    <!-- Responsible Robot Section -->
+    <TextView
+        android:id="@+id/responsible_robot_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:max="100" />
+        android:layout_marginTop="16dp"
+        android:text="Fulfilled By"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Expected End Time Section -->
+    <TextView
+        android:id="@+id/responsible_robot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Fulfilled By: Robot #3"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/start_time_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Date Started"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/date_started"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="12:00 PM"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+    <!-- Progress Bar Section -->
+    <TextView
+        android:id="@+id/task_progress_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Current Status"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/progress_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Robot Progress: 50%"
-        android:textSize="16sp"
-        android:textColor="@color/black" />
+        android:text="Active"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
 
-    <!-- New TextViews -->
+
+
+
+
+    <!-- Date Created Section -->
     <TextView
-        android:id="@+id/expected_end_time"
+        android:id="@+id/end_time_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Expected End Time: 12:00 PM"
-        android:textSize="16sp"
-        android:textColor="@color/black" />
+        android:layout_marginTop="16dp"
+        android:text="Date Completed"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <TextView
-        android:id="@+id/responsible_robot"
+        android:id="@+id/date_completed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Completed By: Robot #3"
+        android:text="Executing..."
+        android:textColor="@color/black"
         android:textSize="16sp"
-        android:textColor="@color/black" />
-
-    <TextView
-        android:id="@+id/created_by"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Created By: Username"
-        android:textSize="16sp"
-        android:textColor="@color/black" />
-    <TextView
-        android:id="@+id/date_created"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Date Created: Unknown"
-        android:textSize="16sp"
-        android:textColor="@color/black" />
+        android:visibility="gone" />
 
 </LinearLayout>

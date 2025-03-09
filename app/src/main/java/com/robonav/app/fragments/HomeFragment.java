@@ -80,7 +80,7 @@ public class HomeFragment extends Fragment {
 
         String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
         String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDE0Njc0MDcsImV4cCI6MTc0MTQ3MTAwN30.cYpnPc5Rd46MXBFrfho4r17w-xHlJjPTkhUrJf3EIxg"; // Ensure this token is up to date
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDE1NTk5MTgsImV4cCI6MTc0MTU2MzUxOH0.WSXLUF_u8s5KMzJ_sU5s28aRZ1Fr74Qi4Vg0zkujIps"; // Ensure this token is up to date
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
@@ -122,7 +122,7 @@ public class HomeFragment extends Fragment {
 
     private void loadTasks(List<Task> taskList, List<Robot> robotList, TaskAdapter taskAdapter) {
         String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDE0Njc0MDcsImV4cCI6MTc0MTQ3MTAwN30.cYpnPc5Rd46MXBFrfho4r17w-xHlJjPTkhUrJf3EIxg"; // Ensure this token is up to date
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDE1NTk5MTgsImV4cCI6MTc0MTU2MzUxOH0.WSXLUF_u8s5KMzJ_sU5s28aRZ1Fr74Qi4Vg0zkujIps"; // Ensure this token is up to date
 
         // Load task data after robots are loaded
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,

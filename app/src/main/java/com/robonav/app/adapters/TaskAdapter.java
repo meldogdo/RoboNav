@@ -1,8 +1,6 @@
 package com.robonav.app.adapters;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,7 +10,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,7 +19,6 @@ import com.robonav.app.R;
 import com.robonav.app.models.Robot;
 import com.robonav.app.models.Task;
 
-import java.text.BreakIterator;
 import java.util.List;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,22 +58,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.taskStartedTextView.setText("Started: " + dateCreated);
         // Handle task status and icon based on progress
         if (task.getState().equals("1")) {
-            holder.taskProgressTextView.setText("State: Active");
+            holder.taskProgressTextView.setText("Status: Active");
             holder.taskIconImageView.setVisibility(View.GONE);
         } else {
             if (task.getState().equals("-1")) {
                 holder.taskProgressTextView.setText("Status: Error");
-                holder.taskIconImageView.setVisibility(View.VISIBLE);
                 holder.taskIconImageView.setImageResource(R.drawable.ic_error);
+                holder.taskIconImageView.setVisibility(View.VISIBLE);
             } else if (task.getState().equals("0")) {
                 holder.taskProgressTextView.setText("Status: Queued");
-                holder.taskIconImageView.setVisibility(View.VISIBLE);
                 holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
+                holder.taskIconImageView.setVisibility(View.VISIBLE);
             }
             else if (task.getState().equals("2")){
                 holder.taskProgressTextView.setText("Status: Complete");
-                holder.taskIconImageView.setVisibility(View.VISIBLE);
                 holder.taskIconImageView.setImageResource(R.drawable.ic_task);
+                holder.taskIconImageView.setVisibility(View.VISIBLE);
             }
         }
 
@@ -116,21 +112,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
     }
 
-    private String formatDate(String isoDate) {
-        try {
-            // Parse the ISO 8601 date
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
-            Date date = isoFormat.parse(isoDate);
-
-            // Format to a more readable format
-            SimpleDateFormat readableFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
-            return readableFormat.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return "Unknown Date";
-        }
-    }
-
     // Show popup method with animations
     private void showTaskPopup(View anchorView, Task task, Robot responsibleRobot) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.task_popup_layout, null);
@@ -142,27 +123,46 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         // Set content for the popup
         TextView titleView = popupView.findViewById(R.id.popup_title);
-        TextView progressStatus = popupView.findViewById(R.id.progress_status);
-        TextView expectedEndTimeView = popupView.findViewById(R.id.expected_end_time);
-        TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
-        TextView createdByView = popupView.findViewById(R.id.created_by);
-        TextView dateCreatedView = popupView.findViewById(R.id.date_created); // New TextView
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
+
+        TextView endTitle = popupView.findViewById(R.id.end_time_title);
+        TextView progressStatus = popupView.findViewById(R.id.progress_status);
+        TextView endDate = popupView.findViewById(R.id.date_completed);
+        TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
+        TextView dateStarted = popupView.findViewById(R.id.date_started); // New TextView
+
 
         // Bind task and robot data
         titleView.setText(task.getName());
-        expectedEndTimeView.setText("Expected End Time: " + "12:00 PM"); // Replace with actual data if available
-        responsibleRobotView.setText("Completed By: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown"));
-        createdByView.setText("Created By: " + task.getCreatedBy());
-        dateCreatedView.setText("Date Created: " + formatDate(task.getDateCreated())); // Format and set the date
+        responsibleRobotView.setText((responsibleRobot != null ? responsibleRobot.getName() : "Unknown"));
 
-        // Handle task status and icon based on progress
-        if (task.getProgress() == -2) {
-            progressStatus.setText("Status: Queued");
-        } else if (task.getProgress() == -1) {
-            progressStatus.setText("Status: Stopped");
+        if (!"null".equals(task.getEnd())) {
+            endTitle.setVisibility(View.VISIBLE);
+            endDate.setText(task.getEnd());
+            endDate.setVisibility(View.VISIBLE);
+        }
+        else{
+            endTitle.setVisibility(View.GONE);
+            endDate.setVisibility(View.GONE);
+        }
+
+
+        // Check if date is null and set it accordingly
+        String dateCreated = !Objects.equals(task.getDateCreated(), "null") ? task.getDateCreated() : "Unknown";
+        dateStarted.setText(dateCreated);
+
+        // Handle task status
+        if (task.getState().equals("1")) {
+            progressStatus.setText("Active");
         } else {
-            progressStatus.setText("Progress: " + task.getProgress() + "%");
+            if (task.getState().equals("-1")) {
+                progressStatus.setText("Error");
+            } else if (task.getState().equals("0")) {
+                progressStatus.setText("Queued");
+            }
+            else if (task.getState().equals("2")){
+                progressStatus.setText("Complete");
+            }
         }
 
         // Handle swipe-down icon click
