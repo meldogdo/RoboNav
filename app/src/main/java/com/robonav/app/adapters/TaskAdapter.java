@@ -59,7 +59,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Handle task status and icon based on progress
         if (task.getState().equals("1")) {
             holder.taskProgressTextView.setText("Status: Active");
-            holder.taskIconImageView.setVisibility(View.GONE);
+            holder.taskIconImageView.setImageResource(R.drawable.bot);
+            holder.taskIconImageView.setVisibility(View.VISIBLE);
         } else {
             if (task.getState().equals("-1")) {
                 holder.taskProgressTextView.setText("Status: Error");
