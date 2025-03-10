@@ -72,7 +72,7 @@ public class JsonUtils {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            showMessage("Error loading robots: " + e.getMessage(),context);
+            //showMessage("Error loading robots: " + e.getMessage(),context);
         }
         return robotNames;
     }
@@ -100,7 +100,7 @@ public class JsonUtils {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            showMessage("Error loading robots: " + e.getMessage(),context);
+            //showMessage("Error loading robots: " + e.getMessage(),context);
         }
         return robotsWithLocations;
     }
@@ -117,7 +117,7 @@ public class JsonUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            showMessage("Error loading robots: " + e.getMessage(),context);
+            //showMessage("Error loading robots: " + e.getMessage(),context);
         }
         return robots;
     }
@@ -132,7 +132,7 @@ public class JsonUtils {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            showMessage("Error loading locations: " + e.getMessage(),context);
+            //showMessage("Error loading locations: " + e.getMessage(),context);
         }
         return locationNames;
     }

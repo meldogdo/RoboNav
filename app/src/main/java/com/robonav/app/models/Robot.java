@@ -9,29 +9,36 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 public class Robot {
 
     private final String id;                   // Unique ID for the robot
     private final String name;                 // Robot's name
-    private final String ping;                 // Robot's network latency
+    private final String ipAdd;                // Robot's IP address
     private final int battery;                 // Battery percentage
     private final List<String> tasks;          // List of task IDs assigned to the robot
-    private String locationName;         // Location name (human-readable)
+    private String locationName;               // Location name (human-readable)
     private final String locationCoordinates;  // Location coordinates (x, y)
+
+    private final int isCharging;
 
     // Constructor to initialize Robot object from a JSON object
     public Robot(JSONObject jsonObject) throws JSONException {
         this.id = jsonObject.getString("id");                              // Retrieve robot ID
         this.name = jsonObject.getString("name");                          // Retrieve robot name
-        this.ping = jsonObject.optString("ping", "Unknown");               // Retrieve ping, default to "Unknown"
+        this.ipAdd = jsonObject.optString("ip_add", "Unknown");            // Retrieve IP address, default to "Unknown"
         this.battery = jsonObject.optInt("battery", -1);                   // Retrieve battery level, default to -1
         this.locationName = jsonObject.optString("location_name", "");     // Retrieve location name, default to empty
         this.locationCoordinates = jsonObject.optString("location_coordinates", ""); // Retrieve location coordinates
         this.tasks = jsonArrayToList(jsonObject.optJSONArray("tasks"));    // Convert tasks array to List
+        this.isCharging = jsonObject.getInt("charging");
     }
 
-
+    public int getIsCharging(){
+        return isCharging;
+    }
 
     // Getters for the class variables
     public String getId() {
@@ -42,8 +49,8 @@ public class Robot {
         return name;
     }
 
-    public String getPing() {
-        return ping;
+    public String getIpAdd() {
+        return ipAdd;
     }
 
     public int getBattery() {
@@ -54,14 +61,26 @@ public class Robot {
         return tasks;
     }
 
+    // Method to get the location name
     public String getLocationName() {
-        return locationName;
+        if (locationName != null && !locationName.equals("Unknown")) {
+            return locationName;
+        } else {
+            return "Unnamed";
+        }
     }
+
+    // Method to get the location coordinates
+    public String getLocationCoordinates() {
+        if (locationCoordinates != null && !locationCoordinates.equals("Unknown")) {
+            return locationCoordinates;
+        } else {
+            return "Unknown";
+        }
+    }
+
     public void setLocationName(String locationName) {
         this.locationName = locationName;
-    }
-    public String getLocationCoordinates() {
-        return locationCoordinates;
     }
 
     // Override toString for better debugging output
@@ -71,7 +90,7 @@ public class Robot {
         return "Robot{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", ping='" + ping + '\'' +
+                ", ipAdd='" + ipAdd + '\'' +
                 ", battery=" + battery +
                 ", tasks=" + tasks +
                 ", locationName='" + locationName + '\'' +
@@ -81,11 +100,20 @@ public class Robot {
 
     // Utility function to find the task in progress (progress between 0 and 99)
     public static Task getTaskInProgress(Robot robot, List<Task> taskList) {
+        // Get the list of tasks for the robot
         List<Task> tasksForRobot = getTasksForRobot(robot, taskList);
+
+        // Filter out tasks that are not active (state 1)
+        tasksForRobot = tasksForRobot.stream()
+                .filter(task -> task.getState().equals("1")) // Filter for active tasks only
+                .collect(Collectors.toList());
+
+        // If no active tasks are found, return null
         if (tasksForRobot.isEmpty()) {
-            return null; // No task in progress if the list is empty
+            return null;
         }
-        // Return the first task as the active task (or your logic)
+
+        // Return the first active task (since we want just the one active task)
         return tasksForRobot.get(0);
     }
 
@@ -105,6 +133,7 @@ public class Robot {
         }
         return tasksForRobot;
     }
+
     public static Robot findRobotByName(String name, List<Robot> robots) {
         for (Robot robot : robots) {
             if (robot.getName().equals(name)) {
@@ -123,7 +152,4 @@ public class Robot {
         String[] coordinates = locationCoordinates.split(",");
         return coordinates.length == 2 ? Double.parseDouble(coordinates[1]) : 0;
     }
-
-
-
 }
