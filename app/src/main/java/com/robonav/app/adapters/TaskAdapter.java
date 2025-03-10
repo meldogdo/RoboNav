@@ -1,6 +1,8 @@
 package com.robonav.app.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,6 +21,7 @@ import com.robonav.app.R;
 import com.robonav.app.models.Robot;
 import com.robonav.app.models.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,43 +51,90 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        Task task = taskList.get(position);
-        Robot responsibleRobot = getRobotForTask(task);
+        List<Task> orderedTaskList = getOrderedTaskList();  // Get the sorted and ordered task list
 
-        // Bind task and robot data
-        holder.taskNameTextView.setText(task.getName());
-        holder.taskRobotTextView.setText("Fulfilled By: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown Robot"));
-        String dateCreated = !Objects.equals(task.getDateCreated(), "null") ? task.getDateCreated() : "Unknown";
-        holder.taskStartedTextView.setText("Started: " + dateCreated);
-        // Handle task status and icon based on progress
+        // Handle case when no tasks are available to avoid crashes
+        if (orderedTaskList.size() > position) {
+            Task task = orderedTaskList.get(position);
+            Robot responsibleRobot = getRobotForTask(task);
+
+            holder.taskNameTextView.setText(task.getName());
+            holder.taskRobotTextView.setText("Fulfilled By: " + (responsibleRobot != null ? responsibleRobot.getName() : "Unknown Robot"));
+            String dateCreated = !Objects.equals(task.getDateCreated(), "null") ? task.getDateCreated() : "Unknown";
+            holder.taskStartedTextView.setText("Started: " + dateCreated);
+
+            // Handle task status and icon based on progress
+            updateTaskStatus(holder, task);
+        }
+    }
+
+    // Utility method to get the ordered task list
+    private List<Task> getOrderedTaskList() {
+        // Separate completed tasks
+        List<Task> completedTasks = new ArrayList<>();
+        for (Task task : taskList) {
+            if ("2".equals(task.getState())) {
+                completedTasks.add(task);
+            }
+        }
+
+        // Sort completed tasks by dateCreated (newest first)
+        completedTasks.sort((task1, task2) -> {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                Date date1 = dateFormat.parse(task1.getEnd());
+                Date date2 = dateFormat.parse(task2.getEnd());
+                return date2.compareTo(date1);  // Sort in descending order
+            } catch (ParseException e) {
+                return 0;
+            }
+        });
+
+        // Limit to the 5 most recent completed tasks
+        completedTasks = completedTasks.size() > 5 ? completedTasks.subList(0, 5) : completedTasks;
+
+        // Create a new list that includes all tasks, keeping the order of non-completed tasks
+        List<Task> orderedTaskList = new ArrayList<>();
+
+        // Add non-completed tasks in the same order as in the original taskList
+        for (Task task : taskList) {
+            if (!"2".equals(task.getState())) {
+                orderedTaskList.add(task);
+            }
+        }
+
+        // Add sorted completed tasks
+        orderedTaskList.addAll(completedTasks);
+
+        return orderedTaskList;
+    }
+
+    // Helper method to update task status
+    private void updateTaskStatus(TaskViewHolder holder, Task task) {
         if (task.getState().equals("1")) {
             holder.taskProgressTextView.setText("Status: Active");
             holder.taskIconImageView.setImageResource(R.drawable.bot);
             holder.taskIconImageView.setVisibility(View.VISIBLE);
-        } else {
-            if (task.getState().equals("-1")) {
-                holder.taskProgressTextView.setText("Status: Error");
-                holder.taskIconImageView.setImageResource(R.drawable.ic_error);
-                holder.taskIconImageView.setVisibility(View.VISIBLE);
-            } else if (task.getState().equals("0")) {
-                holder.taskProgressTextView.setText("Status: Queued");
-                holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
-                holder.taskIconImageView.setVisibility(View.VISIBLE);
-            }
-            else if (task.getState().equals("2")){
-                holder.taskProgressTextView.setText("Status: Complete");
-                holder.taskIconImageView.setImageResource(R.drawable.ic_task);
-                holder.taskIconImageView.setVisibility(View.VISIBLE);
-            }
+        } else if (task.getState().equals("-1")) {
+            holder.taskProgressTextView.setText("Status: Error");
+            holder.taskIconImageView.setImageResource(R.drawable.ic_error);
+            holder.taskIconImageView.setVisibility(View.VISIBLE);
+        } else if (task.getState().equals("0")) {
+            holder.taskProgressTextView.setText("Status: Queued");
+            holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
+            holder.taskIconImageView.setVisibility(View.VISIBLE);
+        } else if (task.getState().equals("2")) {
+            holder.taskProgressTextView.setText("Status: Complete");
+            holder.taskIconImageView.setImageResource(R.drawable.ic_task);
+            holder.taskIconImageView.setVisibility(View.VISIBLE);
         }
-
-        // Set click listener to show popup
-        holder.itemView.setOnClickListener(view -> showTaskPopup(view, task, responsibleRobot));
     }
 
     @Override
     public int getItemCount() {
-        return taskList.size();
+        // Ensure getItemCount returns the size of the ordered task list
+        List<Task> orderedTaskList = getOrderedTaskList();  // Get the sorted and ordered task list
+        return orderedTaskList.size();  // Return the correct size
     }
 
     // Utility function to find the robot responsible for the task

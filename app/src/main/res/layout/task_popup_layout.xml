@@ -1,117 +1,116 @@
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="@color/white"
     android:padding="16dp">
 
-    <!-- Swipe Down Icon -->
-    <ImageView
-        android:id="@+id/swipe_down_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_swipe_down"
-        android:contentDescription="Swipe Down" />
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/popup_title"
-        android:layout_width="wrap_content"
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Task Info"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/black" />
+        android:orientation="vertical">
 
+        <!-- Swipe Down Icon -->
+        <ImageView
+            android:id="@+id/swipe_down_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_swipe_down"
+            android:contentDescription="Swipe Down" />
 
+        <!-- Title -->
+        <TextView
+            android:id="@+id/popup_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Task Info"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
 
-    <!-- Responsible Robot Section -->
-    <TextView
-        android:id="@+id/responsible_robot_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Fulfilled By"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Responsible Robot Section -->
+        <TextView
+            android:id="@+id/responsible_robot_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Fulfilled By"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-    <!-- Expected End Time Section -->
-    <TextView
-        android:id="@+id/responsible_robot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Fulfilled By: Robot #3"
-        android:textColor="@color/black"
-        android:textSize="16sp" />
+        <!-- Expected End Time Section -->
+        <TextView
+            android:id="@+id/responsible_robot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Fulfilled By: Robot #3"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/start_time_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Date Started"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <TextView
+            android:id="@+id/start_time_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Date Started"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/date_started"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="12:00 PM"
-        android:textSize="16sp"
-        android:textColor="@color/black" />
+        <TextView
+            android:id="@+id/date_started"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="12:00 PM"
+            android:textSize="16sp"
+            android:textColor="@color/black" />
 
-    <!-- Progress Bar Section -->
-    <TextView
-        android:id="@+id/task_progress_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Current Status"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Progress Bar Section -->
+        <TextView
+            android:id="@+id/task_progress_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Current Status"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/progress_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Active"
-        android:textColor="@color/black"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/progress_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Active"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
+        <!-- Date Created Section -->
+        <TextView
+            android:id="@+id/end_time_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Date Completed"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
-
-
-
-    <!-- Date Created Section -->
-    <TextView
-        android:id="@+id/end_time_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Date Completed"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/date_completed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Executing..."
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        android:visibility="gone" />
-
-</LinearLayout>
+        <TextView
+            android:id="@+id/date_completed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Executing..."
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>
