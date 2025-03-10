@@ -62,27 +62,6 @@ async function createTransporter() {
   return transporter;
 }
 
-async function testEmail() {
-    const transporter = await createTransporter();
-
-    const mailOptions = {
-        from: EMAIL_USER, 
-        to: 'mohamedeldogdog7@gmail.com',
-        subject: 'Test Email',
-        text: 'This is a test email from Node.js using Gmail API.',
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.log("Error:", error);
-        } else {
-            console.log("Email sent:", info.response);
-        }
-    });
-}
-
-//testEmail();
-
 const app = express();
 
 app.use(express.json()); // For parsing JSON body
@@ -363,20 +342,14 @@ app.post('/api/open/users/request-reset', async (req, res) => {
         db.query(
             'INSERT INTO password_reset_tokens (email, reset_code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reset_code = ?, expires_at = ?',
             [email, resetCode, expiresAt, resetCode, expiresAt],
-            (err) => {
+            async (err) => {
                 if (err) {
                     console.error('Error inserting OTP:', err);
                     return res.status(500).json({ message: 'Database error', error: err });
                 }
 
                 // Send email
-                const transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: process.env.EMAIL_USER,
-                        pass: process.env.EMAIL_PASS,
-                    },
-                });
+                const transporter = await createTransporter();
 
                 const mailOptions = {
                     from: process.env.EMAIL_USER,
