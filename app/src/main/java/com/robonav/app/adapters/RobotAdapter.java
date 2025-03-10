@@ -2,16 +2,19 @@ package com.robonav.app.adapters;
 
 import static com.robonav.app.models.Robot.getTaskInProgress;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -52,7 +55,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         // Bind data to the robot card
         holder.nameTextView.setText(robot.getName());
         holder.pingTextView.setText("IP: " + robot.getIpAdd());
-        holder.batteryTextView.setText("Battery: " + robot.getBattery() + "%");
+
         holder.locationTextView.setText("Location: " + robot.getLocationName());
 
         // Get active task for the robot
@@ -65,14 +68,24 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             holder.taskTextView.setText("Task: None");
         }
 
-        // Update battery icon based on percentage
+        // Update battery icon based on percentage or charging status
         int batteryPercentage = robot.getBattery();
-        if (batteryPercentage > 75) {
-            holder.batteryIcon.setImageResource(R.drawable.ic_full_battery);
-        } else if (batteryPercentage > 25) {
-            holder.batteryIcon.setImageResource(R.drawable.ic_half_battery);
+
+        // Check if the robot is charging
+        if (robot.getIsCharging() == 1) {
+            // If the robot is charging, display the charging icon
+            holder.batteryIcon.setImageResource(R.drawable.charging);
+            holder.batteryTextView.setText("Charging (Battery: " + robot.getBattery() + "%)");
         } else {
-            holder.batteryIcon.setImageResource(R.drawable.ic_empty_battery);
+            holder.batteryTextView.setText("Battery: " + robot.getBattery() + "%");
+            // Otherwise, update based on battery percentage
+            if (batteryPercentage > 75) {
+                holder.batteryIcon.setImageResource(R.drawable.ic_full_battery);
+            } else if (batteryPercentage > 25) {
+                holder.batteryIcon.setImageResource(R.drawable.ic_half_battery);
+            } else {
+                holder.batteryIcon.setImageResource(R.drawable.ic_empty_battery);
+            }
         }
 
         // Show popup on click
@@ -118,6 +131,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         TextView locationDetails = popupView.findViewById(R.id.location_details);
         TextView positionDetails = popupView.findViewById(R.id.position_details);
         TextView ipDetails = popupView.findViewById(R.id.ip_details);
+        ProgressBar progressBar = popupView.findViewById(R.id.progress_bar); // ProgressBar reference
 
         // Assuming the Robot object has a method getLocation() that returns the current location
         locationDetails.setText(robot.getLocationName());
@@ -125,7 +139,45 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         ipDetails.setText(robot.getIpAdd());
         int batteryPercentage = robot.getBattery();
         titleView.setText(robot.getName());
-        batteryPercentageText.setText("Battery Percentage: " + batteryPercentage + "%"); // Set battery percentage
+
+
+
+        // Check if the robot is charging
+        if (robot.getIsCharging() == 1) {
+            // If the robot is charging, display the charging status
+            batteryPercentageText.setText("Charging (Battery Percentage: " + batteryPercentage + "%)");
+
+            // Pulse animation for the progress bar
+            ValueAnimator pulseAnimator = ValueAnimator.ofInt(0, batteryPercentage);
+            pulseAnimator.setDuration(1500);  // Duration of one pulse animation
+            pulseAnimator.setInterpolator(new AccelerateDecelerateInterpolator()); // Smooth acceleration and deceleration
+
+            // Update the progress bar in the animation
+            pulseAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int progress = (int) animation.getAnimatedValue();
+                    progressBar.setProgress(progress);
+                }
+            });
+
+            // Reset the animation to repeat
+            pulseAnimator.setRepeatMode(ValueAnimator.RESTART);
+            pulseAnimator.setRepeatCount(ValueAnimator.INFINITE);
+
+            // Start the pulse animation
+            pulseAnimator.start();
+
+        } else {
+            // If not charging, display the battery percentage and set the progress bar
+            batteryPercentageText.setText("Battery Percentage: " + batteryPercentage + "%");
+
+            // Set the ProgressBar progress directly to the battery percentage
+            progressBar.setProgress(batteryPercentage);
+        }
+
+
+
 
         // Set robot name
         titleView.setText(robot.getName());
@@ -142,8 +194,6 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             taskNameView.setText("Active Task");
             taskPercentageView.setText("No task in progress");
         }
-
-
 
         // Swipe down icon to close the popup
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));
@@ -163,6 +213,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         popupView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_up));
         popupWindow.showAtLocation(anchorView, Gravity.BOTTOM, 0, 0);
     }
+
 
     private void dismissWithAnimation(View popupView, PopupWindow popupWindow) {
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);

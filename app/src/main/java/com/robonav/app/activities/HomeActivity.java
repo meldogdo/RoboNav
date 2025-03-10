@@ -77,9 +77,9 @@ public class HomeActivity extends AppCompatActivity {
                 } else if (position == 2) {
                     return new NavigationFragment(); // Fragment 3: Navigation
                 }
-//                else if (position == 3) {
-//                    //return new GeoVisualizationFragment(); // Fragment 3: Geo Visualization
-//                }
+                else if (position == 3) {
+                    return new MapFragment(); // Fragment 3: Geo Visualization
+                }
                 else {
                     return new HomeFragment(); // Default Fragment
                 }

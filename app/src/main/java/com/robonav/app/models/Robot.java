@@ -22,6 +22,8 @@ public class Robot {
     private String locationName;               // Location name (human-readable)
     private final String locationCoordinates;  // Location coordinates (x, y)
 
+    private final int isCharging;
+
     // Constructor to initialize Robot object from a JSON object
     public Robot(JSONObject jsonObject) throws JSONException {
         this.id = jsonObject.getString("id");                              // Retrieve robot ID
@@ -31,6 +33,11 @@ public class Robot {
         this.locationName = jsonObject.optString("location_name", "");     // Retrieve location name, default to empty
         this.locationCoordinates = jsonObject.optString("location_coordinates", ""); // Retrieve location coordinates
         this.tasks = jsonArrayToList(jsonObject.optJSONArray("tasks"));    // Convert tasks array to List
+        this.isCharging = jsonObject.getInt("charging");
+    }
+
+    public int getIsCharging(){
+        return isCharging;
     }
 
     // Getters for the class variables
