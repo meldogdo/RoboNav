@@ -305,9 +305,11 @@ app.get('/api/robot/tasks', authenticateToken, (req, res) => {
             id: task.task_id,
             name: task.name,
             robot: task.robot_id,
-            progress: 0,
+            progress: 50,
             createdBy: 'n/a',
-            dateCreated: task.start
+            dateCreated: task.start,
+            state: task.state,
+            dateCompleted: task.end
         }));
 
         res.json(tasks);
@@ -457,12 +459,13 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
                         const robotData = {
                             id: robot.robot_id,
                             name: `Robot #${robot.robot_id}`,
-                            ping: `${robot.ping || 'N/A'}ms`,
+                            ip_add: robot.ip_add || 'Unknown',
                             battery: robot.battery,
-                            location_name: location.name || 'Unknown',
-                            location_coordinates: `${location.x || 'N/A'},${location.y || 'N/A'}`,
-                            tasks: tasks
-                        };
+                            location_name: location.name || "Unknown",
+                            location_coordinates: (location.x && location.y) ? `${location.x},${location.y}` : "Unknown",
+                            tasks: tasks,
+                            charging: robot.is_charging
+                        };                        
 
                         robotsData.push(robotData);
                         resolve();
