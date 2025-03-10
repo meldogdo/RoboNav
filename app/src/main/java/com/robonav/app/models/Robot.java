@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class Robot {
@@ -92,11 +93,20 @@ public class Robot {
 
     // Utility function to find the task in progress (progress between 0 and 99)
     public static Task getTaskInProgress(Robot robot, List<Task> taskList) {
+        // Get the list of tasks for the robot
         List<Task> tasksForRobot = getTasksForRobot(robot, taskList);
+
+        // Filter out tasks that are not active (state 1)
+        tasksForRobot = tasksForRobot.stream()
+                .filter(task -> task.getState().equals("1")) // Filter for active tasks only
+                .collect(Collectors.toList());
+
+        // If no active tasks are found, return null
         if (tasksForRobot.isEmpty()) {
-            return null; // No task in progress if the list is empty
+            return null;
         }
-        // Return the first task as the active task (or your logic)
+
+        // Return the first active task (since we want just the one active task)
         return tasksForRobot.get(0);
     }
 
