@@ -65,6 +65,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             // Handle task status and icon based on progress
             updateTaskStatus(holder, task);
+            // Set click listener to show popup
+            holder.itemView.setOnClickListener(view -> showTaskPopup(view, task, responsibleRobot));
+
         }
     }
 
