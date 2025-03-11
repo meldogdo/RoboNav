@@ -42,7 +42,6 @@ async function getAccessToken() {
   const { token } = await oauth2Client.getAccessToken();
   return token;
 }
-
 // Create a transporter using OAuth2
 async function createTransporter() {
   const accessToken = await getAccessToken();
@@ -315,11 +314,13 @@ app.post('/api/open/users/reset-password', (req, res) => {
     });
 });
 
-// Request Reset Code
 app.post('/api/open/users/request-reset', async (req, res) => {
     const { email } = req.body;
 
+    console.log("Received request-reset request:", req.body); // Log incoming request
+
     if (!email) {
+        console.error("Error: Missing email field in request body");
         return res.status(400).json({ message: 'Email is required' });
     }
 
@@ -334,9 +335,13 @@ app.post('/api/open/users/request-reset', async (req, res) => {
             return res.status(404).json({ message: 'Email not found' });
         }
 
+        console.log("Email found in database:", email);
+
         // Generate a 6-digit OTP and expiration time
         const resetCode = generateOTP();
         const expiresAt = new Date(Date.now() + 5 * 60000); // Expires in 5 minutes
+
+        console.log("Generated OTP:", resetCode);
 
         // Save OTP to DB
         db.query(
@@ -348,9 +353,10 @@ app.post('/api/open/users/request-reset', async (req, res) => {
                     return res.status(500).json({ message: 'Database error', error: err });
                 }
 
+                console.log("Reset code saved in database for:", email);
+
                 // Send email
                 const transporter = await createTransporter();
-
                 const mailOptions = {
                     from: process.env.EMAIL_USER,
                     to: email,
@@ -363,6 +369,7 @@ app.post('/api/open/users/request-reset', async (req, res) => {
                         console.error('Error sending email:', error);
                         return res.status(500).json({ message: 'Error sending email', error });
                     }
+                    console.log("Reset code sent successfully to:", email);
                     res.json({ message: 'Reset code sent to email' });
                 });
             }
@@ -371,10 +378,14 @@ app.post('/api/open/users/request-reset', async (req, res) => {
 });
 
 
+
 app.post('/api/open/users/verify-reset', (req, res) => {
     const { email, resetCode } = req.body;
 
+    console.log("Received verify-reset request:", req.body);
+
     if (!email || !resetCode) {
+        console.error("Error: Email or reset code missing in request");
         return res.status(400).json({ message: 'Email and reset code are required' });
     }
 
@@ -383,8 +394,17 @@ app.post('/api/open/users/verify-reset', (req, res) => {
         'SELECT * FROM password_reset_tokens WHERE email = ? AND reset_code = ? AND expires_at > NOW()',
         [email, resetCode],
         (err, results) => {
-            if (err) return res.status(500).json({ message: 'Database error', error: err });
-            if (results.length === 0) return res.status(400).json({ message: 'Invalid or expired reset code' });
+            if (err) {
+                console.error('Database query error:', err);
+                return res.status(500).json({ message: 'Database error', error: err });
+            }
+
+            if (results.length === 0) {
+                console.error("Invalid or expired reset code for:", email, "Code:", resetCode);
+                return res.status(400).json({ message: 'Invalid or expired reset code' });
+            }
+
+            console.log("Reset code verified for:", email);
 
             // Generate JWT token to authenticate reset password request
             const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '10m' });
@@ -396,6 +416,7 @@ app.post('/api/open/users/verify-reset', (req, res) => {
         }
     );
 });
+
 
 // Get info for robot
 app.get('/api/robot/robots', authenticateToken, (req, res) => {
@@ -461,7 +482,6 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
 app.get('/', (req, res) => {
     res.send('Simple Express MySQL API with JWT Authentication is running...');
 });
-
 // Start HTTPS Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);

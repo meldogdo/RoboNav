@@ -1,26 +1,33 @@
 package com.robonav.app.activities;
 
 import android.app.ProgressDialog;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ResetPasswordActivity extends AppCompatActivity {
 
     private EditText newPasswordEditText, confirmPasswordEditText;
+    private Button resetPasswordButton;
+    private String email, token;
+
     private static final String RESET_PASSWORD_URL = "http://10.0.2.2:8080/api/open/users/reset-password";
 
     @Override
@@ -30,7 +37,12 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
         newPasswordEditText = findViewById(R.id.newPasswordEditText);
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
-        Button resetPasswordButton = findViewById(R.id.resetPasswordButton);
+        resetPasswordButton = findViewById(R.id.resetPasswordButton);
+
+        // Retrieve email and token from the intent
+        Intent intent = getIntent();
+        email = intent.getStringExtra("email");
+        token = intent.getStringExtra("token");
 
         resetPasswordButton.setOnClickListener(v -> resetPassword());
     }
@@ -45,10 +57,6 @@ public class ResetPasswordActivity extends AppCompatActivity {
         progressDialog.setMessage("Updating password...");
         progressDialog.show();
 
-        // Get JWT token from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
-        String token = prefs.getString("JWT_TOKEN", "");
-
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("new_password", newPassword);
@@ -60,18 +68,21 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 response -> {
                     progressDialog.dismiss();
                     Toast.makeText(ResetPasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT).show();
+
+                    // Redirect to login page after successful reset
+                    Intent intent = new Intent(ResetPasswordActivity.this, MainActivity.class);
+                    startActivity(intent);
                     finish();
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Log.e("ResetPasswordError", error.toString());
                     Toast.makeText(ResetPasswordActivity.this, "Error updating password", Toast.LENGTH_SHORT).show();
                 }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
-                headers.put("Authorization", "Bearer " + token);
+                headers.put("Authorization", "Bearer " + token); // Pass token in Authorization header
                 return headers;
             }
         };
