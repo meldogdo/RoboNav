@@ -20,6 +20,7 @@ import com.robonav.app.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private Button submitButton, verifyButton;
     private TextView backToLoginText;
     private String email;  // Stores email for later verification
+
+    private TextView resetCodeLabel;
 
     private static final String REQUEST_RESET_URL = "http://10.0.2.2:8080/api/open/users/request-reset";
     private static final String VERIFY_RESET_URL = "http://10.0.2.2:8080/api/open/users/verify-reset";
@@ -45,10 +48,12 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         submitButton = findViewById(R.id.submitButton);
         verifyButton = findViewById(R.id.verifyButton);
         backToLoginText = findViewById(R.id.backToLoginText);
+        resetCodeLabel = findViewById(R.id.resetCodeLabel);
 
         // Hide the verification UI initially
         resetCodeEditText.setVisibility(View.GONE);
         verifyButton.setVisibility(View.GONE);
+        resetCodeLabel.setVisibility(View.GONE);
 
         // Send Reset Code
         submitButton.setOnClickListener(v -> requestResetCode());
@@ -92,6 +97,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     // Show the reset code input & verify button
                     resetCodeEditText.setVisibility(View.VISIBLE);
                     verifyButton.setVisibility(View.VISIBLE);
+                    resetCodeLabel.setVisibility(View.VISIBLE);
 
                     // Disable submit button to prevent multiple requests
                     submitButton.setEnabled(false);

@@ -18,30 +18,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Reset Password Icon -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/resetPasswordIcon"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="64dp"
-            android:contentDescription="@string/reset_password"
-            android:src="@drawable/ic_reset_password"
-            android:clickable="true"
-            android:focusable="true"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_gravity="end">
 
-        <!-- Sign out Icon -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/signOutIcon"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="16dp"
-            android:contentDescription="@string/menu"
-            android:src="@drawable/ic_sign_out"
-            android:clickable="true"
-            android:focusable="true"/>
+            <!-- Reset Password Icon -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/resetPasswordIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                android:clickable="true"
+                android:contentDescription="@string/reset_password"
+                android:focusable="true"
+                android:src="@drawable/ic_reset_password" />
 
+            <!-- Sign out Icon -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/signOutIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="@string/menu"
+                android:focusable="true"
+                android:src="@drawable/ic_sign_out" />
+        </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
     <!-- ViewPager2 for fragment switching -->
@@ -53,10 +58,8 @@
         android:paddingBottom="10dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <!-- Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
