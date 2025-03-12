@@ -67,22 +67,22 @@ public class ResetPasswordActivity extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, RESET_PASSWORD_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ResetPasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ResetPasswordActivity.this, "Password reset successful", Toast.LENGTH_SHORT).show();
 
-                    // Redirect to login page after successful reset
+                    // Redirect to login
                     Intent intent = new Intent(ResetPasswordActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ResetPasswordActivity.this, "Error updating password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ResetPasswordActivity.this, "Error resetting password", Toast.LENGTH_SHORT).show();
                 }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
-                headers.put("Authorization", "Bearer " + token); // Pass token in Authorization header
+                headers.put("Authorization", "Bearer " + token); // Use reset token
                 return headers;
             }
         };
@@ -90,7 +90,6 @@ public class ResetPasswordActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
     }
-
     private boolean arePasswordsValid(String newPassword, String confirmPassword) {
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "Please fill in both fields", Toast.LENGTH_SHORT).show();
@@ -106,4 +105,5 @@ public class ResetPasswordActivity extends AppCompatActivity {
         }
         return true;
     }
+
 }

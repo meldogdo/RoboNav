@@ -42,7 +42,7 @@ public class HomeActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         findViewById(R.id.resetPasswordIcon).setOnClickListener(v -> {
-            Intent resetIntent = new Intent(HomeActivity.this, ResetPasswordActivity.class);
+            Intent resetIntent = new Intent(HomeActivity.this, ChangePasswordActivity.class);
             startActivity(resetIntent);
         });
 
