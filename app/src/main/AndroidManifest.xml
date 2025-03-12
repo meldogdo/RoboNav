@@ -53,6 +53,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.robonav.app.activities.ResetPasswordActivity" />
+        <activity android:name="com.robonav.app.activities.ChangePasswordActivity"/>
+
     </application>
 
 </manifest>

@@ -314,6 +314,43 @@ app.post('/api/open/users/reset-password', (req, res) => {
     });
 });
 
+
+app.post('/api/protected/users/change-password', authenticateToken, async (req, res) => {
+    const { old_password, new_password } = req.body;
+    const userId = req.user.userId; // Extracted from JWT token
+
+    if (!old_password || !new_password) {
+        return res.status(400).json({ message: 'Old and new password are required' });
+    }
+
+    // Retrieve user from database
+    db.query('SELECT * FROM users WHERE id = ?', [userId], async (err, results) => {
+        if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const user = results[0];
+
+        // Verify old password
+        const passwordMatch = await bcrypt.compare(old_password, user.hashed_password);
+        if (!passwordMatch) {
+            return res.status(403).json({ message: 'Incorrect current password' });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        // Update password in database
+        db.query('UPDATE users SET hashed_password = ? WHERE id = ?', [hashedPassword, userId], (err) => {
+            if (err) return res.status(500).json({ message: 'Error updating password', error: err });
+
+            res.json({ message: 'Password changed successfully' });
+        });
+    });
+});
+
 app.post('/api/open/users/request-reset', async (req, res) => {
     const { email } = req.body;
 
