@@ -53,10 +53,6 @@
             </intent-filter>
         </activity>
         <activity android:name="com.robonav.app.activities.ResetPasswordActivity" />
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCcmWbO22Jv2BQPbuTKsxpsjciTD8CTT-E" />
     </application>
 
 </manifest>
