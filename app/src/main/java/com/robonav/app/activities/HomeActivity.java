@@ -139,7 +139,11 @@ public class HomeActivity extends AppCompatActivity {
 
     // Method to log the user out and navigate to MainActivity
     private void logout() {
-        // Optionally, clear any saved session or user data (e.g., SharedPreferences or clearing user session)
+        // Clear JWT token
+        getSharedPreferences("APP_PREFS", MODE_PRIVATE)
+                .edit()
+                .remove("JWT_TOKEN")
+                .apply();
 
         // Navigate to MainActivity
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);
