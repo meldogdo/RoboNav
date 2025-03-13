@@ -87,7 +87,10 @@ public class HomeFragment extends Fragment {
         robotAdapter.notifyDataSetChanged();
         taskAdapter.notifyDataSetChanged();
 
-        String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
+
+        String robotUrl = "http://10.0.2.2:8080/api/robot/protected/robots";
+        String taskUrl = "http://10.0.2.2:8080/api/robot/protected/tasks";
+
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
@@ -128,7 +131,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadTasks(List<Task> taskList, List<Robot> robotList, TaskAdapter taskAdapter) {
-        String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
+        String taskUrl = "http://10.0.2.2:8080/api/protected/robot/tasks";
 
         // Load task data after robots are loaded
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
