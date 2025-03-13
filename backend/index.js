@@ -99,6 +99,10 @@ setInterval(() => {
         if (err) console.error('Error clearing expired tokens:', err);
         else console.log('Expired reset tokens cleared');
     });
+    db.query('DELETE FROM email_confirmations WHERE expires_at < NOW()', (err) => {
+        if (err) console.error('Error clearing expired email confirmations:', err);
+        else console.log('Expired email confirmations cleared');
+    });
 }, 3600000); // Runs every 1 hour (3600000 ms)
 
 // Function to execute SQL dump file
@@ -113,24 +117,6 @@ function initializeDatabase() {
             console.log('Database initialized successfully');
         }
     });
-    // Create the password_reset_tokens table if it does not exist
-        const createResetTokensTable = `
-            CREATE TABLE IF NOT EXISTS password_reset_tokens (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(255) NOT NULL,
-                reset_code VARCHAR(6) NOT NULL,
-                expires_at DATETIME NOT NULL,
-                UNIQUE(email)  -- Ensures only one reset request per user at a time
-            );
-        `;
-
-        db.query(createResetTokensTable, (err) => {
-            if (err) {
-                console.error('Error creating password_reset_tokens table:', err);
-            } else {
-                console.log('password_reset_tokens table is ready');
-            }
-        });
 }
 
 // Middleware to verify JWT token
@@ -175,23 +161,27 @@ app.post('/api/open/users/register', async (req, res) => {
                         return res.status(500).json({ message: 'Error inserting user', error: err });
                     }
 
-                    // Send confirmation email
-                    const token = crypto.randomBytes(32).toString('hex');  // Create a random token
+                    // Generate token and set expiration
+                    const token = crypto.randomBytes(32).toString('hex');
+                    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours expiry
+
                     const confirmationLink = `http://localhost:8080/api/open/users/confirm-email?token=${token}`;
 
-                    // Save token in database (no expiration for simplicity)
-                    db.query('INSERT INTO email_confirmations (user_id, token) VALUES (?, ?)', [result.insertId, token]);
+                    // Save token with expiry in the database
+                    db.query('INSERT INTO email_confirmations (user_id, token, expires_at) VALUES (?, ?, ?)',
+                        [result.insertId, token, expiresAt]);
 
                     // Send the confirmation email
                     const mailOptions = {
                         from: process.env.EMAIL_USER,
                         to: email,
                         subject: 'Confirm your email',
-                        text: `Click the link to confirm your email: ${confirmationLink}`
+                        text: `Click the link to confirm your email: ${confirmationLink} (Expires in 24 hours)`
                     };
+
                     const transporter = await createTransporter();
 
-                    transporter.sendMail(mailOptions, (error, info) => {
+                    transporter.sendMail(mailOptions, (error) => {
                         if (error) {
                             return res.status(500).json({ message: 'Error sending email', error });
                         }
@@ -209,33 +199,27 @@ app.post('/api/open/users/register', async (req, res) => {
 app.get('/api/open/users/confirm-email', (req, res) => {
     const { token } = req.query;
 
-    // Check if token exists
     if (!token) {
         return res.status(400).json({ message: 'No token provided' });
     }
-
-    // Check if the token is valid
-    db.query('SELECT * FROM email_confirmations WHERE token = ?', [token], (err, results) => {
+    db.query('SELECT * FROM email_confirmations WHERE token = ? AND expires_at > NOW()', [token], (err, results) => {
         if (err) return res.status(500).json({ message: 'Database error', error: err });
 
         if (results.length === 0) {
-            return res.status(400).json({ message: 'Invalid token' });
+            return res.status(400).json({ message: 'Invalid or expired token' });
         }
 
-        // Get the user ID from the confirmation
         const userId = results[0].user_id;
 
-        // Update user confirmation status
-        db.query('UPDATE users SET confirmed = 1 WHERE id = ?', [userId], (err, result) => {
+        db.query('UPDATE users SET confirmed = 1 WHERE id = ?', [userId], (err) => {
             if (err) return res.status(500).json({ message: 'Error updating user', error: err });
 
-            // Delete the token from the database (one-time use)
             db.query('DELETE FROM email_confirmations WHERE token = ?', [token]);
-
             res.status(200).json({ message: 'Email confirmed successfully. You can now log in.' });
         });
     });
 });
+
 
 // User Login (JWT Token Generation)
 app.post('/api/open/users/login', (req, res) => {
@@ -270,7 +254,7 @@ app.post('/api/open/users/login', (req, res) => {
 });
 
 // Get robot tasks
-app.get('/api/robot/tasks', authenticateToken, (req, res) => {
+app.get('/api/protected/robot/tasks', authenticateToken, (req, res) => {
     db.query('SELECT * FROM task', (err, results) => {
         if (err) {
             return res.status(500).json({ message: 'Database error' });
@@ -293,23 +277,54 @@ app.get('/api/robot/tasks', authenticateToken, (req, res) => {
         res.json(tasks);
     });
 });
-app.post('/api/open/users/reset-password', (req, res) => {
+
+app.post('/api/protected/users/reset-password', authenticateToken, async (req, res) => {
     const { new_password } = req.body;
-    const authHeader = req.header('Authorization');
 
-    if (!authHeader) return res.status(401).json({ message: 'Unauthorized' });
+    if (!new_password) return res.status(400).json({ message: 'New password is required' });
 
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, SECRET_KEY, async (err, decoded) => {
-        if (err) return res.status(403).json({ message: 'Invalid or expired token' });
+    const email = req.user.email; // Extract email from middleware
+    const hashedPassword = await bcrypt.hash(new_password, 10);
 
-        const email = decoded.email;
+    db.query('UPDATE users SET hashed_password = ? WHERE email = ?', [hashedPassword, email], (err) => {
+        if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+        res.json({ message: 'Password reset successful' });
+    });
+});
+
+app.post('/api/protected/users/change-password', authenticateToken, async (req, res) => {
+    const { old_password, new_password } = req.body;
+    const userId = req.user.userId; // Extracted from JWT token
+
+    if (!old_password || !new_password) {
+        return res.status(400).json({ message: 'Old and new password are required' });
+    }
+
+    // Retrieve user from database
+    db.query('SELECT * FROM users WHERE id = ?', [userId], async (err, results) => {
+        if (err) return res.status(500).json({ message: 'Database error', error: err });
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const user = results[0];
+
+        // Verify old password
+        const passwordMatch = await bcrypt.compare(old_password, user.hashed_password);
+        if (!passwordMatch) {
+            return res.status(403).json({ message: 'Incorrect current password' });
+        }
+
+        // Hash new password
         const hashedPassword = await bcrypt.hash(new_password, 10);
 
-        db.query('UPDATE users SET hashed_password = ? WHERE email = ?', [hashedPassword, email], (err) => {
-            if (err) return res.status(500).json({ message: 'Database error', error: err });
+        // Update password in database
+        db.query('UPDATE users SET hashed_password = ? WHERE id = ?', [hashedPassword, userId], (err) => {
+            if (err) return res.status(500).json({ message: 'Error updating password', error: err });
 
-            res.json({ message: 'Password reset successful' });
+            res.json({ message: 'Password changed successfully' });
         });
     });
 });
@@ -377,8 +392,6 @@ app.post('/api/open/users/request-reset', async (req, res) => {
     });
 });
 
-
-
 app.post('/api/open/users/verify-reset', (req, res) => {
     const { email, resetCode } = req.body;
 
@@ -419,7 +432,7 @@ app.post('/api/open/users/verify-reset', (req, res) => {
 
 
 // Get info for robot
-app.get('/api/robot/robots', authenticateToken, (req, res) => {
+app.get('/api/protected/robot/robots', authenticateToken, (req, res) => {
     const robotQuery = 'SELECT * FROM robot';
     const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';
     const locationQuery = `
@@ -505,16 +518,63 @@ app.get('/api/protected/robot/:robotId/location', authenticateToken, (req, res) 
     });
 });
 
+app.get('/api/protected/robot/callbacks', authenticateToken, (req, res) => {
+    const { ins_id } = req.query;
 
+    if (!ins_id) {
+        return res.status(400).json({ message: 'Instruction ID (ins_id) is required' });
+    }
 
+    const query = `
+        SELECT cr.*, r.type, r.ip_add, r.port, r.battery, r.is_charging
+        FROM callback_rec cr
+        JOIN robot r ON cr.robot_id = r.robot_id
+        WHERE cr.ins_id = ?
+        ORDER BY cr.ctime ASC
+    `;
 
+    db.query(query, [ins_id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
 
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No callbacks found for this instruction ID' });
+        }
 
+        // Format results with robot details
+        const callbackMessages = results.map(callback =>
+            `#${callback.cb_id} - Robot ${callback.robot_id} (${callback.type}) [${callback.ip_add}:${callback.port}] - ${callback.callback} [${callback.ctime}] | Battery: ${callback.battery}% | Charging: ${callback.is_charging ? 'Yes' : 'No'}`
+        );
 
-// Test Route
-app.get('/', (req, res) => {
-    res.send('Simple Express MySQL API with JWT Authentication is running...');
+        res.json({ message: 'Callbacks retrieved', data: callbackMessages });
+    });
 });
+
+app.post('/api/protected/robot/instruction', authenticateToken, (req, res) => {
+    const { robot_id, instruction } = req.body;
+
+    if (!robot_id || !instruction) {
+        return res.status(400).json({ message: 'Robot ID and instruction are required' });
+    }
+
+    const insertQuery = `
+        INSERT INTO ins_send (robot_id, instruction, status)
+        VALUES (?, ?, 'order')
+    `;
+
+    db.query(insertQuery, [robot_id, instruction], (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        res.json({
+            message: `Instruction queued for robot ${robot_id}`,
+            instructionId: result.insertId
+        });
+    });
+});
+
 // Start HTTPS Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);

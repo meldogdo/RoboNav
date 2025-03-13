@@ -15,8 +15,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.robonav.app.fragments.HomeFragment;
 import com.robonav.app.fragments.NavigationFragment;
-//import com.robonav.app.fragments.GeoVisualizationFragment;
-
 
 import com.robonav.app.R;
 import com.robonav.app.fragments.MapFragment;
@@ -44,7 +42,7 @@ public class HomeActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         findViewById(R.id.resetPasswordIcon).setOnClickListener(v -> {
-            Intent resetIntent = new Intent(HomeActivity.this, ResetPasswordActivity.class);
+            Intent resetIntent = new Intent(HomeActivity.this, ChangePasswordActivity.class);
             startActivity(resetIntent);
         });
 
@@ -77,9 +75,6 @@ public class HomeActivity extends AppCompatActivity {
                 } else if (position == 2) {
                     return new NavigationFragment(); // Fragment 3: Navigation
                 }
-                else if (position == 3) {
-                    return new MapFragment(); // Fragment 3: Geo Visualization
-                }
                 else {
                     return new HomeFragment(); // Default Fragment
                 }
@@ -87,7 +82,7 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public int getItemCount() {
-                return 4; // Number of fragments you want to swipe between
+                return 3; // Number of fragments you want to swipe between
             }
         });
 
@@ -103,8 +98,6 @@ public class HomeActivity extends AppCompatActivity {
                     bottomNavigationView.setSelectedItemId(R.id.nav_map);
                 } else if (position == 2) {
                     bottomNavigationView.setSelectedItemId(R.id.nav_navigation);
-                } else if (position == 3) {
-                    bottomNavigationView.setSelectedItemId(R.id.geo_visualization);
                 }
 
             }
@@ -123,9 +116,6 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.nav_navigation) {
                 viewPager.setCurrentItem(2); // Navigate to NavigationFragment
-                return true;
-            } else if (itemId == R.id.geo_visualization) {
-                viewPager.setCurrentItem(3); // Navigate to Geo-Visualization fragment
                 return true;
             }
             else {
@@ -149,7 +139,11 @@ public class HomeActivity extends AppCompatActivity {
 
     // Method to log the user out and navigate to MainActivity
     private void logout() {
-        // Optionally, clear any saved session or user data (e.g., SharedPreferences or clearing user session)
+        // Clear JWT token
+        getSharedPreferences("APP_PREFS", MODE_PRIVATE)
+                .edit()
+                .remove("JWT_TOKEN")
+                .apply();
 
         // Navigate to MainActivity
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);

@@ -1,0 +1,7 @@
+{
+  "events": {
+    "restart": "node -r dotenv/config -e \"require('kill-port')(process.env.PORT || 8080)\"",
+    "crash": "node -r dotenv/config -e \"require('kill-port')(process.env.PORT || 8080)\""
+  },
+  "delay": 1500
+}
