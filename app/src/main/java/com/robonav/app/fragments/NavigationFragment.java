@@ -3,7 +3,6 @@ package com.robonav.app.fragments;
 import static com.robonav.app.utilities.FragmentUtils.appendOutput;
 import static com.robonav.app.utilities.FragmentUtils.isValidCoordinates;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
-import static com.robonav.app.utilities.JsonUtils.getCoordinatesForLocation;
 import static com.robonav.app.utilities.JsonUtils.loadLocationDetails;
 import static com.robonav.app.utilities.JsonUtils.loadRobotNames;
 
@@ -13,8 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -249,14 +246,6 @@ public class NavigationFragment extends Fragment {
             }
             return false;
         });
-
-
-
-
-
-
-
-
         return view;
 
     }

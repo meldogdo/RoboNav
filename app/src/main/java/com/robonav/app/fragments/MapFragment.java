@@ -54,6 +54,8 @@ public class MapFragment extends Fragment {
 
     private NestedScrollView scrollView;
     private View view;
+    private Toast currentToast; // Store the latest toast reference
+
 
     @Nullable
     @Override
@@ -243,13 +245,13 @@ public class MapFragment extends Fragment {
                     // Validate coordinates if "[Use Coordinates]" is selected
                     if (selectedLocation.equals("[Use Coordinates]")) {
                         if (coordinates.isEmpty()) {
-                            Toast.makeText(requireContext(), "Please enter coordinates", Toast.LENGTH_SHORT).show();
+                            showToast("Please enter coordinates.");
                             return;
                         }
 
                         // Validate coordinates format and range
                         if (!isValidCoordinates(coordinates)) {
-                            Toast.makeText(requireContext(), "Invalid coordinates. Enter as 'latitude, longitude' within valid ranges.", Toast.LENGTH_SHORT).show();
+                            showToast("Invalid coordinates. Enter as 'latitude, longitude' within valid ranges.");
                             return;
                         }
                     }
@@ -482,4 +484,14 @@ public class MapFragment extends Fragment {
         View view = inflater.inflate(layoutResId, (ViewGroup) dynamicContentContainer, false);
         ((ViewGroup) dynamicContentContainer).addView(view);
     }
+    // Toast helper method to prevent toast queue buildup
+    private void showToast(String message) {
+        if (currentToast != null) {
+            currentToast.cancel();  // Cancel the previous toast if it exists
+        }
+        currentToast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT);
+        currentToast.show();
+    }
+
+
 }
