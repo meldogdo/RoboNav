@@ -1,66 +1,135 @@
-# RoboNav Mobile App
+# RoboNav Project
 
-RoboNav is an Android mobile application designed to control and monitor OrionStar autonomous robots remotely. This app integrates with the OrionStar SDK to provide real-time robot navigation, control functionalities, and status monitoring through an intuitive mobile interface.
+## Overview
+This repository contains the complete RoboNav system, including both the frontend and backend components.
 
-## Table of Contents
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Technologies Used](#technologies-used)
-4. [Installation](#installation)
-5. [Usage](#usage)
-6. [Project Structure](#project-structure)
-7. [Contributors](#contributors)
-8. [License](#license)
+## Technologies Used
+- **Backend:** Node.js, Express.js, MySQL
+- **Frontend:** [To be added later]
+- **Authentication:** JWT (JSON Web Token), Google OAuth2, bcrypt
+- **Email Services:** Nodemailer
+- **Logging:** Winston
+- **Deployment & Monitoring:** Nodemon, Kill-Port
+
+## Project Structure
+```
+│── /backend
+│   │── /config
+│   │   │── auth.js         # OAuth2 and JWT setup
+│   │   │── db.js           # Database connection setup
+│   │
+│   │── /controllers
+│   │   │── authController.js   # Authentication logic (register, login, reset password)
+│   │   │── robotController.js  # Handles robot-related operations
+│   │
+│   │── /database
+│   │   │── backup.sql         # Backup database provided by professor
+│   │   │── init.sql           # Updated database schema
+│   │
+│   │── /logs
+│   │   │── app.log            # Server logs (generated automatically)
+│   │
+│   │── /middleware
+│   │   │── authMiddleware.js   # JWT authentication middleware
+│   │
+│   │── /routes
+│   │   │── authRoutes.js       # Routes for authentication
+│   │   │── robotRoutes.js      # Routes for robot operations
+│   │
+│   │── /utils
+│   │   │── logger.js       # Winston logger setup
+│   │
+│   │── .env                # Environment variables
+│   │── .gitignore          # Files to ignore in version control
+│   │── app.js              # Express application setup
+│   │── index.js            # Main server entry point
+│   │── nodemon.json        # Nodemon configuration (auto-restart and kill port)
+│   │── package.json        # Dependencies and scripts
+```
 
 ---
 
-### Overview
+# Backend API
 
-The RoboNav Mobile App is developed as part of SE4450 Software Engineering Design Project by Team 7. It enables users to interact with OrionStar autonomous robots through the OrionStar SDK, supporting real-time status updates, navigation controls, and remote monitoring. This mobile interface offers a user-friendly platform for controlling robotic operations effectively.
+## Installation & Setup
+### **1. Clone the Repository**
+```sh
+git clone https://github.com/meldogdo/RoboNav.git
+cd RoboNav/backend
+```
 
-### Features
+### **2. Install Dependencies**
+```sh
+npm install
+```
 
-- **Real-Time Navigation Controls**: Send commands to control robot movement to specific points or through preset routes.
-- **Status Monitoring**: View real-time updates on robot status, location, and battery levels.
-- **Robot Management**: Seamlessly connect and disconnect robots from the mobile device.
-- **Error Alerts**: Receive notifications for any errors or issues in robot operation.
+Or use:
+```sh
+npm run prestart
+```
+Which will automatically install dependencies before starting the server.
 
-### Technologies Used
+### **3. Set Up Environment Variables**
+Create a `.env` file in the `/backend` directory and configure:
+```env
+# Database Configuration
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
 
-- **Android SDK**: For building a native Android application.
-- **OrionStar SDK**: Integrates robot control and monitoring functionalities.
-- **Java**: Primary programming languages for the Android app.
+# Server Configuration
+SERVER_HOST=
+SERVER_PORT=
 
-### Installation
+# Authentication Configuration
+JWT_SECRET=
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/meldogdo/RoboNav.git
-   cd RoboNav
-   
-2. **Set Up the OrionStar SDK**:
-Follow the OrionStar SDK setup guide to integrate the SDK. Place your SDK files in the specified directory in the project.
+# Email Configuration
+EMAIL_USER=
+CLIENT_SECRET=
+REFRESH_TOKEN=
+```
 
-3. **Build the Project**: Open the project in Android Studio. Sync Gradle and build the app.
+### **4. Start the Backend Server**
+#### **Development Mode (Auto-restart with Nodemon)**
+```sh
+npm run dev
+```
+#### **Production Mode**
+```sh
+npm start
+```
 
-4. **Disconnect**: Safely disconnect from the robot through the app’s menu when monitoring or control is complete.
+## API Endpoints
+### **Authentication Routes**
+- `POST /api/open/users/register` → Register a new user
+- `GET /api/open/users/confirm-email` → Confirm user email
+- `POST /api/open/users/login` → User login
+- `POST /api/open/users/request-reset` → Request password reset
+- `POST /api/open/users/verify-reset` → Verify password reset
+- `POST /api/protected/users/reset-password` → Reset password (JWT protected)
+- `POST /api/protected/users/change-password` → Change password (JWT protected)
 
-### Project Structure
+### **Robot Routes (Protected)**
+- `GET /api/protected/robot/tasks` → Retrieve robot tasks
+- `GET /api/protected/robot/robots` → List all robots
+- `GET /api/protected/robot/:robotId/location` → Get robot location
+- `GET /api/protected/robot/callbacks` → Get robot callbacks
+- `POST /api/protected/robot/instruction` → Send robot instructions
 
-- `src/main/java/com/robogroup/robonav`: Contains main app source code files.
-- `src/main/res`: UI layouts and resources.
-- `libs/orionstar-sdk`: OrionStar SDK files.
-- `build.gradle`: Project dependencies and SDK integration.
+## Logging
+The project uses **Winston** for structured logging.
+- Logs are stored in `/backend/logs/app.log`.
+- Console and file logging are enabled.
 
+---
 
-### Contributors
+# Frontend
 
-- Bryson Crook (bcrook4@uwo.ca)
-- Christopher Higgins (chiggi24@uwo.ca)
-- Mohamed El Dogdog (meldogdo@uwo.ca)
-- Seth Langendoen (slangend@uwo.ca)
+(To be added later)
 
-### License
+---
 
-This project is for academic and educational use under the SE4450 course. For licensing details, please refer to [LICENSE](https://github.com/yourusername/yourrepo/blob/main/LICENSE).
-
+For further details, refer to the API documentation or contact the development team.

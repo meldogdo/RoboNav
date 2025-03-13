@@ -1,0 +1,26 @@
+# Backend .gitignore
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+
+# Logs
+logs/
+logs/*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts
+dist/
+build/

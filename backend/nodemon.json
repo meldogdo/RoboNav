@@ -1,7 +1,12 @@
 {
+  "watch": ["."],
+  "ignore": ["logs/*", "logs/**", "logs/app.log"],
+  "ext": "js,json",
+  "exec": "npx kill-port 8080 && node -r dotenv/config index.js",
   "events": {
-    "restart": "node -r dotenv/config -e \"require('kill-port')(process.env.PORT || 8080)\"",
-    "crash": "node -r dotenv/config -e \"require('kill-port')(process.env.PORT || 8080)\""
+    "restart": "npx kill-port 8080",
+    "crash": "npx kill-port 8080"
   },
-  "delay": 1500
+  "delay": 3000,
+  "verbose": false
 }
