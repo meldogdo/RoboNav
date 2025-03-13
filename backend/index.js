@@ -254,7 +254,7 @@ app.post('/api/open/users/login', (req, res) => {
 });
 
 // Get robot tasks
-app.get('/api/robot/tasks', authenticateToken, (req, res) => {
+app.get('/api/protected/robot/tasks', authenticateToken, (req, res) => {
     db.query('SELECT * FROM task', (err, results) => {
         if (err) {
             return res.status(500).json({ message: 'Database error' });
@@ -392,8 +392,6 @@ app.post('/api/open/users/request-reset', async (req, res) => {
     });
 });
 
-
-
 app.post('/api/open/users/verify-reset', (req, res) => {
     const { email, resetCode } = req.body;
 
@@ -434,7 +432,7 @@ app.post('/api/open/users/verify-reset', (req, res) => {
 
 
 // Get info for robot
-app.get('/api/robot/robots', authenticateToken, (req, res) => {
+app.get('/api/protected/robot/robots', authenticateToken, (req, res) => {
     const robotQuery = 'SELECT * FROM robot';
     const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';
     const locationQuery = `
@@ -492,10 +490,64 @@ app.get('/api/robot/robots', authenticateToken, (req, res) => {
             });
     });
 });
-// Test Route
-app.get('/', (req, res) => {
-    res.send('Simple Express MySQL API with JWT Authentication is running...');
+
+app.get('/api/protected/robot/callbacks', authenticateToken, (req, res) => {
+    const { ins_id } = req.query;
+
+    if (!ins_id) {
+        return res.status(400).json({ message: 'Instruction ID (ins_id) is required' });
+    }
+
+    const query = `
+        SELECT cr.*, r.type, r.ip_add, r.port, r.battery, r.is_charging
+        FROM callback_rec cr
+        JOIN robot r ON cr.robot_id = r.robot_id
+        WHERE cr.ins_id = ?
+        ORDER BY cr.ctime ASC
+    `;
+
+    db.query(query, [ins_id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No callbacks found for this instruction ID' });
+        }
+
+        // Format results with robot details
+        const callbackMessages = results.map(callback =>
+            `#${callback.cb_id} - Robot ${callback.robot_id} (${callback.type}) [${callback.ip_add}:${callback.port}] - ${callback.callback} [${callback.ctime}] | Battery: ${callback.battery}% | Charging: ${callback.is_charging ? 'Yes' : 'No'}`
+        );
+
+        res.json({ message: 'Callbacks retrieved', data: callbackMessages });
+    });
 });
+
+app.post('/api/protected/robot/instruction', authenticateToken, (req, res) => {
+    const { robot_id, instruction } = req.body;
+
+    if (!robot_id || !instruction) {
+        return res.status(400).json({ message: 'Robot ID and instruction are required' });
+    }
+
+    const insertQuery = `
+        INSERT INTO ins_send (robot_id, instruction, status)
+        VALUES (?, ?, 'order')
+    `;
+
+    db.query(insertQuery, [robot_id, instruction], (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        res.json({
+            message: `Instruction queued for robot ${robot_id}`,
+            instructionId: result.insertId
+        });
+    });
+});
+
 // Start HTTPS Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
