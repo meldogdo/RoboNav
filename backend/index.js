@@ -277,27 +277,21 @@ app.get('/api/robot/tasks', authenticateToken, (req, res) => {
         res.json(tasks);
     });
 });
-app.post('/api/open/users/reset-password', (req, res) => {
+
+app.post('/api/protected/users/reset-password', authenticateToken, async (req, res) => {
     const { new_password } = req.body;
-    const authHeader = req.header('Authorization');
 
-    if (!authHeader) return res.status(401).json({ message: 'Unauthorized' });
+    if (!new_password) return res.status(400).json({ message: 'New password is required' });
 
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, SECRET_KEY, async (err, decoded) => {
-        if (err) return res.status(403).json({ message: 'Invalid or expired token' });
+    const email = req.user.email; // Extract email from middleware
+    const hashedPassword = await bcrypt.hash(new_password, 10);
 
-        const email = decoded.email;
-        const hashedPassword = await bcrypt.hash(new_password, 10);
+    db.query('UPDATE users SET hashed_password = ? WHERE email = ?', [hashedPassword, email], (err) => {
+        if (err) return res.status(500).json({ message: 'Database error', error: err });
 
-        db.query('UPDATE users SET hashed_password = ? WHERE email = ?', [hashedPassword, email], (err) => {
-            if (err) return res.status(500).json({ message: 'Database error', error: err });
-
-            res.json({ message: 'Password reset successful' });
-        });
+        res.json({ message: 'Password reset successful' });
     });
 });
-
 
 app.post('/api/protected/users/change-password', authenticateToken, async (req, res) => {
     const { old_password, new_password } = req.body;

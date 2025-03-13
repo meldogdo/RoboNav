@@ -28,7 +28,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private Button resetPasswordButton;
     private String email, token;
 
-    private static final String RESET_PASSWORD_URL = "http://10.0.2.2:8080/api/open/users/reset-password";
+    private static final String RESET_PASSWORD_URL = "http://10.0.2.2:8080/api/protected/users/reset-password";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
