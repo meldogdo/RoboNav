@@ -88,8 +88,8 @@ public class HomeFragment extends Fragment {
         taskAdapter.notifyDataSetChanged();
 
 
-        String robotUrl = "http://10.0.2.2:8080/api/robot/protected/robots";
-        String taskUrl = "http://10.0.2.2:8080/api/robot/protected/tasks";
+        String robotUrl = "http://10.0.2.2:8080/api/protected/robot/robots";
+        String taskUrl = "http://10.0.2.2:8080/api/protected/robot/tasks";
 
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());

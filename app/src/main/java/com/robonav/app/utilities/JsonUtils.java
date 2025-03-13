@@ -87,7 +87,7 @@ public class JsonUtils {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 
         List<String> robotNames = new ArrayList<>();
-        String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
+        String robotUrl = "http://10.0.2.2:8080/api/protected/robot/robots";
         RequestQueue queue = Volley.newRequestQueue(context);
 
         JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,

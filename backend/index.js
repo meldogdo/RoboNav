@@ -16,9 +16,7 @@ const PORT = process.env.PORT || 8080;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; 
 
 
-// Generate Random 6-Digit Code
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
 
 // OAuth2 credentials
 const CLIENT_ID = process.env.CLIENT_ID
