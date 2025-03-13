@@ -4,7 +4,14 @@ package com.robonav.app.utilities;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.robonav.app.models.Robot;
 
 import org.json.JSONArray;
@@ -20,9 +27,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 public class JsonUtils {
+
+    private static String getTokenFromPrefs(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+        return prefs.getString("JWT_TOKEN", null); // Default to empty string if not found
+    }
 
     // Reads JSON file from the assets folder
     public static String loadJSONFromAsset(Context context, String fileName) {
@@ -61,21 +77,63 @@ public class JsonUtils {
         return jsonBuilder.toString();
     }
 
-    public static List<String> loadRobotNames(Context context) {
+
+
+
+
+
+    public static CompletableFuture<List<String>> loadRobotNames(Context context) {
+        // Initialize the CompletableFuture to return the result
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+
         List<String> robotNames = new ArrayList<>();
-        String robotJson = JsonUtils.loadJSONFromAsset(context, "robots.json");
-        try {
-            JSONArray robots = new JSONArray(robotJson);
-            for (int i = 0; i < robots.length(); i++) {
-                Robot robot = new Robot(robots.getJSONObject(i));
-                robotNames.add(robot.getName());
+        String robotUrl = "http://10.0.2.2:8080/api/robot/robots";
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
+                response -> {
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            Robot robot = new Robot(response.getJSONObject(i));
+                            robotNames.add(robot.getName());
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Complete the future when robot names are loaded
+                    future.complete(robotNames);
+                },
+                error -> {
+                    error.printStackTrace();
+                    // If there's an error, complete the future exceptionally
+                    future.completeExceptionally(error);
+                }
+        ) {
+            @Override
+            public java.util.Map<String, String> getHeaders() {
+                // Correct the header map type
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getTokenFromPrefs(context));
+                return headers;
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            //showMessage("Error loading robots: " + e.getMessage(),context);
-        }
-        return robotNames;
+        };
+
+        queue.add(robotRequest);
+
+        return future;  // Return the CompletableFuture
     }
+
+
+
+
+
+
+
+
+
+
+
+
     // Helper method to convert JSON array of tasks to List<String>
     public static List<String> jsonArrayToList(JSONArray jsonArray) throws JSONException {
         List<String> taskList = new ArrayList<>();
@@ -121,6 +179,7 @@ public class JsonUtils {
         }
         return robots;
     }
+
     public static List<String> loadLocationNames(Context context) {
         List<String> locationNames = new ArrayList<>();
         try {
@@ -136,6 +195,68 @@ public class JsonUtils {
         }
         return locationNames;
     }
+    public static CompletableFuture<List<JSONObject>> loadLocationDetails(Context context, String robotId) {
+        CompletableFuture<List<JSONObject>> future = new CompletableFuture<>();
+        List<JSONObject> locationDetails = new ArrayList<>();
+        String locationUrl = "http://10.0.2.2:8080/api/protected/robot/" + robotId + "/location";
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        JsonArrayRequest locationRequest = new JsonArrayRequest(Request.Method.GET, locationUrl, null,
+                response -> {
+                    try {
+                        // Iterate through the JSONArray directly
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject location = response.getJSONObject(i);
+
+                            JSONObject locationInfo = new JSONObject();
+                            locationInfo.put("location_name", location.getString("location_name"));
+                            locationInfo.put("location_coordinates", location.getString("location_coordinates"));
+
+                            locationDetails.add(locationInfo);
+                        }
+
+                        Log.d("LocationDetails", locationDetails.toString());
+                        future.complete(locationDetails);
+
+                    } catch (JSONException e) {
+                        Log.e("LocationDetailsError", "Error parsing JSON", e);
+                        future.completeExceptionally(e);
+                    } catch (Exception e) {
+                        Log.e("LocationDetailsError", "Error occurred", e);
+                        future.completeExceptionally(e);
+                    }
+                },
+                error -> {
+                    Log.e("LocationDetailsError", "Network error", error);
+                    future.completeExceptionally(error);
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> headers = new HashMap<>();
+                String token = getTokenFromPrefs(context);
+                Log.d("AuthToken", "Token: " + token);
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        queue.add(locationRequest);
+
+        return future;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public static String getCoordinatesForLocation(String locationName, Context context) {
         try {
