@@ -14,13 +14,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +27,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private EditText emailEditText, resetCodeEditText;
     private Button submitButton, verifyButton;
-    private TextView backToLoginText;
+    private TextView backToLoginText, resetCodeLabel;
     private String email;  // Stores email for later verification
-
-    private TextView resetCodeLabel;
+    private Toast currentToast; // Store the latest toast reference
 
     private static final String REQUEST_RESET_URL = "http://10.0.2.2:8080/api/open/users/request-reset";
     private static final String VERIFY_RESET_URL = "http://10.0.2.2:8080/api/open/users/verify-reset";
@@ -67,6 +64,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+        backToLoginText.setPaintFlags(backToLoginText.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
     }
 
     // Function to send reset code
@@ -74,7 +72,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         email = emailEditText.getText().toString().trim();
 
         if (email.isEmpty()) {
-            Toast.makeText(this, "Please enter your email", Toast.LENGTH_SHORT).show();
+            showToast("Please enter your email");
             return;
         }
 
@@ -92,7 +90,13 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REQUEST_RESET_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
-                    Toast.makeText(this, "Reset code sent to email", Toast.LENGTH_SHORT).show();
+
+                    try {
+                        String message = response.getString("message");
+                        showToast(message);
+                    } catch (JSONException e) {
+                        showToast("Reset code sent to email");
+                    }
 
                     // Show the reset code input & verify button
                     resetCodeEditText.setVisibility(View.VISIBLE);
@@ -104,7 +108,22 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Toast.makeText(this, "Error sending reset code", Toast.LENGTH_SHORT).show();
+
+                    String errorMessage = "Error sending reset code";
+
+                    if (error.networkResponse != null) {
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "UTF-8");
+                            JSONObject errorResponse = new JSONObject(responseBody);
+                            if (errorResponse.has("message")) {
+                                errorMessage = errorResponse.getString("message");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    showToast(errorMessage);
                 });
 
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -116,7 +135,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         String resetCode = resetCodeEditText.getText().toString().trim();
 
         if (email.isEmpty() || resetCode.isEmpty()) {
-            Toast.makeText(this, "Enter your email and reset code", Toast.LENGTH_SHORT).show();
+            showToast("Enter your email and reset code");
             return;
         }
 
@@ -137,18 +156,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     try {
                         if (response.has("token")) {
-                            String token = response.getString("token");  // Extract token from response
+                            String token = response.getString("token");
 
-                            Toast.makeText(this, "Code Verified. Redirecting to Reset Password", Toast.LENGTH_SHORT).show();
+                            showToast("Code Verified. Redirecting to Reset Password");
 
-                            // Navigate to ResetPasswordActivity with token
                             Intent intent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
-                            intent.putExtra("email", email);  // Pass email
-                            intent.putExtra("token", token);  // Pass token
+                            intent.putExtra("email", email);
+                            intent.putExtra("token", token);
                             startActivity(intent);
                             finish();
                         } else {
-                            Toast.makeText(this, "Verification failed. Try again.", Toast.LENGTH_SHORT).show();
+                            showToast("Verification failed. Try again.");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -156,11 +174,34 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Toast.makeText(this, "Invalid or expired reset code", Toast.LENGTH_SHORT).show();
+
+                    String errorMessage = "Invalid or expired reset code";
+
+                    if (error.networkResponse != null) {
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "UTF-8");
+                            JSONObject errorResponse = new JSONObject(responseBody);
+                            if (errorResponse.has("message")) {
+                                errorMessage = errorResponse.getString("message");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    showToast(errorMessage);
                 });
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
     }
 
+    // Toast helper method to prevent toast queue buildup
+    private void showToast(String message) {
+        if (currentToast != null) {
+            currentToast.cancel();  // Cancel the previous toast if it exists
+        }
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        currentToast.show();
+    }
 }

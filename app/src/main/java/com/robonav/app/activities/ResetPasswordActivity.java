@@ -27,6 +27,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private EditText newPasswordEditText, confirmPasswordEditText;
     private Button resetPasswordButton;
     private String email, token;
+    private Toast currentToast; // Store the latest toast reference
 
     private static final String RESET_PASSWORD_URL = "http://10.0.2.2:8080/api/protected/users/reset-password";
 
@@ -67,7 +68,14 @@ public class ResetPasswordActivity extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, RESET_PASSWORD_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ResetPasswordActivity.this, "Password reset successful", Toast.LENGTH_SHORT).show();
+
+                    try {
+                        // Get the message from the response JSON
+                        String message = response.getString("message");
+                        showToast(message);
+                    } catch (JSONException e) {
+                        showToast("Password reset successful");
+                    }
 
                     // Redirect to login
                     Intent intent = new Intent(ResetPasswordActivity.this, MainActivity.class);
@@ -76,7 +84,25 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ResetPasswordActivity.this, "Error resetting password", Toast.LENGTH_SHORT).show();
+
+                    // Default error message
+                    String errorMessage = "Error resetting password";
+
+                    if (error.networkResponse != null) {
+                        try {
+                            // Convert response data to JSON and extract the message
+                            String responseBody = new String(error.networkResponse.data, "UTF-8");
+                            JSONObject errorResponse = new JSONObject(responseBody);
+                            if (errorResponse.has("message")) {
+                                errorMessage = errorResponse.getString("message");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // Display the extracted message in the toast
+                    showToast(errorMessage);
                 }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -90,20 +116,29 @@ public class ResetPasswordActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
     }
+
     private boolean arePasswordsValid(String newPassword, String confirmPassword) {
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            Toast.makeText(this, "Please fill in both fields", Toast.LENGTH_SHORT).show();
+            showToast("Please fill in both fields");
             return false;
         }
         if (!newPassword.equals(confirmPassword)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            showToast("Passwords do not match");
             return false;
         }
         if (newPassword.length() < 6 || newPassword.length() > 20) {
-            Toast.makeText(this, "Password must be between 6 and 20 characters.", Toast.LENGTH_SHORT).show();
+            showToast("Password must be between 6 and 20 characters.");
             return false;
         }
         return true;
     }
 
+    // Toast helper method to prevent toast queue buildup
+    private void showToast(String message) {
+        if (currentToast != null) {
+            currentToast.cancel();  // Cancel the previous toast if it exists
+        }
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        currentToast.show();
+    }
 }

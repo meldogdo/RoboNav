@@ -31,6 +31,8 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText emailEditText;
     private EditText passwordEditText;
     private EditText confirmPasswordEditText;
+    private Toast currentToast; // Store the latest toast reference
+
     private static final String REGISTER_URL = "http://10.0.2.2:8080/api/open/users/register";
 
     @Override
@@ -85,7 +87,8 @@ public class SignUpActivity extends AppCompatActivity {
                 response -> {
                     progressDialog.dismiss();
                     try {
-                        Toast.makeText(SignUpActivity.this, response.getString("message"), Toast.LENGTH_SHORT).show();
+                        String message = response.getString("message");
+                        showToast(message);
 
                         // Redirect to login page and pass username
                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
@@ -94,12 +97,27 @@ public class SignUpActivity extends AppCompatActivity {
                         finish();
 
                     } catch (JSONException e) {
-                        Toast.makeText(SignUpActivity.this, "Error parsing response", Toast.LENGTH_SHORT).show();
+                        showToast("Error parsing response");
                     }
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Toast.makeText(SignUpActivity.this, "Registration failed. Try again.", Toast.LENGTH_SHORT).show();
+
+                    String errorMessage = "Registration failed. Try again.";
+
+                    if (error.networkResponse != null) {
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "UTF-8");
+                            JSONObject errorResponse = new JSONObject(responseBody);
+                            if (errorResponse.has("message")) {
+                                errorMessage = errorResponse.getString("message");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    showToast(errorMessage);
                 }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -116,25 +134,34 @@ public class SignUpActivity extends AppCompatActivity {
     // Validate all fields
     private boolean areFieldsValid(String username, String email, String password, String confirmPassword) {
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            showToast("Please fill in all fields");
             return false;
         }
         if (!username.matches("^[a-zA-Z0-9]{4,20}$")) {
-            Toast.makeText(this, "Username must be between 4-20 alphanumeric characters.", Toast.LENGTH_LONG).show();
+            showToast("Username must be between 4-20 alphanumeric characters.");
             return false;
         }
         if (!password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$")) {
-            Toast.makeText(this, "Password must be between 6-20 characters.", Toast.LENGTH_SHORT).show();
+            showToast("Password must be between 6-20 characters.");
             return false;
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+            showToast("Please enter a valid email address");
             return false;
         }
         if (!password.equals(confirmPassword)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            showToast("Passwords do not match");
             return false;
         }
         return true;
+    }
+
+    // Toast helper method to prevent toast queue buildup
+    private void showToast(String message) {
+        if (currentToast != null) {
+            currentToast.cancel();  // Cancel the previous toast if it exists
+        }
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        currentToast.show();
     }
 }

@@ -22,6 +22,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private EditText oldPasswordEditText, newPasswordEditText, confirmPasswordEditText;
     private Button changePasswordButton;
     private String token;
+    private Toast currentToast; // Store the latest toast reference
 
     private static final String CHANGE_PASSWORD_URL = "http://10.0.2.2:8080/api/protected/users/change-password";
 
@@ -29,10 +30,10 @@ public class ChangePasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
+
         // Close button to exit the activity
         ImageView closeButton = findViewById(R.id.closeButton);
         closeButton.setOnClickListener(v -> finish()); // Exit the activity when clicked
-
 
         oldPasswordEditText = findViewById(R.id.oldPasswordEditText);
         newPasswordEditText = findViewById(R.id.newPasswordEditText);
@@ -67,12 +68,33 @@ public class ChangePasswordActivity extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, CHANGE_PASSWORD_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ChangePasswordActivity.this, "Password changed successfully", Toast.LENGTH_SHORT).show();
-                    finish();
+                    try {
+                        String message = response.getString("message");
+                        showToast(message);
+                        finish(); // Close activity after success
+                    } catch (JSONException e) {
+                        showToast("Password changed successfully");
+                        finish();
+                    }
                 },
                 error -> {
                     progressDialog.dismiss();
-                    Toast.makeText(ChangePasswordActivity.this, "Error changing password", Toast.LENGTH_SHORT).show();
+
+                    String errorMessage = "Error changing password";
+
+                    if (error.networkResponse != null) {
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "UTF-8");
+                            JSONObject errorResponse = new JSONObject(responseBody);
+                            if (errorResponse.has("message")) {
+                                errorMessage = errorResponse.getString("message");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    showToast(errorMessage);
                 }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -89,13 +111,26 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
     private boolean arePasswordsValid(String oldPassword, String newPassword, String confirmPassword) {
         if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
+            showToast("All fields are required");
             return false;
         }
         if (!newPassword.equals(confirmPassword)) {
-            Toast.makeText(this, "New passwords do not match", Toast.LENGTH_SHORT).show();
+            showToast("New passwords do not match");
+            return false;
+        }
+        if (!newPassword.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$")) {
+            showToast("Password must be between 6 and 20 characters.");
             return false;
         }
         return true;
+    }
+
+    // Toast helper method to prevent toast queue buildup
+    private void showToast(String message) {
+        if (currentToast != null) {
+            currentToast.cancel();  // Cancel the previous toast if it exists
+        }
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        currentToast.show();
     }
 }

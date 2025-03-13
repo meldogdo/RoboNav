@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText usernameEditText;
     private EditText passwordEditText;
+    private Toast currentToast; // Store the latest toast reference
 
     private static final String LOGIN_URL = "http://10.0.2.2:8080/api/open/users/login";
 
@@ -100,46 +101,44 @@ public class MainActivity extends AppCompatActivity {
                                         .putString("JWT_TOKEN", token)
                                         .apply();
 
-                                Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                showToast(response.getString("message"));
 
                                 // Navigate to HomeActivity
                                 Intent homeIntent = new Intent(MainActivity.this, HomeActivity.class);
                                 homeIntent.putExtra("username", username);
                                 startActivity(homeIntent);
                                 finish();
-                            } else {
-                                Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
-                            Toast.makeText(MainActivity.this, "Error parsing response", Toast.LENGTH_SHORT).show();
+                            showToast("Error parsing response");
                         }
-                    },error -> {
-                        progressDialog.dismiss();
+                    }, error -> {
+                progressDialog.dismiss();
 
-                        // Default error message
-                        String errorMessage = "An error occurred. Please try again.";
+                // Default error message
+                String errorMessage = "An error occurred. Please try again.";
 
-                        // Check if the error has a network response
-                        if (error.networkResponse != null) {
-                            try {
-                                // Get the error response body
-                                String responseBody = new String(error.networkResponse.data, "UTF-8");
+                // Check if the error has a network response
+                if (error.networkResponse != null) {
+                    try {
+                        // Get the error response body
+                        String responseBody = new String(error.networkResponse.data, "UTF-8");
 
-                                // Parse the error response body into a JSONObject
-                                JSONObject errorResponse = new JSONObject(responseBody);
+                        // Parse the error response body into a JSONObject
+                        JSONObject errorResponse = new JSONObject(responseBody);
 
-                                // Check if there's a "message" field in the error response
-                                if (errorResponse.has("message")) {
-                                    errorMessage = errorResponse.getString("message");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                        // Check if there's a "message" field in the error response
+                        if (errorResponse.has("message")) {
+                            errorMessage = errorResponse.getString("message");
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
-                        // Show the extracted or default error message
-                        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                    }) {
+                // Show the extracted or default error message
+                showToast(errorMessage);
+            }) {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
@@ -151,19 +150,21 @@ public class MainActivity extends AppCompatActivity {
             RequestQueue queue = Volley.newRequestQueue(this);
             queue.add(request);
         });
+
     }
 
     // Validate username and password
     private boolean areInputsValid(String username, String password) {
+
         // Check for empty fields
         if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill in both fields", Toast.LENGTH_SHORT).show();
+            showToast("Please fill in both fields");
             return false;
         }
 
         // Validate username (4–20 alphanumeric characters)
         if (!isValidUsername(username)) {
-            Toast.makeText(this, "Username must be between 4-20 alphanumeric characters.", Toast.LENGTH_SHORT).show();
+            showToast("Username must be between 4-20 alphanumeric characters.");
             return false;
         }
 
@@ -171,11 +172,11 @@ public class MainActivity extends AppCompatActivity {
         if (!isValidPassword(password)) {
             // Check if the password is too short or too long, contains spaces, or invalid characters
             if (password.length() < 6 || password.length() > 20) {
-                Toast.makeText(this, "Password must be between 6 and 20 characters.", Toast.LENGTH_SHORT).show();
+                showToast("Password must be between 6 and 20 characters.");
             } else if (password.contains(" ")) {
-                Toast.makeText(this, "Password cannot contain spaces.", Toast.LENGTH_SHORT).show();
+                showToast("Password cannot contain spaces.");
             } else {
-                Toast.makeText(this, "Password contains invalid characters. Only letters, numbers, and special characters (@, #, !, $, %, ^, &, *, etc.) are allowed.", Toast.LENGTH_SHORT).show();
+                showToast("Password contains invalid characters. Only letters, numbers, and special characters (@, #, !, $, %, ^, &, *, etc.) are allowed.");
             }
             return false;
         }
@@ -192,4 +193,12 @@ public class MainActivity extends AppCompatActivity {
         return password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$");
     }
 
+    // Toast helper method to prevent toast queue buildup
+    private void showToast(String message) {
+        if (currentToast != null) {
+            currentToast.cancel();  // Cancel the previous toast if it exists
+        }
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        currentToast.show();
+    }
 }
