@@ -16,9 +16,7 @@ const PORT = process.env.PORT || 8080;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; 
 
 
-// Generate Random 6-Digit Code
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
 
 // OAuth2 credentials
 const CLIENT_ID = process.env.CLIENT_ID
@@ -483,6 +481,33 @@ app.get('/api/protected/robot/robots', authenticateToken, (req, res) => {
             .catch((error) => {
                 res.status(500).json(error);
             });
+    });
+});
+
+// Get list of locations for a specific robot
+app.get('/api/protected/robot/:robotId/location', authenticateToken, (req, res) => {
+    const robotId = req.params.robotId;
+
+    const locationQuery = `
+        SELECT x, y, name FROM location
+        WHERE robot_id = ?;`;
+
+    db.query(locationQuery, [robotId], (err, locationResults) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        // If no locations found, return an empty array instead of a 404 error
+        if (locationResults.length === 0) {
+            return res.status(200).json([]); // You could also return a custom message if preferred
+        }
+
+        const uniqueLocations = locationResults.map(location => ({
+            location_name: location.name || 'Unknown',
+            location_coordinates: `${location.x},${location.y}`
+        }));
+
+        res.json(uniqueLocations);
     });
 });
 

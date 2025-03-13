@@ -176,7 +176,7 @@ public class MapFragment extends Fragment {
                 Button btnSetPosition = dynamicContentContainer.findViewById(R.id.btn_set_initial_position);
 
                 // Load robots into dropdown
-                robotNames = loadRobotNames(requireContext());
+                //robotNames = loadRobotNames(requireContext());
                 robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
                 robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 robotDropdown.setAdapter(robotAdapter);

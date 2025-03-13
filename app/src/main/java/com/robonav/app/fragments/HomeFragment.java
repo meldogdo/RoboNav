@@ -1,5 +1,7 @@
 package com.robonav.app.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +39,10 @@ public class HomeFragment extends Fragment {
     private List<Robot> robotList;
     private List<Task> taskList;
 
+    private String token;
+
+
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -66,6 +72,9 @@ public class HomeFragment extends Fragment {
         swipeRefreshLayout.setRefreshing(true); // Start the refreshing animation
         loadData(); // Load the data after starting the refresh
 
+        SharedPreferences prefs = requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+        token = prefs.getString("JWT_TOKEN", null); // Returns null if not found
+
         return rootView;
     }
 
@@ -78,9 +87,10 @@ public class HomeFragment extends Fragment {
         robotAdapter.notifyDataSetChanged();
         taskAdapter.notifyDataSetChanged();
 
-        String robotUrl = "http://10.0.2.2:8080/api/robot/protected/robots";
-        String taskUrl = "http://10.0.2.2:8080/api/robot/protected/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDE3MzYzMTIsImV4cCI6MTc0MTczOTkxMn0.SN3NGzV7yZWK94cNw1d8bK3OqhMN0CJcdVs-z1IsVJ0"; // Ensure this token is up to date
+
+        String robotUrl = "http://10.0.2.2:8080/api/protected/robot/robots";
+        String taskUrl = "http://10.0.2.2:8080/api/protected/robot/tasks";
+
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
@@ -121,8 +131,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadTasks(List<Task> taskList, List<Robot> robotList, TaskAdapter taskAdapter) {
-        String taskUrl = "http://10.0.2.2:8080/api/robot/tasks";
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDE3MzYzMTIsImV4cCI6MTc0MTczOTkxMn0.SN3NGzV7yZWK94cNw1d8bK3OqhMN0CJcdVs-z1IsVJ0"; // Ensure this token is up to date
+        String taskUrl = "http://10.0.2.2:8080/api/protected/robot/tasks";
 
         // Load task data after robots are loaded
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
