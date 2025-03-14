@@ -179,8 +179,8 @@ const sendRobotInstruction = (req, res) => {
   logger.info(`Queuing instruction for robot ${robot_id}: ${instruction}`);
 
   const insertQuery = `
-      INSERT INTO ins_send (robot_id, instruction, status)
-      VALUES (?, ?, 'order')
+      INSERT INTO ins_send (robot_id, instruction, status, ctime)
+      VALUES (?, ?, 'order', NOW())
   `;
 
   db.query(insertQuery, [robot_id, instruction], (err, result) => {
