@@ -58,7 +58,7 @@ public class NavigationFragment extends Fragment {
 
         // Initialize locationNames here
         locationNames = new ArrayList<>();
-        locationNames.add("[Use Coordinates]"); // Default option
+        locationNames.add("{Please Select an Option}"); // Default option
 
         // Initialize locationAdapter
         locationAdapter = new ArrayAdapter<>(requireContext(),
@@ -202,7 +202,8 @@ public class NavigationFragment extends Fragment {
                 loadLocationDetails(requireContext(), robotId).thenAccept(locationDetails -> {
                     // Initialize a list to hold location names
                     List<String> newLocationNames = new ArrayList<>();
-                    newLocationNames.add("[Use Coordinates]"); // Default option
+                    newLocationNames.add("{Please Select an Option}");
+                    newLocationNames.add("[Use Coordinates]");
 
                     // If location details are empty, don't add any further locations
                     if (locationDetails.isEmpty()) {

@@ -3,6 +3,7 @@ package com.robonav.app.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,10 +39,7 @@ public class HomeFragment extends Fragment {
     private TaskAdapter taskAdapter;
     private List<Robot> robotList;
     private List<Task> taskList;
-
     private String token;
-
-
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
@@ -68,8 +66,6 @@ public class HomeFragment extends Fragment {
         // Set swipe refresh listener to reload data
         swipeRefreshLayout.setOnRefreshListener(this::loadData);
 
-        // Trigger the refresh on initial load
-        swipeRefreshLayout.setRefreshing(true); // Start the refreshing animation
         loadData(); // Load the data after starting the refresh
 
         SharedPreferences prefs = requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
@@ -87,10 +83,7 @@ public class HomeFragment extends Fragment {
         robotAdapter.notifyDataSetChanged();
         taskAdapter.notifyDataSetChanged();
 
-
         String robotUrl = "http://10.0.2.2:8080/api/protected/robot/robots";
-        String taskUrl = "http://10.0.2.2:8080/api/protected/robot/tasks";
-
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
@@ -104,7 +97,7 @@ public class HomeFragment extends Fragment {
                         }
 
                         // After loading robots, load tasks
-                        loadTasks(taskList, robotList, taskAdapter);
+                        loadTasks(taskList, taskAdapter);
                     } catch (JSONException e) {
                         e.printStackTrace();
                         swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
@@ -130,7 +123,7 @@ public class HomeFragment extends Fragment {
         swipeRefreshLayout.setRefreshing(true);
     }
 
-    private void loadTasks(List<Task> taskList, List<Robot> robotList, TaskAdapter taskAdapter) {
+    private void loadTasks(List<Task> taskList, TaskAdapter taskAdapter) {
         String taskUrl = "http://10.0.2.2:8080/api/protected/robot/tasks";
 
         // Load task data after robots are loaded
