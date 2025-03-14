@@ -3,7 +3,7 @@ const app = require('./app');
 const logger = require('./utils/logger');
 
 const SERVER_PORT = process.env.SERVER_PORT || 8080;
-const SERVER_HOST = process.env.SERVER_HOST || "0.0.0.0";
+const SERVER_HOST = process.env.SERVER_HOST || "127.0.0.1";
 
 // Start the server
 const startServer = async () => {
