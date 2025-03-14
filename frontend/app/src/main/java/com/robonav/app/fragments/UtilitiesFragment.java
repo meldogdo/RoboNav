@@ -5,9 +5,7 @@ import static com.robonav.app.utilities.FragmentUtils.appendOutput;
 import static com.robonav.app.utilities.FragmentUtils.isValidCoordinates;
 import static com.robonav.app.utilities.FragmentUtils.saveLocation;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
-import static com.robonav.app.utilities.JsonUtils.getAvailableMapFiles;
 import static com.robonav.app.utilities.JsonUtils.loadAllRobots;
-import static com.robonav.app.utilities.JsonUtils.loadRobotNames;
 import static com.robonav.app.utilities.JsonUtils.loadRobotsWithLocations;
 import static com.robonav.app.utilities.JsonUtils.loadLocationNames;
 import static com.robonav.app.utilities.JsonUtils.getCoordinatesForLocation;
@@ -31,10 +29,6 @@ import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-
 import com.robonav.app.utilities.JsonUtils;
 import com.robonav.app.R;
 import com.robonav.app.models.Robot;
@@ -47,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MapFragment extends Fragment {
+public class UtilitiesFragment extends Fragment {
 
     private Spinner actionSpinner;
     private View dynamicContentContainer;
@@ -60,7 +54,7 @@ public class MapFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_map, container, false);
+        view = inflater.inflate(R.layout.fragment_utilities, container, false);
 
         scrollView = view.findViewById(R.id.output_scroll_view);
         actionSpinner = view.findViewById(R.id.action_spinner);
@@ -78,8 +72,6 @@ public class MapFragment extends Fragment {
                 "Remove All Locations",
                 "Get Location by Name",
                 "Get All Locations",
-                "Get Current Map",
-                "Swap Map"
         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, actions);
@@ -429,45 +421,6 @@ public class MapFragment extends Fragment {
                     } else {
                         appendOutput("Coordinates not found for the selected location.", scrollView, view);
                     }
-                });
-                break;
-            case "Get Current Map":
-                inflateContent(R.layout.dynamic_get_current_map);
-
-                // Initialize components
-                Button btnRetrieveMapFile = dynamicContentContainer.findViewById(R.id.btn_retrieve_map_file);
-
-                // Simulate map file retrieval
-                btnRetrieveMapFile.setOnClickListener(v -> {
-                    String simulatedMapFileName = "current_map.json"; // Simulated map file name
-                    String simulatedMapDetails = "Map Size: 5MB, Updated: 2024-11-28"; // Simulated metadata
-
-                    appendOutput("File Name: " + simulatedMapFileName + "\n" +
-                            simulatedMapDetails, scrollView, view);
-                });
-                break;
-            case "Swap Map":
-                inflateContent(R.layout.dynamic_swap_map);
-
-                // Initialize components
-                Spinner mapFileDropdown = dynamicContentContainer.findViewById(R.id.map_file_dropdown);
-                Button btnSwapMap = dynamicContentContainer.findViewById(R.id.btn_swap_map);
-
-                // Simulate available map files (you could replace this with actual file browsing logic)
-                List<String> availableMapFiles = getAvailableMapFiles();
-                ArrayAdapter<String> mapFileAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, availableMapFiles);
-                mapFileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                mapFileDropdown.setAdapter(mapFileAdapter);
-
-                // Handle Swap Map button click
-                btnSwapMap.setOnClickListener(v -> {
-                    String selectedMapFile = mapFileDropdown.getSelectedItem() != null ? mapFileDropdown.getSelectedItem().toString() : "";
-
-                    if (selectedMapFile.isEmpty()) {
-                        appendOutput("No map file selected. Please choose a map file.", scrollView, view);
-                        return;
-                    }
-                    appendOutput("Map file swapped successfully to: " + selectedMapFile, scrollView, view);
                 });
                 break;
             default:

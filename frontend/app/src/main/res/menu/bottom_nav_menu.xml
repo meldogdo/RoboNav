@@ -5,11 +5,11 @@
         android:icon="@drawable/ic_home"
         android:title="@string/home" />
     <item
-        android:id="@+id/nav_map"
-        android:icon="@drawable/ic_map"
-        android:title="@string/map" />
-    <item
         android:id="@+id/nav_navigation"
         android:icon="@drawable/ic_navigation"
         android:title="@string/navigation" />
+    <item
+        android:id="@+id/nav_utilities"
+        android:icon="@drawable/ic_util"
+        android:title="@string/utilities" />
 </menu>

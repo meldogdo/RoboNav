@@ -17,7 +17,7 @@ import com.robonav.app.fragments.HomeFragment;
 import com.robonav.app.fragments.NavigationFragment;
 
 import com.robonav.app.R;
-import com.robonav.app.fragments.MapFragment;
+import com.robonav.app.fragments.UtilitiesFragment;
 
 import java.util.Objects;
 
@@ -71,9 +71,9 @@ public class HomeActivity extends AppCompatActivity {
                 if (position == 0) {
                     return new HomeFragment(); // Fragment 1: Home
                 } else if (position == 1) {
-                    return new MapFragment(); // Fragment 2: Map
+                    return new NavigationFragment(); // Fragment 2: Navigation
                 } else if (position == 2) {
-                    return new NavigationFragment(); // Fragment 3: Navigation
+                    return new UtilitiesFragment(); // Fragment 3: Utilities
                 }
                 else {
                     return new HomeFragment(); // Default Fragment
@@ -95,9 +95,9 @@ public class HomeActivity extends AppCompatActivity {
                 if (position == 0) {
                     bottomNavigationView.setSelectedItemId(R.id.nav_home);
                 } else if (position == 1) {
-                    bottomNavigationView.setSelectedItemId(R.id.nav_map);
-                } else if (position == 2) {
                     bottomNavigationView.setSelectedItemId(R.id.nav_navigation);
+                } else if (position == 2) {
+                    bottomNavigationView.setSelectedItemId(R.id.nav_utilities);
                 }
 
             }
@@ -111,11 +111,11 @@ public class HomeActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 viewPager.setCurrentItem(0); // Navigate to HomeFragment
                 return true;
-            } else if (itemId == R.id.nav_map) {
-                viewPager.setCurrentItem(1); // Navigate to MapFragment
-                return true;
             } else if (itemId == R.id.nav_navigation) {
-                viewPager.setCurrentItem(2); // Navigate to NavigationFragment
+                viewPager.setCurrentItem(1); // Navigate to NavigationFragment
+                return true;
+            } else if (itemId == R.id.nav_utilities) {
+                viewPager.setCurrentItem(2); // Navigate to MapFragment
                 return true;
             }
             else {
