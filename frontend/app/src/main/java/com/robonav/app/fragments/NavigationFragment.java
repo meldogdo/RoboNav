@@ -3,6 +3,7 @@ package com.robonav.app.fragments;
 import static com.robonav.app.utilities.FragmentUtils.appendOutput;
 import static com.robonav.app.utilities.FragmentUtils.isValidCoordinates;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
+import static com.robonav.app.utilities.JsonUtils.loadCallbacks;
 import static com.robonav.app.utilities.JsonUtils.loadLocationDetails;
 import static com.robonav.app.utilities.JsonUtils.loadRobotNames;
 
@@ -18,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView;
@@ -55,14 +58,14 @@ public class NavigationFragment extends Fragment {
         locationDropdown = view.findViewById(R.id.pre_existing_location_dropdown);
         locationCoordinatesTextView = view.findViewById(R.id.input_coordinates);
         Button btnNavigate = view.findViewById(R.id.btn_navigate);
+        ImageButton refreshButton = view.findViewById(R.id.refresh_button);
 
         // Initialize locationNames here
         locationNames = new ArrayList<>();
         locationNames.add("{Please Select an Option}"); // Default option
 
         // Initialize locationAdapter
-        locationAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, locationNames);
+        locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
         locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationDropdown.setAdapter(locationAdapter);
 
@@ -76,6 +79,30 @@ public class NavigationFragment extends Fragment {
             ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
             robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             robotDropdown.setAdapter(robotAdapter);
+        }).exceptionally(ex -> {
+            // Handle any errors during the network request
+            ex.printStackTrace();
+            return null;
+        });
+
+        // Load callback messages asynchronously
+        loadCallbacks(requireContext()).thenAccept(callbackMessages -> {
+            // Convert the callback messages into a String with newlines
+            StringBuilder callbackText = new StringBuilder();
+            for (String message : callbackMessages) {
+                callbackText.append(message).append("\n\n");
+            }
+
+            // Ensure UI updates are done on the main thread
+            requireActivity().runOnUiThread(() -> {
+                // Populate the TextView inside the ScrollView
+                TextView outputTextView = requireView().findViewById(R.id.output_text_view);
+                outputTextView.setText(callbackText.toString());
+
+                // Scroll to the top of the ScrollView
+                ScrollView scrollView = requireView().findViewById(R.id.output_scroll_view);
+                scrollView.post(() -> scrollView.fullScroll(View.FOCUS_UP));
+            });
         }).exceptionally(ex -> {
             // Handle any errors during the network request
             ex.printStackTrace();
@@ -115,6 +142,35 @@ public class NavigationFragment extends Fragment {
             // Append the message to the output
             appendOutput(message, scrollView, view);
         });
+
+        refreshButton.setOnClickListener(v -> {
+            TextView outputTextView = requireView().findViewById(R.id.output_text_view);
+            // Clear the current content in the ScrollView
+            outputTextView.setText("");  // Clears the TextView inside ScrollView
+
+            // Reload callback messages
+            loadCallbacks(requireContext()).thenAccept(callbackMessages -> {
+                // Convert the callback messages into a String with newlines
+                StringBuilder callbackText = new StringBuilder();
+                for (String message : callbackMessages) {
+                    callbackText.append(message).append("\n\n");
+                }
+
+                // Ensure UI updates are done on the main thread
+                requireActivity().runOnUiThread(() -> {
+                    // Populate the TextView inside the ScrollView with new data
+                    outputTextView.setText(callbackText.toString());
+
+                    // Scroll to the top of the ScrollView
+                    scrollView.post(() -> scrollView.fullScroll(View.FOCUS_UP));
+                });
+            }).exceptionally(ex -> {
+                // Handle any errors during the network request
+                ex.printStackTrace();
+                return null;
+            });
+        });
+
 
         // Handle robot selection and enable location dropdown or coordinates input
         robotDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -171,8 +227,6 @@ public class NavigationFragment extends Fragment {
                 locationCoordinatesTextView.setText("");
             }
         });
-
-
 
         // Set the touch listener for the robot dropdown to update when expanded
         robotDropdown.setOnTouchListener((v, event) -> {

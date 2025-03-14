@@ -3,15 +3,21 @@ package com.robonav.app.utilities;
 
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.View;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.robonav.app.R;
 import com.robonav.app.models.Robot;
 
 import org.json.JSONArray;
@@ -301,4 +307,54 @@ public class JsonUtils {
 
         // You can replace this with actual file browsing logic if needed
     }
+
+    public static CompletableFuture<List<String>> loadCallbacks(Context context) {
+        // Initialize the CompletableFuture to return the result
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/callbacks";
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        // Parse the response
+                        JSONObject jsonResponse = new JSONObject(response);
+                        JSONArray data = jsonResponse.getJSONArray("data");
+
+                        List<String> callbackMessages = new ArrayList<>();
+                        for (int i = 0; i < data.length(); i++) {
+                            callbackMessages.add(data.getString(i));
+                        }
+
+                        // Complete the future with the callback messages data
+                        future.complete(callbackMessages);
+
+                    } catch (JSONException e) {
+                        // Handle the exception and complete the future exceptionally
+                        future.completeExceptionally(new Exception("Error parsing callback data.", e));
+                    }
+                },
+                error -> {
+                    // Handle the error and complete the future exceptionally
+                    future.completeExceptionally(new Exception("Failed to fetch callbacks.", error));
+                }) {
+            @Override
+            public java.util.Map<String, String> getHeaders() {
+                // Correct the header map type
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getTokenFromPrefs(context));
+                return headers;
+            }
+        };
+
+        queue.add(request);
+        return future;  // Return the CompletableFuture with the list of callback messages
+    }
+
+
+
+
+
 }
