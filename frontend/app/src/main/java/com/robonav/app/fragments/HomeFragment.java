@@ -3,6 +3,7 @@ package com.robonav.app.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,7 +104,7 @@ public class HomeFragment extends Fragment {
                         }
 
                         // After loading robots, load tasks
-                        loadTasks(taskList, robotList, taskAdapter);
+                        loadTasks(taskList, taskAdapter);
                     } catch (JSONException e) {
                         e.printStackTrace();
                         swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
@@ -129,7 +130,7 @@ public class HomeFragment extends Fragment {
         swipeRefreshLayout.setRefreshing(true);
     }
 
-    private void loadTasks(List<Task> taskList, List<Robot> robotList, TaskAdapter taskAdapter) {
+    private void loadTasks(List<Task> taskList, TaskAdapter taskAdapter) {
         String taskUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/tasks";
 
         // Load task data after robots are loaded
