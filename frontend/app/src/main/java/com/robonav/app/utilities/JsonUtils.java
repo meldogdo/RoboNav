@@ -83,11 +83,6 @@ public class JsonUtils {
         return jsonBuilder.toString();
     }
 
-
-
-
-
-
     public static CompletableFuture<List<String>> loadRobotNames(Context context) {
         // Initialize the CompletableFuture to return the result
         CompletableFuture<List<String>> future = new CompletableFuture<>();
@@ -128,17 +123,6 @@ public class JsonUtils {
 
         return future;  // Return the CompletableFuture
     }
-
-
-
-
-
-
-
-
-
-
-
 
     // Helper method to convert JSON array of tasks to List<String>
     public static List<String> jsonArrayToList(JSONArray jsonArray) throws JSONException {
@@ -352,6 +336,66 @@ public class JsonUtils {
         queue.add(request);
         return future;  // Return the CompletableFuture with the list of callback messages
     }
+
+
+
+    // Method to send robot instruction to API
+    public static CompletableFuture<String> sendRobotInstruction(Context context, String robotId, String instruction) {
+        // Initialize the CompletableFuture to return the result
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        // Prepare the request body
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("robot_id", robotId);
+            requestBody.put("instruction", instruction);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            future.completeExceptionally(e);
+            return future;  // Return if there's an error preparing the request
+        }
+
+        // Define the URL for the API endpoint
+        String apiUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/instruction";
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        // Create a JsonObjectRequest for the POST request
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, apiUrl, requestBody,
+                response -> {
+                    try {
+                        // Parse the response to get the message
+                        String message = response.getString("message");
+                        // Complete the future with the success message
+                        future.complete(message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        future.completeExceptionally(e);  // Complete exceptionally if JSON parsing fails
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    // Complete the future exceptionally if there was an error with the request
+                    future.completeExceptionally(error);
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                // Provide authorization headers if needed
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getTokenFromPrefs(context));  // Add token from preferences
+                return headers;
+            }
+        };
+
+        // Add the request to the queue
+        queue.add(request);
+
+        // Return the CompletableFuture that will be completed when the response is received
+        return future;
+    }
+
+
+
 
 
 
