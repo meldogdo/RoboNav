@@ -134,45 +134,38 @@ const getRobotLocation = (req, res) => {
   });
 };
 
-// Get robot callbacks
+// Get the 30 most recent robot callbacks
 const getRobotCallbacks = (req, res) => {
-  const { ins_id } = req.query;
-
-  if (!ins_id) {
-      logger.warn('Missing instruction ID (ins_id) in request.');
-      return res.status(400).json({ message: 'Instruction ID (ins_id) is required' });
-  }
-
-  logger.info(`Fetching callbacks for instruction ID: ${ins_id}...`);
-
-  const query = `
-      SELECT cr.*, r.type, r.ip_add, r.port, r.battery, r.is_charging
-      FROM callback_rec cr
-      JOIN robot r ON cr.robot_id = r.robot_id
-      WHERE cr.ins_id = ?
-      ORDER BY cr.ctime ASC
-  `;
-
-  db.query(query, [ins_id], (err, results) => {
-      if (err) {
-          logger.error(`Database error while fetching callbacks for instruction ID ${ins_id}:`, err);
-          return res.status(500).json({ message: 'Database error', error: err });
-      }
-
-      if (results.length === 0) {
-          logger.warn(`No callbacks found for instruction ID ${ins_id}.`);
-          return res.status(404).json({ message: 'No callbacks found for this instruction ID' });
-      }
-
-      // Format results with robot details
-      const callbackMessages = results.map(callback =>
-          `#${callback.cb_id} - Robot ${callback.robot_id} (${callback.type}) [${callback.ip_add}:${callback.port}] - ${callback.callback} [${callback.ctime}] | Battery: ${callback.battery}% | Charging: ${callback.is_charging ? 'Yes' : 'No'}`
-      );
-
-      logger.info(`Successfully retrieved ${callbackMessages.length} callbacks for instruction ID ${ins_id}.`);
-      res.json({ message: 'Callbacks retrieved', data: callbackMessages });
-  });
-};
+    logger.info('Fetching the 30 most recent callbacks...');
+  
+    const query = `
+        SELECT robot_id, callback, ctime
+        FROM callback_rec
+        ORDER BY cb_id DESC
+        LIMIT 30
+    `;
+  
+    db.query(query, (err, results) => {
+        if (err) {
+            logger.error('Database error while fetching callbacks:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+  
+        if (results.length === 0) {
+            logger.warn('No callbacks found.');
+            return res.status(404).json({ message: 'No callbacks found' });
+        }
+  
+        // Format results
+        const callbackMessages = results.map(callback =>
+            `Robot ${callback.robot_id}: ${callback.callback} [${callback.ctime}]`
+        );
+  
+        logger.info(`Successfully retrieved ${callbackMessages.length} callbacks.`);
+        res.json({ message: 'Callbacks retrieved', data: callbackMessages });
+    });
+  };
+  
 
 // Send robot instructions
 const sendRobotInstruction = (req, res) => {
