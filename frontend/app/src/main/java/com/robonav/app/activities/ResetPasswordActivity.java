@@ -3,10 +3,10 @@ package com.robonav.app.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.robonav.app.utilities.ConfigManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,8 +28,8 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private Button resetPasswordButton;
     private String email, token;
     private Toast currentToast; // Store the latest toast reference
-
-    private static final String RESET_PASSWORD_URL = "http://10.0.2.2:8080/api/protected/users/reset-password";
+    
+    private static final String RESET_PASSWORD_URL = ConfigManager.getBaseUrl() + "/api/protected/users/reset-password";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

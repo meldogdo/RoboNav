@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
+import com.robonav.app.utilities.ConfigManager;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
@@ -24,7 +25,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private String token;
     private Toast currentToast; // Store the latest toast reference
 
-    private static final String CHANGE_PASSWORD_URL = "http://10.0.2.2:8080/api/protected/users/change-password";
+    private static final String CHANGE_PASSWORD_URL = ConfigManager.getBaseUrl() + "/api/protected/users/change-password";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

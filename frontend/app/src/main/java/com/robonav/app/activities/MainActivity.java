@@ -1,6 +1,6 @@
 package com.robonav.app.activities;
 
-import static androidx.core.content.ContextCompat.startActivity;
+import com.robonav.app.utilities.ConfigManager;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText passwordEditText;
     private Toast currentToast; // Store the latest toast reference
 
-    private static final String LOGIN_URL = "http://10.0.2.2:8080/api/open/users/login";
+    private static final String LOGIN_URL = ConfigManager.getBaseUrl() + "/api/open/users/login";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

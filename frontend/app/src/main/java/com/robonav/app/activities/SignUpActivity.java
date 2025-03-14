@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.robonav.app.utilities.ConfigManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -33,8 +34,8 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText confirmPasswordEditText;
     private Toast currentToast; // Store the latest toast reference
 
-    private static final String REGISTER_URL = "http://10.0.2.2:8080/api/open/users/register";
-
+    private static final String REGISTER_URL = ConfigManager.getBaseUrl() + "/api/open/users/register";
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

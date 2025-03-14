@@ -1,15 +1,28 @@
 # RoboNav Project
 
 ## Overview
-This repository contains the complete RoboNav system, including both the frontend and backend components.
+This repository contains the complete **RoboNav** system, including both the **frontend** (Android app) and **backend** (Express API and MySQL database). The system facilitates robot navigation, task assignment, and map management through a mobile interface.
+
+---
 
 ## Technologies Used
-- **Backend:** Node.js, Express.js, MySQL
-- **Frontend:** [To be added later]
-- **Authentication:** JWT (JSON Web Token), Google OAuth2, bcrypt
+
+### **Backend:**
+- **Server:** Node.js, Express.js
+- **Database:** MySQL
+- **Authentication:** JWT (JSON Web Token), bcrypt
 - **Email Services:** Nodemailer
 - **Logging:** Winston
 - **Deployment & Monitoring:** Nodemon, Kill-Port
+
+### **Frontend:**
+- **Framework:** Android (Java, XML)
+- **Networking:** Volley (for API calls)
+- **UI Components:** EditText, TextView, RecyclerView, Toasts
+- **Authentication:** JWT (retrieved from backend)
+- **Error Handling:** Custom error messages parsed from API responses
+
+---
 
 ## Project Structure
 ```
@@ -45,6 +58,25 @@ This repository contains the complete RoboNav system, including both the fronten
 │   │── index.js            # Main server entry point
 │   │── nodemon.json        # Nodemon configuration (auto-restart and kill port)
 │   │── package.json        # Dependencies and scripts
+│
+│── /frontend
+│   │── /app/src/main/java/com/robonav/app
+│   │   ├── activities/       # Main app screens (Login, Signup, Dashboard)
+│   │   ├── adapters/         # Custom adapters for RecyclerViews & lists
+│   │   ├── fragments/        # Modular UI components for better UX
+│   │   ├── interfaces/       # API callbacks & event handling
+│   │   ├── models/           # Data models representing API responses
+│   │   ├── utilities/        # Helper functions (Validation, API Requests, etc.)
+│   │
+│   │── /app/src/main/res/layout    # XML UI layouts for activities & fragments
+│   │
+│   │── /app/src/main/res/drawable  # Icon assets
+│
+│   │── AndroidManifest.xml         # Android app permissions & settings
+│   │── build.gradle                # Gradle configuration & dependencies
+│   │── settings.gradle             # Project-level Gradle settings
+│
+│── README.md  # This documentation
 ```
 
 ---
@@ -52,6 +84,7 @@ This repository contains the complete RoboNav system, including both the fronten
 # Backend API
 
 ## Installation & Setup
+
 ### **1. Clone the Repository**
 ```sh
 git clone https://github.com/meldogdo/RoboNav.git
@@ -103,6 +136,7 @@ npm start
 ```
 
 ## API Endpoints
+
 ### **Authentication Routes**
 - `POST /api/open/users/register` → Register a new user
 - `GET /api/open/users/confirm-email` → Confirm user email
@@ -126,10 +160,50 @@ The project uses **Winston** for structured logging.
 
 ---
 
-# Frontend
+# Frontend (Android App)
 
-(To be added later)
+## Installation & Setup
+
+### **1. Clone the Repository**
+```sh
+git clone https://github.com/meldogdo/RoboNav.git
+cd RoboNav/frontend
+```
+
+### **2. Open in Android Studio**
+1. Open **Android Studio**.
+2. Select **Open an Existing Project**.
+3. Navigate to `RoboNav/frontend` and open it.
+
+### **3. Build & Run**
+1. Ensure **USB debugging** is enabled on your Android device or use the Android Emulator.
+2. Click **Run (▶️)** in Android Studio.
+
+### **4. Configure API URL**
+By default, the app fetches the backend URL from a configuration file:
+
+#### **Edit `/app/src/main/res/raw/config.properties`**
+```properties
+# Backend Configuration
+BACKEND_IP=10.0.2.2
+BACKEND_PORT=8080
+USE_HTTPS=false
+```
+- Modify `BACKEND_IP` to match your backend host.
+- Change `BACKEND_PORT` if your backend runs on a different port.
+- Set `USE_HTTPS=true` if using HTTPS instead of HTTP.
+
+If the backend is running on **HTTP** locally, use the default `10.0.2.2` as the hostname.
+
+## Features
+- **User Authentication** (Register, Login, JWT-based sessions)
+- **Robot Management** (View tasks, locations, and callbacks)
+- **Instruction Handling** (Send instructions to robots)
+- **Map Upload & Retrieval** (Upload and retrieve robot map files)
 
 ---
 
-For further details, refer to the API documentation or contact the development team.
+## Contributors
+- Christopher Higgins
+- Bryson Crook
+- Mohamed El Dogdog

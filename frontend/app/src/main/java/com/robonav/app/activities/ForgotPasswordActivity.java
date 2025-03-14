@@ -16,6 +16,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.utilities.ConfigManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,8 +32,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private String email;  // Stores email for later verification
     private Toast currentToast; // Store the latest toast reference
 
-    private static final String REQUEST_RESET_URL = "http://10.0.2.2:8080/api/open/users/request-reset";
-    private static final String VERIFY_RESET_URL = "http://10.0.2.2:8080/api/open/users/verify-reset";
+    private static final String REQUEST_RESET_URL = ConfigManager.getBaseUrl() + "/api/open/users/request-reset";
+    private static final String VERIFY_RESET_URL = ConfigManager.getBaseUrl() + "/api/open/users/verify-reset";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

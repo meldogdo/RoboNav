@@ -87,7 +87,7 @@ public class JsonUtils {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 
         List<String> robotNames = new ArrayList<>();
-        String robotUrl = "http://10.0.2.2:8080/api/protected/robot/robots";
+        String robotUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/robots";
         RequestQueue queue = Volley.newRequestQueue(context);
 
         JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
@@ -198,7 +198,7 @@ public class JsonUtils {
     public static CompletableFuture<List<JSONObject>> loadLocationDetails(Context context, String robotId) {
         CompletableFuture<List<JSONObject>> future = new CompletableFuture<>();
         List<JSONObject> locationDetails = new ArrayList<>();
-        String locationUrl = "http://10.0.2.2:8080/api/protected/robot/" + robotId + "/location";
+        String locationUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/" + robotId + "/location";
         RequestQueue queue = Volley.newRequestQueue(context);
 
         JsonArrayRequest locationRequest = new JsonArrayRequest(Request.Method.GET, locationUrl, null,
