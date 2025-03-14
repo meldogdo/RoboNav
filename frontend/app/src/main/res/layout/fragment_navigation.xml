@@ -11,21 +11,19 @@
         android:layout_height="wrap_content"
         tools:context=".fragments.MapFragment">
 
-        <!-- Title Section -->
+        <!-- Title: Navigation -->
 
-        <!-- Dynamic Content Container -->
-
+        <!-- Dynamic content container -->
         <TextView
             android:id="@+id/title_map_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Navigation"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Start Navigation"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.054"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,77 +32,61 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:layout_marginTop="8dp"
             android:background="@color/gray_medium"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.072"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title_map_info">
 
-            <!-- Content inside the FrameLayout -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="8dp">
 
-                <!-- Text: Select Robot -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:text="Select Robot"
                     android:textColor="@color/white"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp" />
 
-                <!-- Spinner: Robot Dropdown -->
                 <Spinner
                     android:id="@+id/robot_dropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:background="@color/white"
-                    android:minHeight="48dp" />
+                    android:minHeight="40dp"
+                    android:layout_marginBottom="8dp"/>
 
-                <!-- Text: Select Pre-existing Location -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:text="Select Pre-existing Location"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="8dp"/>
 
-                <!-- Spinner: Pre-existing Location Dropdown -->
                 <Spinner
                     android:id="@+id/pre_existing_location_dropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:layout_marginBottom="16dp"
                     android:background="@color/white"
-                    android:minHeight="48dp" />
+                    android:minHeight="40dp"
+                    android:layout_marginBottom="8dp"/>
 
-                <!-- Text: Enter Coordinates -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:text="Enter Coordinates"
                     android:textColor="@color/white" />
 
-                <!-- EditText: Coordinates Input -->
                 <EditText
                     android:id="@+id/input_coordinates"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:hint="Latitude, Longitude"
-                    android:minHeight="48dp"
+                    android:minHeight="40dp"
                     android:textColor="@android:color/white"
                     android:textColorHint="@color/gray_high_contrast" />
 
-                <!-- Button: Set Initial Position -->
                 <Button
                     android:id="@+id/btn_navigate"
                     android:layout_width="match_parent"
@@ -115,65 +97,114 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Output Title -->
+        <!-- Title: Stop Navigation -->
 
+        <!-- Stop navigation container -->
+        <TextView
+            android:id="@+id/title_stop_navigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Stop Navigation"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+
+        <FrameLayout
+            android:id="@+id/stop_navigation_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@color/gray_medium"
+            app:layout_constraintTop_toBottomOf="@id/title_stop_navigation">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select Robot"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <Spinner
+                    android:id="@+id/robot_stop_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:minHeight="40dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <Button
+                    android:id="@+id/btn_stop_navigation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/red_dark"
+                    android:text="Stop Navigation"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Title: Output Messages -->
+
+        <!-- Refresh Button -->
         <TextView
             android:id="@+id/title_robot_tasks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:text="Output Messages"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+            app:layout_constraintTop_toBottomOf="@id/stop_navigation_container" />
 
-        <!-- Reset Button -->
-
-        <!-- Align top with title -->
-
-
+        <!-- Output ScrollView -->
         <ImageButton
             android:id="@+id/refresh_button"
             android:layout_width="39dp"
             android:layout_height="32dp"
+            android:layout_marginStart="148dp"
             android:background="@null"
             android:scaleType="fitCenter"
             android:src="@drawable/refresh"
-            app:layout_constraintBottom_toBottomOf="@id/title_robot_tasks"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.904"
             app:layout_constraintStart_toEndOf="@id/title_robot_tasks"
-            app:layout_constraintTop_toTopOf="@id/title_robot_tasks"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintTop_toTopOf="@id/title_robot_tasks" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/output_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="296dp"
+            android:layout_height="0dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/refresh_button">
+            app:layout_constraintTop_toBottomOf="@id/refresh_button"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <!-- TextView inside the NestedScrollView -->
-            <TextView
-                android:id="@+id/output_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/gray_medium"
-                android:minHeight="296dp"
-                android:padding="8dp"
-                android:scrollbars="vertical"
-                android:textColor="@color/gray_high_contrast"
-                android:textSize="16sp" />
-        </androidx.core.widget.NestedScrollView>
+        <TextView
+            android:id="@+id/output_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/gray_medium"
+            android:minHeight="296dp"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            android:textColor="@color/gray_high_contrast"
+            android:textSize="16sp" />
+    </androidx.core.widget.NestedScrollView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
