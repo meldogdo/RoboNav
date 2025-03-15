@@ -1,6 +1,141 @@
 const db = require('../config/db');
 const logger = require('../utils/logger');
 
+// Get the last known position of a robot
+const getRobotPosition = (req, res) => {
+    const { robotId } = req.params;
+
+    if (!robotId) {
+        return res.status(400).json({ message: 'Robot ID is required' });
+    }
+
+    const sql = `
+        SELECT latitude, longitude, timestamp 
+        FROM robot_location 
+        WHERE robot_id = ? 
+        ORDER BY timestamp DESC 
+        LIMIT 1;
+    `;
+
+    db.query(sql, [robotId], (err, results) => {
+        if (err) {
+            logger.error(`Error fetching live coordinates for robot ${robotId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No location data found for this robot' });
+        }
+
+        res.json(results[0]);
+    });
+};
+
+const saveRobotLocation = (req, res) => {
+    const { robotId, locationName } = req.body;
+
+    if (!robotId || !locationName) {
+        return res.status(400).json({ message: 'Robot ID and location name are required' });
+    }
+
+    const fetchLocationSQL = `
+        SELECT latitude, longitude FROM robot_location 
+        WHERE robot_id = ? 
+        ORDER BY timestamp DESC 
+        LIMIT 1;
+    `;
+
+    db.query(fetchLocationSQL, [robotId], (err, results) => {
+        if (err) {
+            logger.error(`Error fetching robot ${robotId} location:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No recorded location for this robot' });
+        }
+
+        const { latitude, longitude } = results[0];
+
+        const insertLocationSQL = `
+            INSERT INTO location (name, latitude, longitude, robot_id) 
+            VALUES (?, ?, ?, ?);
+        `;
+
+        db.query(insertLocationSQL, [locationName, latitude, longitude, robotId], (err) => {
+            if (err) {
+                logger.error(`Error saving location ${locationName} for robot ${robotId}:`, err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            res.status(201).json({ message: `Location '${locationName}' saved successfully.` });
+        });
+    });
+};
+
+const removeAllRobotLocations = (req, res) => {
+    const { robotId } = req.params;
+
+    if (!robotId) {
+        return res.status(400).json({ message: 'Robot ID is required' });
+    }
+
+    const sql = `DELETE FROM location WHERE robot_id = ?`;
+
+    db.query(sql, [robotId], (err, result) => {
+        if (err) {
+            logger.error(`Error deleting locations for robot ${robotId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'No locations found for this robot' });
+        }
+
+        res.json({ message: `All locations removed for robot ${robotId}.` });
+    });
+};
+
+const getCoordinatesByLocation = (req, res) => {
+    const { locationName } = req.params;
+
+    if (!locationName) {
+        return res.status(400).json({ message: 'Location name is required' });
+    }
+
+    const sql = `SELECT latitude, longitude FROM location WHERE name = ?`;
+
+    db.query(sql, [locationName], (err, results) => {
+        if (err) {
+            logger.error(`Error fetching coordinates for location ${locationName}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Location not found' });
+        }
+
+        res.json(results[0]);
+    });
+};
+
+const getAllLocations = (req, res) => {
+    const sql = `SELECT name, latitude, longitude FROM location`;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            logger.error('Error fetching all locations:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No locations found' });
+        }
+
+        res.json(results);
+    });
+};
+
 // Delete a task by ID
 const deleteTask = (req, res) => {
     const { taskId } = req.params;
@@ -239,39 +374,39 @@ const createRobot = (req, res) => {
 
 // Get Robot Tasks
 const getRobotTasks = (req, res) => {
-  logger.info('Fetching robot tasks...');
-  db.query('SELECT * FROM task', (err, results) => {
-      if (err) {
-          logger.error('Database error while fetching tasks:', err);
-          return res.status(500).json({ message: 'Database error' });
-      }
-      if (results.length === 0) {
-          logger.warn('No tasks found in the database.');
-          return res.status(404).json({ message: 'No tasks found' });
-      }
+    logger.info('Fetching robot tasks...');
+    db.query('SELECT * FROM task', (err, results) => {
+        if (err) {
+            logger.error('Database error while fetching tasks:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+        if (results.length === 0) {
+            logger.warn('No tasks found in the database.');
+            return res.status(404).json({ message: 'No tasks found' });
+        }
 
-      const tasks = results.map(task => ({
-          id: task.task_id,
-          name: task.name,
-          robot: task.robot_id,
-          progress: 50,
-          createdBy: 'n/a',
-          dateCreated: task.start,
-          state: task.state,
-          dateCompleted: task.end
-      }));
+        const tasks = results.map(task => ({
+            id: task.task_id,
+            name: task.name,
+            robot: task.robot_id,
+            progress: 50,
+            createdBy: 'n/a',
+            dateCreated: task.start,
+            state: task.state,
+            dateCompleted: task.end
+        }));
 
-      logger.info(`Successfully retrieved ${tasks.length} tasks.`);
-      res.json(tasks);
-  });
+        logger.info(`Successfully retrieved ${tasks.length} tasks.`);
+        res.json(tasks);
+    });
 };
 // Get all robots
 const getAllRobots = (req, res) => {
-  logger.info('Fetching all robots...');
+    logger.info('Fetching all robots...');
 
-  const robotQuery = 'SELECT * FROM robot';
-  const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';
-  const locationQuery = `
+    const robotQuery = 'SELECT * FROM robot';
+    const taskQuery = 'SELECT task_id FROM task WHERE robot_id = ?';
+    const locationQuery = `
       SELECT rl.*, l.name 
       FROM robot_location rl
       LEFT JOIN location l 
@@ -279,158 +414,158 @@ const getAllRobots = (req, res) => {
       WHERE rl.robot_id = ? 
       ORDER BY rl.r_loc_id DESC LIMIT 1`;
 
-  db.query(robotQuery, (err, robotResults) => {
-      if (err) {
-          logger.error('Database error while fetching robots:', err);
-          return res.status(500).json({ message: 'Database error' });
-      }
-      if (robotResults.length === 0) {
-          logger.warn('No robots found in the database.');
-          return res.status(404).json({ message: 'No robots found' });
-      }
+    db.query(robotQuery, (err, robotResults) => {
+        if (err) {
+            logger.error('Database error while fetching robots:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+        if (robotResults.length === 0) {
+            logger.warn('No robots found in the database.');
+            return res.status(404).json({ message: 'No robots found' });
+        }
 
-      logger.info(`Found ${robotResults.length} robots, fetching tasks and locations...`);
+        logger.info(`Found ${robotResults.length} robots, fetching tasks and locations...`);
 
-      const robotsData = [];
-      const robotQueries = robotResults.map((robot) => {
-          return new Promise((resolve, reject) => {
-              db.query(taskQuery, [robot.robot_id], (err, taskResults) => {
-                  if (err) {
-                      logger.error(`Error fetching tasks for robot ${robot.robot_id}:`, err);
-                      return reject({ message: 'Database error' });
-                  }
+        const robotsData = [];
+        const robotQueries = robotResults.map((robot) => {
+            return new Promise((resolve, reject) => {
+                db.query(taskQuery, [robot.robot_id], (err, taskResults) => {
+                    if (err) {
+                        logger.error(`Error fetching tasks for robot ${robot.robot_id}:`, err);
+                        return reject({ message: 'Database error' });
+                    }
 
-                  db.query(locationQuery, [robot.robot_id], (err, locationResults) => {
-                      if (err) {
-                          logger.error(`Error fetching location for robot ${robot.robot_id}:`, err);
-                          return reject({ message: 'Database error' });
-                      }
+                    db.query(locationQuery, [robot.robot_id], (err, locationResults) => {
+                        if (err) {
+                            logger.error(`Error fetching location for robot ${robot.robot_id}:`, err);
+                            return reject({ message: 'Database error' });
+                        }
 
-                      const tasks = taskResults.length > 0 ? taskResults.map(task => task.task_id) : [];
-                      const location = locationResults[0] || {};
+                        const tasks = taskResults.length > 0 ? taskResults.map(task => task.task_id) : [];
+                        const location = locationResults[0] || {};
 
-                      const robotData = {
-                          id: robot.robot_id,
-                          name: `Robot #${robot.robot_id}`,
-                          ip_add: robot.ip_add || 'Unknown',
-                          battery: robot.battery,
-                          location_name: location.name || "Unknown",
-                          location_coordinates: (location.x && location.y) ? `${location.x},${location.y}` : "Unknown",
-                          tasks: tasks,
-                          charging: robot.is_charging
-                      };
+                        const robotData = {
+                            id: robot.robot_id,
+                            name: `Robot #${robot.robot_id}`,
+                            ip_add: robot.ip_add || 'Unknown',
+                            battery: robot.battery,
+                            location_name: location.name || "Unknown",
+                            location_coordinates: (location.x && location.y) ? `${location.x},${location.y}` : "Unknown",
+                            tasks: tasks,
+                            charging: robot.is_charging
+                        };
 
-                      robotsData.push(robotData);
-                      resolve();
-                  });
-              });
-          });
-      });
+                        robotsData.push(robotData);
+                        resolve();
+                    });
+                });
+            });
+        });
 
-      Promise.all(robotQueries)
-          .then(() => {
-              logger.info(`Successfully retrieved data for ${robotsData.length} robots.`);
-              res.json(robotsData);
-          })
-          .catch((error) => {
-              logger.error('Error processing robot data:', error);
-              res.status(500).json(error);
-          });
-  });
+        Promise.all(robotQueries)
+            .then(() => {
+                logger.info(`Successfully retrieved data for ${robotsData.length} robots.`);
+                res.json(robotsData);
+            })
+            .catch((error) => {
+                logger.error('Error processing robot data:', error);
+                res.status(500).json(error);
+            });
+    });
 };
 
 // Get robot location
 const getRobotLocation = (req, res) => {
-  const robotId = req.params.robotId;
+    const robotId = req.params.robotId;
 
-  logger.info(`Fetching locations for robot ID: ${robotId}...`);
+    logger.info(`Fetching locations for robot ID: ${robotId}...`);
 
-  const locationQuery = `
+    const locationQuery = `
       SELECT x, y, name FROM location
       WHERE robot_id = ?;`;
 
-  db.query(locationQuery, [robotId], (err, locationResults) => {
-      if (err) {
-          logger.error(`Database error while fetching locations for robot ${robotId}:`, err);
-          return res.status(500).json({ message: 'Database error' });
-      }
+    db.query(locationQuery, [robotId], (err, locationResults) => {
+        if (err) {
+            logger.error(`Database error while fetching locations for robot ${robotId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
 
-      if (locationResults.length === 0) {
-          logger.warn(`No locations found for robot ${robotId}.`);
-          return res.status(200).json([]); // Returning empty array instead of 404
-      }
+        if (locationResults.length === 0) {
+            logger.warn(`No locations found for robot ${robotId}.`);
+            return res.status(200).json([]); // Returning empty array instead of 404
+        }
 
-      const uniqueLocations = locationResults.map(location => ({
-          location_name: location.name || 'Unknown',
-          location_coordinates: `${location.x},${location.y}`
-      }));
+        const uniqueLocations = locationResults.map(location => ({
+            location_name: location.name || 'Unknown',
+            location_coordinates: `${location.x},${location.y}`
+        }));
 
-      logger.info(`Successfully retrieved ${uniqueLocations.length} locations for robot ${robotId}.`);
-      res.json(uniqueLocations);
-  });
+        logger.info(`Successfully retrieved ${uniqueLocations.length} locations for robot ${robotId}.`);
+        res.json(uniqueLocations);
+    });
 };
 
 // Get the 30 most recent robot callbacks
 const getRobotCallbacks = (req, res) => {
     logger.info('Fetching the 30 most recent callbacks...');
-  
+
     const query = `
         SELECT robot_id, callback, ctime
         FROM callback_rec
         ORDER BY cb_id DESC
         LIMIT 30
     `;
-  
+
     db.query(query, (err, results) => {
         if (err) {
             logger.error('Database error while fetching callbacks:', err);
             return res.status(500).json({ message: 'Database error', error: err });
         }
-  
+
         if (results.length === 0) {
             logger.warn('No callbacks found.');
             return res.status(404).json({ message: 'No callbacks found' });
         }
-  
+
         // Format results
         const callbackMessages = results.map(callback =>
             `Robot ${callback.robot_id}: ${callback.callback} [${callback.ctime}]`
         );
-  
+
         logger.info(`Successfully retrieved ${callbackMessages.length} callbacks.`);
         res.json({ message: 'Callbacks retrieved', data: callbackMessages });
     });
-  };
-  
+};
+
 
 // Send robot instructions
 const sendRobotInstruction = (req, res) => {
-  const { robot_id, instruction } = req.body;
+    const { robot_id, instruction } = req.body;
 
-  if (!robot_id || !instruction) {
-      logger.warn('Missing required fields: Robot ID or instruction.');
-      return res.status(400).json({ message: 'Robot ID and instruction are required' });
-  }
+    if (!robot_id || !instruction) {
+        logger.warn('Missing required fields: Robot ID or instruction.');
+        return res.status(400).json({ message: 'Robot ID and instruction are required' });
+    }
 
-  logger.info(`Queuing instruction for robot ${robot_id}: ${instruction}`);
+    logger.info(`Queuing instruction for robot ${robot_id}: ${instruction}`);
 
-  const insertQuery = `
+    const insertQuery = `
       INSERT INTO ins_send (robot_id, instruction, status, ctime)
       VALUES (?, ?, 'order', NOW())
   `;
 
-  db.query(insertQuery, [robot_id, instruction], (err, result) => {
-      if (err) {
-          logger.error(`Database error while queuing instruction for robot ${robot_id}:`, err);
-          return res.status(500).json({ message: 'Database error', error: err });
-      }
+    db.query(insertQuery, [robot_id, instruction], (err, result) => {
+        if (err) {
+            logger.error(`Database error while queuing instruction for robot ${robot_id}:`, err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
 
-      logger.info(`Instruction successfully queued for robot ${robot_id} with ID: ${result.insertId}`);
-      res.json({
-          message: `Instruction queued for robot ${robot_id}`,
-          instructionId: result.insertId
-      });
-  });
+        logger.info(`Instruction successfully queued for robot ${robot_id} with ID: ${result.insertId}`);
+        res.json({
+            message: `Instruction queued for robot ${robot_id}`,
+            instructionId: result.insertId
+        });
+    });
 };
 
-module.exports = {deleteTask,  getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction, createRobot, deleteRobot, createTask};
+module.exports = { getAllLocations, getCoordinatesByLocation, removeAllRobotLocations, saveRobotLocation, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction, createRobot, deleteRobot, createTask };
