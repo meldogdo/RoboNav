@@ -1,6 +1,40 @@
 const db = require('../config/db');
 const logger = require('../utils/logger');
 
+// Create a new robot
+const createRobot = (req, res) => {
+    const { type, ip_add, port } = req.body;
+
+    // Input validation
+    if (!type || !ip_add || !port) {
+        logger.warn('Missing required fields for creating a robot.');
+        return res.status(400).json({ message: 'Missing required fields: type, ip_add, port' });
+    }
+
+    // Default values
+    const site_id = 1;  // Set site_id to 1 (London)
+    const serial_num = "";  // Manually set serial number to an empty string
+
+    // SQL query to insert new robot
+    const sql = `
+        INSERT INTO robot (type, ip_add, port, serial_num, site_id)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql, [type, ip_add, port, serial_num, site_id], (err, result) => {
+        if (err) {
+            logger.error('Database error while inserting robot:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        logger.info(`New robot created with ID: ${result.insertId}`);
+        res.status(201).json({
+            message: 'Robot created successfully',
+            robot_id: result.insertId
+        });
+    });
+};
+
 // Get Robot Tasks
 const getRobotTasks = (req, res) => {
   logger.info('Fetching robot tasks...');
@@ -197,4 +231,4 @@ const sendRobotInstruction = (req, res) => {
   });
 };
 
-module.exports = { getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction };
+module.exports = { getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction, createRobot };
