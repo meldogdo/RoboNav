@@ -67,7 +67,6 @@ public class UtilitiesFragment extends Fragment {
     private void setupDropdownMenu() {
         String[] actions = {
                 "Check Robot Position",
-                "Set Initial Robot Position",
                 "Save Current Location",
                 "Remove All Locations",
                 "Get Location by Name",
@@ -156,110 +155,6 @@ public class UtilitiesFragment extends Fragment {
                     } else {
                         showMessage("Please select a robot with a valid location.", requireContext());
                     }
-                });
-                break;
-
-            case "Set Initial Robot Position":
-                // Inflate dynamic content
-                inflateContent(R.layout.dynamic_set_position);
-
-                // Initialize components
-                robotDropdown = dynamicContentContainer.findViewById(R.id.robot_dropdown);
-                Spinner preExistingLocationDropdown = dynamicContentContainer.findViewById(R.id.pre_existing_location_dropdown);
-                EditText inputCoordinates = dynamicContentContainer.findViewById(R.id.input_coordinates);
-                Button btnSetPosition = dynamicContentContainer.findViewById(R.id.btn_set_initial_position);
-
-                // Load robots into dropdown
-                //robotNames = loadRobotNames(requireContext());
-                robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
-                robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                robotDropdown.setAdapter(robotAdapter);
-
-                // Load pre-existing locations into dropdown
-
-                locationNames.add(0, "[Use Coordinates]");
-
-                locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                preExistingLocationDropdown.setAdapter(locationAdapter);
-
-                // Disable location dropdown and coordinates input initially
-                preExistingLocationDropdown.setEnabled(false);
-                inputCoordinates.setEnabled(false);
-
-                // Enable location dropdown and coordinates input when a robot is selected
-                robotDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                        // Enable location dropdown and coordinates input once a robot is selected
-                        preExistingLocationDropdown.setEnabled(true);
-                        inputCoordinates.setEnabled(true);
-
-                        // Clear any existing coordinates when robot is changed
-                        preExistingLocationDropdown.setSelection(0);  // Reset to "No Location"
-                        inputCoordinates.setText("");  // Clear coordinates
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parentView) {
-                        // Handle case when no robot is selected
-                    }
-                });
-
-                // Handle location selection and reset coordinates input or allow editing
-                preExistingLocationDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                        String selectedLocation = preExistingLocationDropdown.getSelectedItem().toString();
-                        if (selectedLocation.equals("[Use Coordinates]")) {
-                            // If "No Location" is selected, allow the user to enter coordinates
-                            inputCoordinates.setEnabled(true);
-                            inputCoordinates.setText("");  // Clear any coordinates
-                        } else {
-                            // If a location is selected, fill coordinates and disable the input
-                            String coordinates = getCoordinatesForLocation(selectedLocation, requireContext());
-                            inputCoordinates.setText(coordinates);
-                            inputCoordinates.setEnabled(false);  // Disable editing
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parentView) {
-                        // Handle case where no location is selected
-                    }
-                });
-
-                // Set position button click listener
-                btnSetPosition.setOnClickListener(v -> {
-                    String selectedRobot = robotDropdown.getSelectedItem().toString();
-                    String selectedLocation = preExistingLocationDropdown.getSelectedItem().toString();
-                    String coordinates = inputCoordinates.getText().toString().trim();
-
-                    // Validate coordinates if "[Use Coordinates]" is selected
-                    if (selectedLocation.equals("[Use Coordinates]")) {
-                        if (coordinates.isEmpty()) {
-                            showToast("Please enter coordinates.");
-                            return;
-                        }
-
-                        // Validate coordinates format and range
-                        if (!isValidCoordinates(coordinates)) {
-                            showToast("Invalid coordinates. Enter as 'latitude, longitude' within valid ranges.");
-                            return;
-                        }
-                    }
-
-                    // Build the message based on the location choice
-                    String message;
-                    if (selectedLocation.equals("[Use Coordinates]")) {
-                        message = selectedRobot + " set to Coordinates:\n" + coordinates;
-                    } else {
-                        // If a location is selected, coordinates are fetched and displayed
-                        String locationCoordinates = getCoordinatesForLocation(selectedLocation,requireContext());
-                        message = selectedRobot + " set to Location:\n" + selectedLocation + " (" + locationCoordinates + ")";
-                    }
-
-                    // Optionally add logic to handle the robot position setting
-                    appendOutput(message, scrollView, view);
                 });
                 break;
             case "Save Current Location":

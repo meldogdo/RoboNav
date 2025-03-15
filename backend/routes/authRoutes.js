@@ -25,3 +25,4 @@ router.post('/protected/users/reset-password', resetPassword);
 router.post('/protected/users/change-password', changePassword);
 
 module.exports = router;
+
