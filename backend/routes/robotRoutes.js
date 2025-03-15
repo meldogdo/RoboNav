@@ -5,7 +5,10 @@ const {
   getRobotLocation,
   getRobotCallbacks,
   sendRobotInstruction,
-  createRobot  // Import the new function
+  createRobot,
+  deleteRobot,
+  createTask,
+  deleteTask
 } = require('../controllers/robotController');
 const { authenticateUser } = require('../middleware/authMiddleware');
 
@@ -20,5 +23,8 @@ router.get('/protected/robot/:robotId/location', getRobotLocation);
 router.get('/protected/robot/callbacks', getRobotCallbacks);
 router.post('/protected/robot/instruction', sendRobotInstruction);
 router.post('/protected/robot/create', createRobot);
+router.post('/protected/robot/task/create', createTask); 
+router.delete('/protected/robot/task/:taskId/delete', deleteTask); 
+router.delete('/protected/robot/:robotId/delete', deleteRobot);
 
 module.exports = router;

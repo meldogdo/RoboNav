@@ -1,6 +1,208 @@
 const db = require('../config/db');
 const logger = require('../utils/logger');
 
+// Delete a task by ID
+const deleteTask = (req, res) => {
+    const { taskId } = req.params;
+
+    // Input validation
+    if (!taskId) {
+        logger.warn('Task ID is required for deletion.');
+        return res.status(400).json({ message: 'Task ID is required' });
+    }
+
+    // Step 1: Check the task state
+    const getTaskSQL = `SELECT state, instruction_ids, robot_id FROM task WHERE task_id = ?`;
+
+    db.query(getTaskSQL, [taskId], (err, results) => {
+        if (err) {
+            logger.error(`Database error while checking task state for task ID ${taskId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            logger.warn(`Task with ID ${taskId} not found.`);
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        const { state, instruction_ids, robot_id } = results[0];
+
+        // Step 2: If state = 2, delete task immediately
+        if (state === 2) {
+            const deleteTaskSQL = `DELETE FROM task WHERE task_id = ?`;
+            db.query(deleteTaskSQL, [taskId], (err, result) => {
+                if (err) {
+                    logger.error(`Database error while deleting task ID ${taskId}:`, err);
+                    return res.status(500).json({ message: 'Database error' });
+                }
+
+                logger.info(`Task with ID ${taskId} deleted successfully.`);
+                return res.json({ message: `Task with ID ${taskId} deleted successfully.` });
+            });
+            return;
+        }
+
+        // Step 3: If state ≠ 2, handle active instructions
+        if (!instruction_ids) {
+            logger.warn(`No instructions associated with task ID ${taskId}.`);
+            return res.status(400).json({ message: 'Task has no instructions to stop.' });
+        }
+
+        const instructionList = instruction_ids.split(',').map(id => parseInt(id.trim()));
+
+        // Fetch all instructions related to this task
+        const getInstructionsSQL = `
+            SELECT ins_id, instruction, status FROM ins_send WHERE ins_id IN (?)
+        `;
+
+        db.query(getInstructionsSQL, [instructionList], (err, instructions) => {
+            if (err) {
+                logger.error(`Database error while fetching instructions for task ID ${taskId}:`, err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            let activeInstruction = null;
+            let orderInstructions = [];
+
+            // Determine active instruction and order instructions
+            instructions.forEach(instr => {
+                if (instr.status === 'accept') {
+                    activeInstruction = instr;
+                } else if (instr.status === 'order') {
+                    orderInstructions.push(instr.ins_id);
+                }
+            });
+
+            // Step 4: Delete all "order" instructions **before** stopping the active one
+            if (orderInstructions.length > 0) {
+                const deleteOrderInstructionsSQL = `DELETE FROM ins_send WHERE ins_id IN (?)`;
+
+                db.query(deleteOrderInstructionsSQL, [orderInstructions], (err) => {
+                    if (err) {
+                        logger.error(`Database error while deleting pending instructions for task ID ${taskId}:`, err);
+                        return res.status(500).json({ message: 'Database error' });
+                    }
+
+                    logger.info(`Deleted ${orderInstructions.length} pending instructions for task ID ${taskId}`);
+                });
+            }
+
+            // Step 5: Stop active instruction if found **after deleting "order" instructions**
+            if (activeInstruction) {
+                const stopInstruction = `navigation:stopNavigation:${activeInstruction.instruction.split(':')[2]}`;
+
+                const insertInstructionSQL = `
+                    INSERT INTO ins_send (robot_id, instruction, status, ctime) VALUES (?, ?, 'order', NOW())
+                `;
+
+                db.query(insertInstructionSQL, [robot_id, stopInstruction], (err) => {
+                    if (err) {
+                        logger.error(`Failed to send stop navigation instruction for task ID ${taskId}:`, err);
+                        return res.status(500).json({ message: 'Failed to send stop navigation instruction.' });
+                    }
+
+                    logger.info(`Stop navigation instruction sent for instruction ID ${activeInstruction.ins_id}`);
+                });
+            }
+
+            // Step 6: Delete the task after stopping/removing instructions
+            const deleteTaskSQL = `DELETE FROM task WHERE task_id = ?`;
+
+            db.query(deleteTaskSQL, [taskId], (err) => {
+                if (err) {
+                    logger.error(`Database error while deleting task ID ${taskId}:`, err);
+                    return res.status(500).json({ message: 'Database error' });
+                }
+
+                logger.info(`Task with ID ${taskId} deleted successfully.`);
+                return res.json({ message: `Task with ID ${taskId} deleted successfully.` });
+            });
+        });
+    });
+};
+
+// Create a new task for a robot
+const createTask = (req, res) => {
+    const { name, robot_id } = req.body;
+
+    // Input validation
+    if (!name || !robot_id) {
+        logger.warn('Missing required fields for creating a task.');
+        return res.status(400).json({ message: 'Missing required fields: name, robot_id' });
+    }
+
+    // Default values
+    const state = 0; // Default task state (e.g., Not Started)
+    const timestamp = new Date(); // Current timestamp
+
+    // SQL query to insert new task
+    const sql = `
+        INSERT INTO task (name, robot_id, state, timeStamp)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(sql, [name, robot_id, state, timestamp], (err, result) => {
+        if (err) {
+            logger.error('Database error while inserting task:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        logger.info(`New task created with ID: ${result.insertId}`);
+        res.status(201).json({
+            message: 'Task created successfully',
+            task_id: result.insertId
+        });
+    });
+};
+
+// Delete a robot by ID
+const deleteRobot = (req, res) => {
+    const { robotId } = req.params;
+
+    // Input validation
+    if (!robotId) {
+        logger.warn('Robot ID is required for deletion.');
+        return res.status(400).json({ message: 'Robot ID is required' });
+    }
+
+    // SQL query to check if the robot has active instructions
+    const checkInstructionsSQL = `
+        SELECT COUNT(*) AS count FROM ins_send
+        WHERE robot_id = ? AND status IN ('accept', 'order')
+    `;
+
+    db.query(checkInstructionsSQL, [robotId], (err, results) => {
+        if (err) {
+            logger.error(`Database error while checking instructions for robot ID ${robotId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        // If robot has active instructions, prevent deletion
+        if (results[0].count > 0) {
+            logger.warn(`Cannot delete robot ID ${robotId} - it has pending instructions.`);
+            return res.status(403).json({ message: 'Cannot delete robot with active instructions (accept/order status).' });
+        }
+
+        // If no active instructions, proceed with deletion
+        const deleteSQL = `DELETE FROM robot WHERE robot_id = ?`;
+
+        db.query(deleteSQL, [robotId], (err, result) => {
+            if (err) {
+                logger.error(`Database error while deleting robot ID ${robotId}:`, err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            if (result.affectedRows === 0) {
+                logger.warn(`Robot with ID ${robotId} not found.`);
+                return res.status(404).json({ message: 'Robot not found' });
+            }
+
+            logger.info(`Robot with ID ${robotId} deleted successfully.`);
+            res.json({ message: `Robot with ID ${robotId} deleted successfully.` });
+        });
+    });
+};
+
 // Create a new robot
 const createRobot = (req, res) => {
     const { type, ip_add, port } = req.body;
@@ -231,4 +433,4 @@ const sendRobotInstruction = (req, res) => {
   });
 };
 
-module.exports = { getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction, createRobot };
+module.exports = {deleteTask,  getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction, createRobot, deleteRobot, createTask};
