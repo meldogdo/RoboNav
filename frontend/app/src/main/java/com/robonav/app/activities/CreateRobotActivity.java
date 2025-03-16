@@ -1,6 +1,7 @@
 package com.robonav.app.activities;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +23,7 @@ public class CreateRobotActivity extends AppCompatActivity {
     private Button submitRobotButton;
     private String token;
     private static final String CREATE_ROBOT_URL = "http://10.0.2.2:8080/api/protected/robot/create";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,8 @@ public class CreateRobotActivity extends AppCompatActivity {
                 response -> {
                     progressDialog.dismiss();
                     Toast.makeText(CreateRobotActivity.this, "Robot created successfully", Toast.LENGTH_SHORT).show();
+                    Intent resultIntent = new Intent();
+                    setResult(RESULT_OK, resultIntent);
                     finish();
                 },
                 error -> {

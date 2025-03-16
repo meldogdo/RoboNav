@@ -48,7 +48,13 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
     private String token;
     private Button createRobotButton;
 
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == getActivity().RESULT_OK) {
+            onUpdate(); // Refresh HomeFragment
+        }
+    }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
@@ -63,7 +69,7 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
         // Set click listener to navigate to Create Robot screen
         createRobotButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CreateRobotActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         });
         // Initialize lists
         robotList = new ArrayList<>();
