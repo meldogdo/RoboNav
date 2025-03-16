@@ -1,6 +1,9 @@
 package com.robonav.app.adapters;
 
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -8,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -15,17 +19,28 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.interfaces.OnUpdateListener;
 import com.robonav.app.models.Robot;
 import com.robonav.app.models.Task;
+import com.robonav.app.utilities.ConfigManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-
+import java.util.Map;
 import java.util.Objects;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
@@ -33,11 +48,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private final Context context;
     private final List<Task> taskList;
     private final List<Robot> robotList;
+    private final OnUpdateListener onUpdateListener;
+    private final String token;
 
-    public TaskAdapter(Context context, List<Task> taskList, List<Robot> robotList) {
+    public TaskAdapter(Context context, List<Task> taskList, List<Robot> robotList, OnUpdateListener onUpdateListener) {
         this.context = context;
         this.taskList = taskList;
         this.robotList = robotList;
+        this.onUpdateListener = onUpdateListener;
+
+        // Retrieve token from SharedPreferences
+        SharedPreferences prefs = context.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+        this.token = prefs.getString("JWT_TOKEN", null);
     }
 
     @NonNull
@@ -49,9 +71,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        List<Task> orderedTaskList = getOrderedTaskList();  // Get the sorted and ordered task list
+        List<Task> orderedTaskList = getOrderedTaskList();
 
-        // Handle case when no tasks are available to avoid crashes
         if (orderedTaskList.size() > position) {
             Task task = orderedTaskList.get(position);
             Robot responsibleRobot = getRobotForTask(task);
@@ -64,7 +85,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             // Handle task status and icon based on progress
             updateTaskStatus(holder, task);
             // Set click listener to show popup
-            holder.itemView.setOnClickListener(view -> showTaskPopup(view, task, responsibleRobot));
+            holder.itemView.setOnClickListener(view -> {showTaskPopup(view, task, responsibleRobot, position);});
 
         }
     }
@@ -110,6 +131,46 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         return orderedTaskList;
     }
 
+    private void deleteTask(int taskId, int position) {
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/delete";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, null,
+                response -> {
+                    try {
+                        String message = response.getString("message");
+                        showMessage(message, context);
+                    } catch (JSONException e) {
+                        showMessage("Task deleted successfully", context);
+                    }
+                    taskList.remove(position);
+                    notifyItemRemoved(position);
+                    if (onUpdateListener != null) {
+                        onUpdateListener.onUpdate();
+                    }
+                },
+                error -> {
+                    try {
+                        String errorMsg = new String(error.networkResponse.data);
+                        JSONObject errorJson = new JSONObject(errorMsg);
+                        String message = errorJson.getString("message");
+                        showMessage(message, context);
+                    } catch (Exception e) {
+                        showMessage("Failed to delete task", context);
+                    }
+                    error.printStackTrace();
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
+
     // Helper method to update task status
     private void updateTaskStatus(TaskViewHolder holder, Task task) {
         if (task.getState().equals("1")) {
@@ -133,22 +194,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public int getItemCount() {
-        // Ensure getItemCount returns the size of the ordered task list
-        List<Task> orderedTaskList = getOrderedTaskList();  // Get the sorted and ordered task list
-        return orderedTaskList.size();  // Return the correct size
+        return getOrderedTaskList().size();
     }
 
-    // Utility function to find the robot responsible for the task
     private Robot getRobotForTask(Task task) {
         for (Robot robot : robotList) {
             if (robot.getId().equals(task.getRobotId())) {
                 return robot;
             }
         }
-        return null; // Return null if no robot is found
+        return null;
     }
 
-    // ViewHolder class
     static class TaskViewHolder extends RecyclerView.ViewHolder {
         TextView taskStartedTextView;
         TextView taskNameTextView, taskRobotTextView, taskProgressTextView;
@@ -164,27 +221,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
     }
 
-    // Show popup method with animations
-    private void showTaskPopup(View anchorView, Task task, Robot responsibleRobot) {
+    private void showTaskPopup(View anchorView, Task task, Robot responsibleRobot, int position) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.task_popup_layout, null);
-
         PopupWindow popupWindow = new PopupWindow(popupView,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 true);
 
-        // Set content for the popup
         TextView titleView = popupView.findViewById(R.id.popup_title);
         ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
-
         TextView endTitle = popupView.findViewById(R.id.end_time_title);
         TextView progressStatus = popupView.findViewById(R.id.progress_status);
         TextView endDate = popupView.findViewById(R.id.date_completed);
         TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
         TextView dateStarted = popupView.findViewById(R.id.date_started); // New TextView
+        Button deleteButton = popupView.findViewById(R.id.delete_task_button);
 
-
-        // Bind task and robot data
         titleView.setText(task.getName());
         responsibleRobotView.setText((responsibleRobot != null ? responsibleRobot.getName() : "Unknown"));
 
@@ -192,12 +244,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             endTitle.setVisibility(View.VISIBLE);
             endDate.setText(task.getEnd());
             endDate.setVisibility(View.VISIBLE);
-        }
-        else{
+        } else {
             endTitle.setVisibility(View.GONE);
             endDate.setVisibility(View.GONE);
         }
-
 
         // Check if date is null and set it accordingly
         String dateCreated = !Objects.equals(task.getDateCreated(), "null") ? task.getDateCreated() : "Unknown";
@@ -231,6 +281,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             return false;
         });
 
+        deleteButton.setOnClickListener(v -> {
+            deleteTask(Integer.parseInt(task.getId()), position);
+            popupWindow.dismiss();
+        });
+
         // Apply slide-up animation
         popupView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_up));
 
@@ -242,8 +297,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);
         slideDown.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-            }
+            public void onAnimationStart(Animation animation) {}
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -251,8 +305,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
+            public void onAnimationRepeat(Animation animation) {}
         });
         popupView.startAnimation(slideDown);
     }
@@ -266,3 +319,4 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 y >= location[1] && y <= location[1] + view.getHeight();
     }
 }
+

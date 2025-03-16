@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.robonav.app.interfaces.OnUpdateListener;
 import com.robonav.app.utilities.ConfigManager;
 
 import androidx.fragment.app.Fragment;
@@ -32,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements OnUpdateListener {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView robotRecyclerView, taskRecyclerView;
@@ -58,8 +60,8 @@ public class HomeFragment extends Fragment {
         taskList = new ArrayList<>();
 
         // Define your adapters upfront
-        robotAdapter = new RobotAdapter(getContext(), robotList, taskList);
-        taskAdapter = new TaskAdapter(getContext(), taskList, robotList);
+        robotAdapter = new RobotAdapter(getContext(), robotList, taskList,this);
+        taskAdapter = new TaskAdapter(getContext(), taskList, robotList,this );
 
         robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         robotRecyclerView.setAdapter(robotAdapter);
@@ -169,4 +171,9 @@ public class HomeFragment extends Fragment {
         queue.add(taskRequest);
     }
 
+    // Implement the generic update callback
+    @Override
+    public void onUpdate() {
+        loadData(); // Refresh the entire fragment
+    }
 }

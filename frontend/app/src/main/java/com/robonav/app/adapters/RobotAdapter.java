@@ -1,9 +1,9 @@
 package com.robonav.app.adapters;
 
-import static com.robonav.app.models.Robot.getTaskInProgress;
-
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,21 +12,34 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import static com.robonav.app.models.Robot.getTaskInProgress;
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.interfaces.OnUpdateListener;
 import com.robonav.app.models.Robot;
 import com.robonav.app.models.Task;
+import com.robonav.app.utilities.ConfigManager;
 
-import org.w3c.dom.Text;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHolder> {
@@ -34,11 +47,19 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
     private final Context context;
     private final List<Robot> robotList;
     private final List<Task> taskList;
+    private final OnUpdateListener onUpdateListener;
+    private final String token;
+    private static final String TAG = "RobotAdapter";
 
-    public RobotAdapter(Context context, List<Robot> robotList, List<Task> taskList) {
+    public RobotAdapter(Context context, List<Robot> robotList, List<Task> taskList, OnUpdateListener onUpdateListener) {
         this.context = context;
         this.robotList = robotList;
         this.taskList = taskList;
+        this.onUpdateListener = onUpdateListener;
+
+        // Retrieve token from SharedPreferences
+        SharedPreferences prefs = context.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+        this.token = prefs.getString("JWT_TOKEN", null);
     }
 
     @NonNull
@@ -55,41 +76,21 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         // Bind data to the robot card
         holder.nameTextView.setText(robot.getName());
         holder.pingTextView.setText("IP: " + robot.getIpAdd());
-
         holder.locationTextView.setText("Location: " + robot.getLocationName());
 
-        // Get active task for the robot
-        Task activeTask = getTaskInProgress(robot, taskList);
+        Task activeTask = Robot.getTaskInProgress(robot, taskList);
+        holder.taskTextView.setText(activeTask != null ? "Task: " + activeTask.getName() : "Task: None");
 
-        // Safely handle the case where no task is in progress
-        if (activeTask != null) {
-            holder.taskTextView.setText("Task: " + activeTask.getName());
-        } else {
-            holder.taskTextView.setText("Task: None");
-        }
-
-        // Update battery icon based on percentage or charging status
         int batteryPercentage = robot.getBattery();
+        holder.batteryTextView.setText(robot.getIsCharging() == 1 ?
+                "Charging (Battery: " + batteryPercentage + "%)" :
+                "Battery: " + batteryPercentage + "%");
 
-        // Check if the robot is charging
-        if (robot.getIsCharging() == 1) {
-            // If the robot is charging, display the charging icon
-            holder.batteryIcon.setImageResource(R.drawable.charging);
-            holder.batteryTextView.setText("Charging (Battery: " + robot.getBattery() + "%)");
-        } else {
-            holder.batteryTextView.setText("Battery: " + robot.getBattery() + "%");
-            // Otherwise, update based on battery percentage
-            if (batteryPercentage > 75) {
-                holder.batteryIcon.setImageResource(R.drawable.ic_full_battery);
-            } else if (batteryPercentage > 25) {
-                holder.batteryIcon.setImageResource(R.drawable.ic_half_battery);
-            } else {
-                holder.batteryIcon.setImageResource(R.drawable.ic_empty_battery);
-            }
-        }
+        holder.batteryIcon.setImageResource(batteryPercentage > 75 ? R.drawable.ic_full_battery :
+                (batteryPercentage > 25 ? R.drawable.ic_half_battery : R.drawable.ic_empty_battery));
 
-        // Show popup on click
-        holder.itemView.setOnClickListener(view -> showRobotPopup(view, robot));
+        // Show popup when robot is clicked
+        holder.itemView.setOnClickListener(view -> showRobotPopup(view, robot, position));
     }
 
     @Override
@@ -97,10 +98,9 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         return robotList.size();
     }
 
-    // ViewHolder class
     static class RobotViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView, pingTextView, batteryTextView, taskTextView, locationTextView;
-        ImageView batteryIcon; // Add reference to the battery icon ImageView
+        ImageView batteryIcon;
 
         public RobotViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -109,37 +109,34 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             batteryTextView = itemView.findViewById(R.id.robot_battery);
             taskTextView = itemView.findViewById(R.id.robot_task);
             locationTextView = itemView.findViewById(R.id.robot_location);
-            batteryIcon = itemView.findViewById(R.id.robot_battery_icon); // Initialize battery icon
+            batteryIcon = itemView.findViewById(R.id.robot_battery_icon);
         }
     }
 
-    // Show popup method
-    private void showRobotPopup(View anchorView, Robot robot) {
+    private void showRobotPopup(View anchorView, Robot robot, int position) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.robot_popup_layout, null);
-
         PopupWindow popupWindow = new PopupWindow(popupView,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 true);
 
-        // Initialize UI components
         TextView titleView = popupView.findViewById(R.id.popup_title);
-        TextView taskNameView = popupView.findViewById(R.id.task_progress_title); // Removed ProgressBar reference
-        TextView taskPercentageView = popupView.findViewById(R.id.task_start);
-        ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
-        TextView batteryPercentageText = popupView.findViewById(R.id.battery_percentage_text);
         TextView locationDetails = popupView.findViewById(R.id.location_details);
         TextView positionDetails = popupView.findViewById(R.id.position_details);
         TextView ipDetails = popupView.findViewById(R.id.ip_details);
-        ProgressBar progressBar = popupView.findViewById(R.id.progress_bar); // ProgressBar reference
+        int batteryPercentage = robot.getBattery();
+        TextView batteryPercentageText = popupView.findViewById(R.id.battery_percentage_text);
+        ImageView swipeDownIcon = popupView.findViewById(R.id.swipe_down_icon);
+        ProgressBar progressBar = popupView.findViewById(R.id.progress_bar);
+        Button deleteButton = popupView.findViewById(R.id.delete_robot_button);
+        TextView taskNameView = popupView.findViewById(R.id.task_progress_title); // Removed ProgressBar reference
+        TextView taskPercentageView = popupView.findViewById(R.id.task_start);
 
-        // Assuming the Robot object has a method getLocation() that returns the current location
+
         locationDetails.setText(robot.getLocationName());
         positionDetails.setText(robot.getLocationCoordinates());
         ipDetails.setText(robot.getIpAdd());
-        int batteryPercentage = robot.getBattery();
         titleView.setText(robot.getName());
-
 
 
         // Check if the robot is charging
@@ -176,9 +173,6 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             progressBar.setProgress(batteryPercentage);
         }
 
-
-
-
         // Set robot name
         titleView.setText(robot.getName());
 
@@ -196,6 +190,11 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         }
 
         // Swipe down icon to close the popup
+        deleteButton.setOnClickListener(v -> {
+            deleteRobot(Integer.parseInt(robot.getId()), position);
+            popupWindow.dismiss();
+        });
+
         swipeDownIcon.setOnClickListener(v -> dismissWithAnimation(popupView, popupWindow));
 
         // Close popup when clicked outside
@@ -209,18 +208,56 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             return false;
         });
 
-        // Show popup with animation
+        // Apply the correct slide-up animation and then show the popup
         popupView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_up));
         popupWindow.showAtLocation(anchorView, Gravity.BOTTOM, 0, 0);
     }
 
+    private void deleteRobot(int robotId, int position) {
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/" + robotId + "/delete";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, null,
+                response -> {
+                    try {
+                        String message = response.getString("message");
+                        showMessage(message, context);
+                    } catch (JSONException e) {
+                        showMessage("Robot deleted successfully", context);
+                    }
+                    robotList.remove(position);
+                    notifyItemRemoved(position);
+                    if (onUpdateListener != null) {
+                        onUpdateListener.onUpdate();
+                    }
+                },
+                error -> {
+                    try {
+                        String errorMsg = new String(error.networkResponse.data);
+                        JSONObject errorJson = new JSONObject(errorMsg);
+                        String message = errorJson.getString("message");
+                        showMessage(message, context);
+                    } catch (Exception e) {
+                        showMessage("Failed to delete robot", context);
+                    }
+                    error.printStackTrace();
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
 
     private void dismissWithAnimation(View popupView, PopupWindow popupWindow) {
         Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down);
         slideDown.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-            }
+            public void onAnimationStart(Animation animation) {}
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -228,8 +265,7 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
+            public void onAnimationRepeat(Animation animation) {}
         });
         popupView.startAnimation(slideDown);
     }
