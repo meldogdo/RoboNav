@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_dark"
+    tools:context=".activities.CreateRobotActivity">
+
+    <!-- Card Container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="325dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        app:cardBackgroundColor="@color/gray_medium"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Robot Name -->
+            <EditText
+                android:id="@+id/robotNameEditText"
+                android:layout_width="279dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:hint="Robot Name"
+                android:inputType="text"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/white"
+                android:textColorHint="@color/gray_high_contrast"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Robot Model -->
+            <EditText
+                android:id="@+id/robotModelEditText"
+                android:layout_width="279dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="15dp"
+                android:hint="Robot Model"
+                android:inputType="text"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/white"
+                android:textColorHint="@color/gray_high_contrast"
+                app:layout_constraintTop_toBottomOf="@id/robotNameEditText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Robot Type -->
+            <EditText
+                android:id="@+id/robotTypeEditText"
+                android:layout_width="279dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="15dp"
+                android:hint="Robot Type"
+                android:inputType="text"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/white"
+                android:textColorHint="@color/gray_high_contrast"
+                app:layout_constraintTop_toBottomOf="@id/robotModelEditText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- IP Address -->
+            <EditText
+                android:id="@+id/ipAddressEditText"
+                android:layout_width="279dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="15dp"
+                android:hint="IP Address"
+                android:inputType="text"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/white"
+                android:textColorHint="@color/gray_high_contrast"
+                app:layout_constraintTop_toBottomOf="@id/robotTypeEditText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Port -->
+            <EditText
+                android:id="@+id/portEditText"
+                android:layout_width="279dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="15dp"
+                android:hint="Port"
+                android:inputType="number"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/white"
+                android:textColorHint="@color/gray_high_contrast"
+                app:layout_constraintTop_toBottomOf="@id/ipAddressEditText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/submitRobotButton"
+                android:layout_width="279dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Create Robot"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/blue_dark"
+                app:layout_constraintTop_toBottomOf="@id/portEditText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
