@@ -15,13 +15,14 @@ const {
   // Callback functions
   getRobotCallbacks,
 
-  // Utility functions
+  // Utility functions (Added missing routes)
   getRobotPosition,
   saveRobotLocation,
   removeAllRobotLocations,
   getCoordinatesByLocation,
   getAllLocations
 } = require('../controllers/robotController');
+
 const { authenticateUser } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -29,26 +30,26 @@ const router = express.Router();
 // Protect all routes under /protected/robot
 router.use('/protected/robot', authenticateUser);
 
-// Routes related to creating, deleting, and managing robots.
-router.get('/robots', getAllRobots);
-router.post('/create', createRobot);
-router.delete('/:robotId/delete', deleteRobot);
-router.get('/:robotId/location', getRobotLocation);
+// 🏗️ **Task Routes**
+router.get('/protected/robot/tasks', getRobotTasks);
+router.post('/protected/robot/task/create', createTask);
+router.delete('/protected/robot/task/:taskId/delete', deleteTask);
 
-// Routes for handling robot tasks.
-router.get('/tasks', getRobotTasks);
-router.post('/task/create', createTask);
-router.delete('/task/:taskId/delete', deleteTask);
+// 🤖 **Robot Routes**
+router.get('/protected/robot/robots', getAllRobots);
+router.post('/protected/robot/create', createRobot);
+router.delete('/protected/robot/:robotId/delete', deleteRobot);
+router.get('/protected/robot/:robotId/location', getRobotLocation);
 
-// Routes for handling robot instructions and callbacks.
-router.get('/callbacks', getRobotCallbacks);
-router.post('/instruction', sendRobotInstruction);
+// 📡 **Instruction & Callback Routes**
+router.post('/protected/robot/instruction', sendRobotInstruction);
+router.get('/protected/robot/callbacks', getRobotCallbacks);
 
-// Routes for getting and managing robot locations.
-router.get('/:robotId/position', getRobotPosition);
-router.post('/save-location', saveRobotLocation);
-router.delete('/:robotId/remove-locations', removeAllRobotLocations);
-router.get('/location/:locationName', getCoordinatesByLocation);
-router.get('/locations', getAllLocations);
+// 🗺️ **Location & Position Routes (Added Missing Ones)**
+router.get('/protected/robot/:robotId/position', getRobotPosition);
+router.post('/protected/robot/save-location', saveRobotLocation);
+router.delete('/protected/robot/:robotId/remove-locations', removeAllRobotLocations);
+router.get('/protected/robot/location/:locationName', getCoordinatesByLocation);
+router.get('/protected/robot/locations', getAllLocations);
 
 module.exports = router;
