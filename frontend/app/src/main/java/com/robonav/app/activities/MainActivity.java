@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;  // Import Log
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity"; // Log tag
     private EditText usernameEditText;
     private EditText passwordEditText;
     private Toast currentToast; // Store the latest toast reference
@@ -36,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d(TAG, "onCreate: MainActivity started");
 
         // Initialize the views
         usernameEditText = findViewById(R.id.usernameEditText);
@@ -53,24 +57,27 @@ public class MainActivity extends AppCompatActivity {
         String prefilledUsername = intent.getStringExtra("username");
         if (prefilledUsername != null && !prefilledUsername.isEmpty()) {
             usernameEditText.setText(prefilledUsername);
+            Log.d(TAG, "Prefilled username: " + prefilledUsername);
         }
 
-        // OnClickListener for "Forgot Password"
+        // Set up click listeners
         forgotPasswordText.setOnClickListener(v -> {
+            Log.d(TAG, "Forgot Password clicked");
             Intent forgotPasswordIntent = new Intent(MainActivity.this, ForgotPasswordActivity.class);
             startActivity(forgotPasswordIntent);
         });
 
-        // OnClickListener for "Sign Up"
         signUpText.setOnClickListener(v -> {
+            Log.d(TAG, "Sign Up clicked");
             Intent signUpIntent = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(signUpIntent);
         });
 
-        // Set onClickListener for the login button
         loginButton.setOnClickListener(v -> {
             String username = usernameEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
+
+            Log.d(TAG, "Login button clicked. Username: " + username);
 
             if (!areInputsValid(username, password)) return;
 
@@ -83,14 +90,16 @@ public class MainActivity extends AppCompatActivity {
             try {
                 jsonBody.put("username", username);
                 jsonBody.put("password", password);
+                Log.d(TAG, "JSON request body: " + jsonBody.toString());
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "JSON creation error", e);
             }
 
             // Send JSON request
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, LOGIN_URL, jsonBody,
                     response -> {
                         progressDialog.dismiss();
+                        Log.d(TAG, "Server Response: " + response.toString());
                         try {
                             if (response.has("token")) {
                                 String token = response.getString("token");
@@ -108,12 +117,17 @@ public class MainActivity extends AppCompatActivity {
                                 homeIntent.putExtra("username", username);
                                 startActivity(homeIntent);
                                 finish();
+                            } else {
+                                Log.e(TAG, "Token missing in response");
+                                showToast("Login failed. Try again.");
                             }
                         } catch (JSONException e) {
+                            Log.e(TAG, "Error parsing response", e);
                             showToast("Error parsing response");
                         }
                     }, error -> {
                 progressDialog.dismiss();
+                Log.e(TAG, "Volley error: " + error.toString());
 
                 // Default error message
                 String errorMessage = "An error occurred. Please try again.";
@@ -121,28 +135,25 @@ public class MainActivity extends AppCompatActivity {
                 // Check if the error has a network response
                 if (error.networkResponse != null) {
                     try {
-                        // Get the error response body
                         String responseBody = new String(error.networkResponse.data, "UTF-8");
-
-                        // Parse the error response body into a JSONObject
                         JSONObject errorResponse = new JSONObject(responseBody);
+                        Log.e(TAG, "Error response from server: " + responseBody);
 
-                        // Check if there's a "message" field in the error response
                         if (errorResponse.has("message")) {
                             errorMessage = errorResponse.getString("message");
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Error parsing error response", e);
                     }
                 }
 
-                // Show the extracted or default error message
                 showToast(errorMessage);
             }) {
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json"); // Ensure JSON request
+                    headers.put("Content-Type", "application/json");
+                    Log.d(TAG, "Request Headers: " + headers.toString());
                     return headers;
                 }
             };
@@ -150,38 +161,28 @@ public class MainActivity extends AppCompatActivity {
             RequestQueue queue = Volley.newRequestQueue(this);
             queue.add(request);
         });
-
     }
 
     // Validate username and password
     private boolean areInputsValid(String username, String password) {
+        Log.d(TAG, "Validating inputs: " + username + " / " + password);
 
-        // Check for empty fields
         if (username.isEmpty() || password.isEmpty()) {
             showToast("Please fill in both fields");
             return false;
         }
 
-        // Validate username (4–20 alphanumeric characters)
         if (!isValidUsername(username)) {
             showToast("Username must be between 4-20 alphanumeric characters.");
             return false;
         }
 
-        // Validate password length
         if (!isValidPassword(password)) {
-            // Check if the password is too short or too long, contains spaces, or invalid characters
-            if (password.length() < 6 || password.length() > 20) {
-                showToast("Password must be between 6 and 20 characters.");
-            } else if (password.contains(" ")) {
-                showToast("Password cannot contain spaces.");
-            } else {
-                showToast("Password contains invalid characters. Only letters, numbers, and special characters (@, #, !, $, %, ^, &, *, etc.) are allowed.");
-            }
+            showToast("Invalid password format.");
             return false;
         }
 
-        return true; // All validations passed
+        return true;
     }
 
     private boolean isValidUsername(String username) {
@@ -189,14 +190,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isValidPassword(String password) {
-        // Check if password length is between 6 and 20, contains no spaces, or invalid characters
         return password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$");
     }
 
     // Toast helper method to prevent toast queue buildup
     private void showToast(String message) {
+        Log.d(TAG, "Showing toast: " + message);
         if (currentToast != null) {
-            currentToast.cancel();  // Cancel the previous toast if it exists
+            currentToast.cancel();
         }
         currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         currentToast.show();
