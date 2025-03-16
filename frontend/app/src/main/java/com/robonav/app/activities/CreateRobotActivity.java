@@ -11,6 +11,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.utilities.ConfigManager;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
@@ -21,7 +23,8 @@ public class CreateRobotActivity extends AppCompatActivity {
     private EditText robotNameEditText, robotModelEditText, robotTypeEditText, ipAddressEditText, portEditText;
     private Button submitRobotButton;
     private String token;
-    private static final String CREATE_ROBOT_URL = "http://10.0.2.2:8080/api/protected/robot/create";
+    private static final String CREATE_ROBOT_URL = ConfigManager.getBaseUrl() + "/api/protected/robot/create";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
