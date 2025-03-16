@@ -427,11 +427,12 @@ CREATE TABLE `task` (
   `name` varchar(128) DEFAULT NULL,
   `robot_id` int DEFAULT NULL,
   `state` tinyint DEFAULT NULL,
+  `instruction_list` text,
   `cost` int DEFAULT NULL,
   `start` varchar(128) DEFAULT NULL,
   `end` varchar(128) DEFAULT NULL,
   `timeStamp` datetime DEFAULT NULL,
-  `instruction_ids` text,
+  `current_instruction_index` int DEFAULT '0',
   PRIMARY KEY (`task_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -442,7 +443,7 @@ CREATE TABLE `task` (
 
 LOCK TABLES `task` WRITE;
 /*!40000 ALTER TABLE `task` DISABLE KEYS */;
-INSERT INTO `task` VALUES (1,'task1',1,1,NULL,'2023-03-16 08:45:21',NULL,NULL,'2,5'),(2,'task2',11,2,NULL,'2025-02-20 13:35:07','2025-01-01 09:27:49',NULL,'1,2'),(3,'task3',1,-1,NULL,NULL,NULL,NULL,'2,6'),(4,'task4',2,0,NULL,NULL,NULL,NULL,'2,8'),(5,'task5',3,NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `task` VALUES (1,'task1',1,0,'[\"navigation:startNavigation:point 2\",\"navigation:startNavigation:point 2\"]',NULL,'2023-03-16 08:45:21',NULL,NULL,0),(2,'task2',11,2,NULL,NULL,'2025-02-20 13:35:07','2025-01-01 09:27:49',NULL,0),(3,'task3',1,-1,NULL,NULL,NULL,NULL,NULL,0),(4,'task4',2,0,NULL,NULL,NULL,NULL,NULL,0),(5,'task5',3,NULL,NULL,NULL,NULL,NULL,NULL,0);
 /*!40000 ALTER TABLE `task` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -484,4 +485,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-16  1:07:52
+-- Dump completed on 2025-03-16 17:07:05

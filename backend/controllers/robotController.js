@@ -140,14 +140,13 @@ const getAllLocations = (req, res) => {
 const deleteTask = (req, res) => {
     const { taskId } = req.params;
 
-    // Input validation
     if (!taskId) {
         logger.warn('Task ID is required for deletion.');
         return res.status(400).json({ message: 'Task ID is required' });
     }
 
-    // Step 1: Check the task state
-    const getTaskSQL = `SELECT state, instruction_ids, robot_id FROM task WHERE task_id = ?`;
+    // Fetch task state
+    const getTaskSQL = `SELECT state FROM task WHERE task_id = ?`;
 
     db.query(getTaskSQL, [taskId], (err, results) => {
         if (err) {
@@ -160,12 +159,12 @@ const deleteTask = (req, res) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const { state, instruction_ids, robot_id } = results[0];
+        const { state } = results[0];
 
-        // Step 2: If state = 2, delete task immediately
-        if (state === 2) {
+        // Allow deletion if task is Not Started (0) or Completed (2)
+        if (state === 0 || state === 2) {
             const deleteTaskSQL = `DELETE FROM task WHERE task_id = ?`;
-            db.query(deleteTaskSQL, [taskId], (err, result) => {
+            db.query(deleteTaskSQL, [taskId], (err) => {
                 if (err) {
                     logger.error(`Database error while deleting task ID ${taskId}:`, err);
                     return res.status(500).json({ message: 'Database error' });
@@ -177,83 +176,200 @@ const deleteTask = (req, res) => {
             return;
         }
 
-        // Step 3: If state ≠ 2, handle active instructions
-        if (!instruction_ids) {
-            logger.warn(`No instructions associated with task ID ${taskId}.`);
-            return res.status(400).json({ message: 'Task has no instructions to stop.' });
+        // Prevent deletion of Running tasks (state = 1)
+        logger.warn(`Task ID ${taskId} is still running. Stop the task before deleting.`);
+        return res.status(400).json({
+            message: `Task ID ${taskId} is still running. Please stop the task before deleting.`
+        });
+    });
+};
+
+const startTask = (req, res) => {
+    const { taskId } = req.params;
+
+    if (!taskId) {
+        logger.warn('Task ID is required.');
+        return res.status(400).json({ message: 'Task ID is required.' });
+    }
+
+    // Step 1: Fetch task details (robot ID + instruction list)
+    const getTaskSQL = `SELECT robot_id, instruction_list FROM task WHERE task_id = ? AND state = 0`;
+
+    db.query(getTaskSQL, [taskId], (err, results) => {
+        if (err) {
+            logger.error(`Database error while fetching task ${taskId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
         }
 
-        const instructionList = instruction_ids.split(',').map(id => parseInt(id.trim()));
+        if (results.length === 0) {
+            logger.warn(`Task ${taskId} not found or already started.`);
+            return res.status(400).json({ message: 'Task not found or has already started.' });
+        }
 
-        // Fetch all instructions related to this task
-        const getInstructionsSQL = `
-            SELECT ins_id, instruction, status FROM ins_send WHERE ins_id IN (?)
-        `;
+        const { robot_id, instruction_list } = results[0];
 
-        db.query(getInstructionsSQL, [instructionList], (err, instructions) => {
+        if (!instruction_list) {
+            logger.warn(`Task ${taskId} has no instructions.`);
+            return res.status(400).json({ message: 'Task has no instructions.' });
+        }
+
+        const instructions = instruction_list.split(',').map(instr => instr.trim()); // Convert to array
+
+        // Step 2: Check if another task for the same robot is already running
+        const checkActiveTaskSQL = `SELECT task_id FROM task WHERE robot_id = ? AND state = 1`;
+
+        db.query(checkActiveTaskSQL, [robot_id], (err, activeResults) => {
             if (err) {
-                logger.error(`Database error while fetching instructions for task ID ${taskId}:`, err);
+                logger.error(`Database error while checking active task for robot ${robot_id}:`, err);
                 return res.status(500).json({ message: 'Database error' });
             }
 
-            let activeInstruction = null;
-            let orderInstructions = [];
-
-            // Determine active instruction and order instructions
-            instructions.forEach(instr => {
-                if (instr.status === 'accept') {
-                    activeInstruction = instr;
-                } else if (instr.status === 'order') {
-                    orderInstructions.push(instr.ins_id);
-                }
-            });
-
-            // Step 4: Delete all "order" instructions **before** stopping the active one
-            if (orderInstructions.length > 0) {
-                const deleteOrderInstructionsSQL = `DELETE FROM ins_send WHERE ins_id IN (?)`;
-
-                db.query(deleteOrderInstructionsSQL, [orderInstructions], (err) => {
-                    if (err) {
-                        logger.error(`Database error while deleting pending instructions for task ID ${taskId}:`, err);
-                        return res.status(500).json({ message: 'Database error' });
-                    }
-
-                    logger.info(`Deleted ${orderInstructions.length} pending instructions for task ID ${taskId}`);
+            if (activeResults.length > 0) {
+                const activeTaskId = activeResults[0].task_id;
+                logger.warn(`Robot ${robot_id} already has an active task (ID: ${activeTaskId}). Cannot start a new task.`);
+                return res.status(400).json({
+                    message: `Robot ${robot_id} is already running task ID ${activeTaskId}. Please complete that task before starting a new one.`
                 });
             }
 
-            // Step 5: Stop active instruction if found **after deleting "order" instructions**
-            if (activeInstruction) {
-                const stopInstruction = `navigation:stopNavigation:${activeInstruction.instruction.split(':')[2]}`;
+            // Step 3: No active task exists, update task state to running
+            const updateTaskSQL = `UPDATE task SET state = 1 WHERE task_id = ?`;
 
-                const insertInstructionSQL = `
-                    INSERT INTO ins_send (robot_id, instruction, status, ctime) VALUES (?, ?, 'order', NOW())
-                `;
-
-                db.query(insertInstructionSQL, [robot_id, stopInstruction], (err) => {
-                    if (err) {
-                        logger.error(`Failed to send stop navigation instruction for task ID ${taskId}:`, err);
-                        return res.status(500).json({ message: 'Failed to send stop navigation instruction.' });
-                    }
-
-                    logger.info(`Stop navigation instruction sent for instruction ID ${activeInstruction.ins_id}`);
-                });
-            }
-
-            // Step 6: Delete the task after stopping/removing instructions
-            const deleteTaskSQL = `DELETE FROM task WHERE task_id = ?`;
-
-            db.query(deleteTaskSQL, [taskId], (err) => {
+            db.query(updateTaskSQL, [taskId], (err) => {
                 if (err) {
-                    logger.error(`Database error while deleting task ID ${taskId}:`, err);
-                    return res.status(500).json({ message: 'Database error' });
+                    logger.error(`Database error while updating task ${taskId} to running:`, err);
+                    return res.status(500).json({ message: 'Failed to update task state' });
                 }
 
-                logger.info(`Task with ID ${taskId} deleted successfully.`);
-                return res.json({ message: `Task with ID ${taskId} deleted successfully.` });
+                logger.info(`Task ${taskId} updated to Running. Starting queue.`);
+
+                // Step 4: Start queueing the instructions
+                queueTaskInstructions(taskId, robot_id, instructions);
+
+                return res.json({ message: `Task ${taskId} started successfully.` });
             });
         });
     });
+};
+
+const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
+    const processNextInstruction = (taskId, robotId, instructions, index) => {
+        if (index >= instructions.length) {
+            logger.info(`All instructions for task ${taskId} completed. Marking as complete...`);
+
+            // Step 1: Mark task as complete (`state = 2`)
+            const completeTaskSQL = `UPDATE task SET state = 2, current_instruction_index = 0 WHERE task_id = ?`;
+            db.query(completeTaskSQL, [taskId], (err) => {
+                if (err) {
+                    logger.error(`Database error updating task ${taskId} to complete:`, err);
+                } else {
+                    logger.info(`Task ${taskId} marked as complete.`);
+                }
+            });
+
+            return; // No more instructions to process
+        }
+
+        // Step 2: Check if task has been stopped before proceeding
+        const checkTaskStateSQL = `SELECT state FROM task WHERE task_id = ?`;
+
+        db.query(checkTaskStateSQL, [taskId], (err, results) => {
+            if (err) {
+                logger.error(`Database error while checking state of task ${taskId}:`, err);
+                return;
+            }
+
+            if (results.length === 0) {
+                logger.warn(`Task ID ${taskId} not found, stopping queue.`);
+                return;
+            }
+
+            const { state } = results[0];
+
+            if (state === 3) {
+                const adjustedIndex = Math.max(0, index - 1); // Ensure it's at least 0
+                
+                logger.warn(`Task ${taskId} has been stopped. Storing current index ${adjustedIndex}.`);
+                
+                // Store `index - 1` to redo the last instruction when resuming
+                const updateIndexSQL = `UPDATE task SET current_instruction_index = ? WHERE task_id = ?`;
+                db.query(updateIndexSQL, [adjustedIndex, taskId], (err) => {
+                    if (err) {
+                        logger.error(`Database error while updating current instruction index for task ${taskId}:`, err);
+                    } else {
+                        logger.info(`Task ${taskId} progress saved at index ${adjustedIndex}.`);
+                    }
+                });
+
+                return; // Stop queueing instructions
+            }
+
+            const instruction = instructions[index];
+
+            // Step 3: Insert the instruction into `ins_send`
+            const insertInstructionSQL = `
+                INSERT INTO ins_send (robot_id, instruction, status, ctime) 
+                VALUES (?, ?, 'order', NOW())
+            `;
+
+            db.query(insertInstructionSQL, [robotId, instruction], (err, result) => {
+                if (err) {
+                    logger.error(`Failed to send instruction: ${instruction} for task ${taskId}:`, err);
+                    return;
+                }
+
+                const insId = result.insertId;
+                logger.info(`Instruction ${instruction} (ID: ${insId}) sent to robot ${robotId}.`);
+
+                // Step 4: Update progress in the database
+                const updateTaskSQL = `UPDATE task SET current_instruction_index = ? WHERE task_id = ?`;
+
+                db.query(updateTaskSQL, [index, taskId], (err) => {
+                    if (err) {
+                        logger.error(`Database error while updating instruction index for task ${taskId}:`, err);
+                    }
+                });
+
+                // Step 5: Wait for the instruction to complete before moving to the next one
+                waitForInstructionCompletion(insId, robotId, () => {
+                    processNextInstruction(taskId, robotId, instructions, index + 1);
+                });
+            });
+        });
+    };
+
+    processNextInstruction(taskId, robotId, instructions, index);
+};
+
+const waitForInstructionCompletion = (insId, robotId, callback) => {
+    const checkStatusSQL = `SELECT status FROM ins_send WHERE ins_id = ?`;
+
+    const interval = setInterval(() => {
+        db.query(checkStatusSQL, [insId], (err, results) => {
+            if (err) {
+                logger.error(`Error checking status for instruction ID ${insId}:`, err);
+                clearInterval(interval);
+                return;
+            }
+
+            if (results.length === 0) {
+                logger.warn(`Instruction ID ${insId} no longer exists.`);
+                clearInterval(interval);
+                return;
+            }
+
+            const { status } = results[0];
+
+            if (status === 'complete') {
+                logger.info(`Instruction ID ${insId} completed successfully.`);
+                clearInterval(interval);
+                callback(); // Move to the next instruction
+            } else if (status === 'emg' || status === 'aborted') {
+                logger.warn(`Instruction ID ${insId} was stopped or failed (Status: ${status}).`);
+                clearInterval(interval);
+            }
+        });
+    }, 5000); // Check every 5 seconds
 };
 
 // Create a new task for a robot
@@ -290,35 +406,98 @@ const createTask = (req, res) => {
     });
 };
 
+const stopTask = (req, res) => {
+    const { taskId } = req.params;
+
+    if (!taskId) {
+        logger.warn('Task ID is required to stop a task.');
+        return res.status(400).json({ message: 'Task ID is required.' });
+    }
+
+    // Step 1: Fetch the task details
+    const getTaskSQL = `SELECT robot_id, state, current_instruction_index FROM task WHERE task_id = ?`;
+
+    db.query(getTaskSQL, [taskId], (err, results) => {
+        if (err) {
+            logger.error(`Database error while fetching task ${taskId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            logger.warn(`Task ${taskId} not found.`);
+            return res.status(404).json({ message: 'Task not found.' });
+        }
+
+        const { robot_id, state, current_instruction_index } = results[0];
+
+        // If the task is not running, return an error
+        if (state !== 1) {
+            logger.warn(`Task ${taskId} is not currently running.`);
+            return res.status(400).json({ message: 'Task is not running and cannot be stopped.' });
+        }
+
+        // Step 2: Send an emergency stop instruction to the robot
+        const stopInstruction = `navigation:stopNavigation`;
+
+        const insertStopInstructionSQL = `
+            INSERT INTO ins_send (robot_id, instruction, status, ctime) 
+            VALUES (?, ?, 'emg', NOW())
+        `;
+
+        db.query(insertStopInstructionSQL, [robot_id, stopInstruction], (err) => {
+            if (err) {
+                logger.error(`Database error while sending stop command for robot ${robot_id}:`, err);
+                return res.status(500).json({ message: 'Failed to send stop command.' });
+            }
+
+            logger.info(`Emergency stop instruction sent for robot ${robot_id}.`);
+
+            // Step 3: Mark the task as stopped (`state = 3`)
+            const updateTaskSQL = `UPDATE task SET state = 3 WHERE task_id = ?`;
+
+            db.query(updateTaskSQL, [taskId], (err) => {
+                if (err) {
+                    logger.error(`Database error while updating task ${taskId} to stopped:`, err);
+                    return res.status(500).json({ message: 'Failed to update task state to stopped.' });
+                }
+
+                logger.info(`Task ${taskId} marked as stopped at index ${current_instruction_index}.`);
+                res.json({ message: `Task ${taskId} has been stopped. Progress saved at instruction index ${current_instruction_index}.` });
+            });
+        });
+    });
+};
+
 // Delete a robot by ID
 const deleteRobot = (req, res) => {
     const { robotId } = req.params;
 
-    // Input validation
     if (!robotId) {
         logger.warn('Robot ID is required for deletion.');
         return res.status(400).json({ message: 'Robot ID is required' });
     }
 
-    // SQL query to check if the robot has active instructions
-    const checkInstructionsSQL = `
-        SELECT COUNT(*) AS count FROM ins_send
-        WHERE robot_id = ? AND status IN ('accept', 'order')
+    // Step 1: Check if the robot has any tasks that are Not Started (0) or Running (1)
+    const checkTasksSQL = `
+        SELECT COUNT(*) AS count FROM task
+        WHERE robot_id = ? AND state IN (0, 1)
     `;
 
-    db.query(checkInstructionsSQL, [robotId], (err, results) => {
+    db.query(checkTasksSQL, [robotId], (err, results) => {
         if (err) {
-            logger.error(`Database error while checking instructions for robot ID ${robotId}:`, err);
+            logger.error(`Database error while checking tasks for robot ID ${robotId}:`, err);
             return res.status(500).json({ message: 'Database error' });
         }
 
-        // If robot has active instructions, prevent deletion
+        // Prevent deletion if the robot has tasks that are not started or running
         if (results[0].count > 0) {
-            logger.warn(`Cannot delete robot ID ${robotId} - it has pending instructions.`);
-            return res.status(403).json({ message: 'Cannot delete robot with active instructions (accept/order status).' });
+            logger.warn(`Cannot delete robot ID ${robotId} - it has pending or active tasks.`);
+            return res.status(403).json({
+                message: `Cannot delete robot ID ${robotId}. It has tasks that are either not started or still running. Complete or delete those tasks first.`
+            });
         }
 
-        // If no active instructions, proceed with deletion
+        // Step 2: If no such tasks exist, proceed with deletion
         const deleteSQL = `DELETE FROM robot WHERE robot_id = ?`;
 
         db.query(deleteSQL, [robotId], (err, result) => {
@@ -400,6 +579,7 @@ const getRobotTasks = (req, res) => {
         res.json(tasks);
     });
 };
+
 // Get all robots
 const getAllRobots = (req, res) => {
     logger.info('Fetching all robots...');
@@ -539,33 +719,60 @@ const getRobotCallbacks = (req, res) => {
 
 
 // Send robot instructions
-const sendRobotInstruction = (req, res) => {
-    const { robot_id, instruction } = req.body;
+const addInstructionToTask = (req, res) => {
+    const { task_id, instruction } = req.body;
 
-    if (!robot_id || !instruction) {
-        logger.warn('Missing required fields: Robot ID or instruction.');
-        return res.status(400).json({ message: 'Robot ID and instruction are required' });
+    if (!task_id || !instruction) {
+        logger.warn('Missing required fields: Task ID or instruction.');
+        return res.status(400).json({ message: 'Task ID and instruction are required' });
     }
 
-    logger.info(`Queuing instruction for robot ${robot_id}: ${instruction}`);
+    logger.info(`Adding instruction to task ${task_id}: ${instruction}`);
 
-    const insertQuery = `
-      INSERT INTO ins_send (robot_id, instruction, status, ctime)
-      VALUES (?, ?, 'order', NOW())
-  `;
+    // Step 1: Fetch the current instruction list for the given task
+    const getTaskSQL = `SELECT instruction_list FROM task WHERE task_id = ? AND state = 0 LIMIT 1`;
 
-    db.query(insertQuery, [robot_id, instruction], (err, result) => {
+    db.query(getTaskSQL, [task_id], (err, results) => {
         if (err) {
-            logger.error(`Database error while queuing instruction for robot ${robot_id}:`, err);
-            return res.status(500).json({ message: 'Database error', error: err });
+            logger.error(`Database error while fetching task ID ${task_id}:`, err);
+            return res.status(500).json({ message: 'Database error' });
         }
 
-        logger.info(`Instruction successfully queued for robot ${robot_id} with ID: ${result.insertId}`);
-        res.json({
-            message: `Instruction queued for robot ${robot_id}`,
-            instructionId: result.insertId
+        if (results.length === 0) {
+            logger.warn(`Task ID ${task_id} not found or is already started.`);
+            return res.status(400).json({ message: 'Task not found or has already started.' });
+        }
+
+        let instructionList = [];
+
+        // Step 2: Parse existing instructions if any
+        if (results[0].instruction_list) {
+            try {
+                instructionList = JSON.parse(results[0].instruction_list);
+            } catch (parseErr) {
+                logger.error(`Error parsing instruction list for task ${task_id}:`, parseErr);
+                return res.status(500).json({ message: 'Error parsing instruction list.' });
+            }
+        }
+
+        // Step 3: Append the new instruction
+        instructionList.push(instruction);
+        const updatedInstructionList = JSON.stringify(instructionList);
+
+        // Step 4: Update the task table with the new instruction list
+        const updateTaskSQL = `UPDATE task SET instruction_list = ? WHERE task_id = ?`;
+
+        db.query(updateTaskSQL, [updatedInstructionList, task_id], (err) => {
+            if (err) {
+                logger.error(`Database error while updating instruction list for task ID ${task_id}:`, err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            logger.info(`Instruction added successfully to task ${task_id}.`);
+            res.json({ message: `Instruction added to task ${task_id}.` });
         });
     });
 };
 
-module.exports = { getAllLocations, getCoordinatesByLocation, removeAllRobotLocations, saveRobotLocation, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, sendRobotInstruction, createRobot, deleteRobot, createTask };
+
+module.exports = { getAllLocations, getCoordinatesByLocation, removeAllRobotLocations, saveRobotLocation, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };

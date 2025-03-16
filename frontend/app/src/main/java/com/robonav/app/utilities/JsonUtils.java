@@ -356,7 +356,7 @@ public class JsonUtils {
         }
 
         // Define the URL for the API endpoint
-        String apiUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/instruction";
+        String apiUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/task/instruction";
         RequestQueue queue = Volley.newRequestQueue(context);
 
         // Create a JsonObjectRequest for the POST request

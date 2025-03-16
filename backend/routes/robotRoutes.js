@@ -10,7 +10,7 @@ const {
   createRobot,
   deleteRobot,
   getRobotLocation,
-  sendRobotInstruction,
+  addInstructionToTask,
 
   // Callback functions
   getRobotCallbacks,
@@ -42,7 +42,7 @@ router.delete('/protected/robot/:robotId/delete', deleteRobot);
 router.get('/protected/robot/:robotId/location', getRobotLocation);
 
 // 📡 **Instruction & Callback Routes**
-router.post('/protected/robot/instruction', sendRobotInstruction);
+router.post('/protected/robot/task/instruction', addInstructionToTask);
 router.get('/protected/robot/callbacks', getRobotCallbacks);
 
 // 🗺️ **Location & Position Routes (Added Missing Ones)**

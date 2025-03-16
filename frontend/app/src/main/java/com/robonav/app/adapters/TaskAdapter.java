@@ -177,12 +177,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.taskProgressTextView.setText("Status: Active");
             holder.taskIconImageView.setImageResource(R.drawable.bot);
             holder.taskIconImageView.setVisibility(View.VISIBLE);
-        } else if (task.getState().equals("-1")) {
-            holder.taskProgressTextView.setText("Status: Error");
-            holder.taskIconImageView.setImageResource(R.drawable.ic_error);
-            holder.taskIconImageView.setVisibility(View.VISIBLE);
         } else if (task.getState().equals("0")) {
-            holder.taskProgressTextView.setText("Status: Queued");
+            holder.taskProgressTextView.setText("Status: Not Started");
             holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
             holder.taskIconImageView.setVisibility(View.VISIBLE);
         } else if (task.getState().equals("2")) {
@@ -257,10 +253,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         if (task.getState().equals("1")) {
             progressStatus.setText("Active");
         } else {
-            if (task.getState().equals("-1")) {
-                progressStatus.setText("Error");
-            } else if (task.getState().equals("0")) {
-                progressStatus.setText("Queued");
+            if (task.getState().equals("0")) {
+                progressStatus.setText("Not Started");
             }
             else if (task.getState().equals("2")){
                 progressStatus.setText("Complete");
