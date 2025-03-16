@@ -1,7 +1,9 @@
 package com.robonav.app.activities;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,7 +26,7 @@ public class CreateTaskActivity extends AppCompatActivity {
     private EditText taskNameEditText, robotIdEditText;
     private Button submitTaskButton;
     private String token;
-    private static final String CREATE_TASK_URL = ConfigManager.getBaseUrl() + "/api/protected/task/create";
+    private static final String CREATE_TASK_URL = ConfigManager.getBaseUrl() + "/api/protected/robot/task/create";
 
     private static Toast activeToast; // Global Toast instance to prevent queuing
 
@@ -56,6 +58,8 @@ public class CreateTaskActivity extends AppCompatActivity {
         submitTaskButton.setOnClickListener(v -> createTask());
     }
 
+    private static final String TAG = "CreateTask";
+
     private void createTask() {
         String taskName = taskNameEditText.getText().toString().trim();
         String robotId = robotIdEditText.getText().toString().trim();
@@ -85,12 +89,14 @@ public class CreateTaskActivity extends AppCompatActivity {
                 response -> {
                     progressDialog.dismiss();
                     showToast("Task created successfully");
+                    Intent resultIntent = new Intent();
+                    setResult(RESULT_OK, resultIntent);
                     finish();
                 },
                 error -> {
                     progressDialog.dismiss();
-
                     String errorMessage = "Error creating task";
+
                     if (error.networkResponse != null) {
                         try {
                             String responseBody = new String(error.networkResponse.data, "UTF-8");
@@ -98,11 +104,9 @@ public class CreateTaskActivity extends AppCompatActivity {
                             if (errorResponse.has("message")) {
                                 errorMessage = errorResponse.getString("message");
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        } catch (Exception ignored) {
                         }
                     }
-
                     showToast(errorMessage);
                 }) {
             @Override
@@ -113,7 +117,6 @@ public class CreateTaskActivity extends AppCompatActivity {
                 return headers;
             }
         };
-
         queue.add(request);
     }
 

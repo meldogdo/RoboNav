@@ -89,6 +89,8 @@ public class CreateRobotActivity extends AppCompatActivity {
                 response -> {
                     progressDialog.dismiss();
                     showToast("Robot created successfully");
+                    Intent resultIntent = new Intent();
+                    setResult(RESULT_OK, resultIntent);
                     finish();
                 },
                 error -> {
