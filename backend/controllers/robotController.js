@@ -193,7 +193,7 @@ const startTask = (req, res) => {
     }
 
     // Step 1: Fetch task details (robot ID + instruction list)
-    const getTaskSQL = `SELECT robot_id, instruction_list FROM task WHERE task_id = ? AND state = 0`;
+    const getTaskSQL = `SELECT robot_id, instruction_list FROM task WHERE task_id = ? AND state = 0 OR state = 3`;
 
     db.query(getTaskSQL, [taskId], (err, results) => {
         if (err) {
@@ -213,7 +213,18 @@ const startTask = (req, res) => {
             return res.status(400).json({ message: 'Task has no instructions.' });
         }
 
-        const instructions = instruction_list.split(',').map(instr => instr.trim()); // Convert to array
+        let instructions;
+        try {
+            instructions = JSON.parse(instruction_list);
+        } catch (parseError) {
+            logger.error(`Failed to parse instruction list for task ${taskId}:`, parseError);
+            return res.status(500).json({ message: 'Invalid instruction list format.' });
+        }
+
+        if (!Array.isArray(instructions) || instructions.length === 0) {
+            logger.warn(`Task ${taskId} has an empty instruction list.`);
+            return res.status(400).json({ message: 'Task has no valid instructions.' });
+        }
 
         // Step 2: Check if another task for the same robot is already running
         const checkActiveTaskSQL = `SELECT task_id FROM task WHERE robot_id = ? AND state = 1`;
@@ -257,13 +268,14 @@ const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
         if (index >= instructions.length) {
             logger.info(`All instructions for task ${taskId} completed. Marking as complete...`);
 
-            // Step 1: Mark task as complete (`state = 2`)
-            const completeTaskSQL = `UPDATE task SET state = 2, current_instruction_index = 0 WHERE task_id = ?`;
+            // Step 1: Mark task as complete (`state = 2`) and set end time
+            const completeTaskSQL = `UPDATE task SET state = 2, current_instruction_index = 0, end = NOW() WHERE task_id = ?`;
+
             db.query(completeTaskSQL, [taskId], (err) => {
                 if (err) {
                     logger.error(`Database error updating task ${taskId} to complete:`, err);
                 } else {
-                    logger.info(`Task ${taskId} marked as complete.`);
+                    logger.info(`Task ${taskId} marked as complete with end time recorded.`);
                 }
             });
 
@@ -306,6 +318,7 @@ const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
 
             const instruction = instructions[index];
 
+
             // Step 3: Insert the instruction into `ins_send`
             const insertInstructionSQL = `
                 INSERT INTO ins_send (robot_id, instruction, status, ctime) 
@@ -331,7 +344,7 @@ const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
                 });
 
                 // Step 5: Wait for the instruction to complete before moving to the next one
-                waitForInstructionCompletion(insId, robotId, () => {
+                waitForInstructionCompletion(insId, taskId, robotId, () => {
                     processNextInstruction(taskId, robotId, instructions, index + 1);
                 });
             });
@@ -341,8 +354,9 @@ const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
     processNextInstruction(taskId, robotId, instructions, index);
 };
 
-const waitForInstructionCompletion = (insId, robotId, callback) => {
+const waitForInstructionCompletion = (insId, taskId, robotId, callback) => {
     const checkStatusSQL = `SELECT status FROM ins_send WHERE ins_id = ?`;
+    const checkTaskStateSQL = `SELECT state FROM task WHERE task_id = ?`;
 
     const interval = setInterval(() => {
         db.query(checkStatusSQL, [insId], (err, results) => {
@@ -360,14 +374,38 @@ const waitForInstructionCompletion = (insId, robotId, callback) => {
 
             const { status } = results[0];
 
-            if (status === 'complete') {
-                logger.info(`Instruction ID ${insId} completed successfully.`);
-                clearInterval(interval);
-                callback(); // Move to the next instruction
-            } else if (status === 'emg' || status === 'aborted') {
-                logger.warn(`Instruction ID ${insId} was stopped or failed (Status: ${status}).`);
-                clearInterval(interval);
-            }
+            // Step 1: Check if task has been stopped
+            db.query(checkTaskStateSQL, [taskId], (err, taskResults) => {
+                if (err) {
+                    logger.error(`Error checking state for task ${taskId}:`, err);
+                    clearInterval(interval);
+                    return;
+                }
+
+                if (taskResults.length === 0) {
+                    logger.warn(`Task ID ${taskId} no longer exists.`);
+                    clearInterval(interval);
+                    return;
+                }
+
+                const { state } = taskResults[0];
+
+                if (state === 3) {
+                    logger.warn(`Task ${taskId} has been stopped. Halting instruction queue.`);
+                    clearInterval(interval);
+                    return;
+                }
+
+                // Step 2: If instruction is complete, proceed to next one
+                if (status === 'complete') {
+                    logger.info(`Instruction ID ${insId} completed successfully.`);
+                    clearInterval(interval);
+                    callback(); // Move to the next instruction
+                } else if (status === 'emg' || status === 'aborted') {
+                    logger.warn(`Instruction ID ${insId} was stopped or failed (Status: ${status}).`);
+                    clearInterval(interval);
+                }
+            });
         });
     }, 5000); // Check every 5 seconds
 };
@@ -774,5 +812,84 @@ const addInstructionToTask = (req, res) => {
     });
 };
 
+const resumeTask = (req, res) => {
+    const { taskId } = req.params;
 
-module.exports = { getAllLocations, getCoordinatesByLocation, removeAllRobotLocations, saveRobotLocation, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };
+    if (!taskId) {
+        logger.warn('Task ID is required.');
+        return res.status(400).json({ message: 'Task ID is required.' });
+    }
+
+    // Step 1: Fetch task details (robot ID, instruction list, current index)
+    const getTaskSQL = `SELECT robot_id, instruction_list, current_instruction_index FROM task WHERE task_id = ? AND state = 3`;
+
+    db.query(getTaskSQL, [taskId], (err, results) => {
+        if (err) {
+            logger.error(`Database error while fetching task ${taskId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            logger.warn(`Task ${taskId} not found or is not in a stopped state.`);
+            return res.status(400).json({ message: 'Task not found or is not in a stopped state.' });
+        }
+
+        const { robot_id, instruction_list, current_instruction_index } = results[0];
+
+        if (!instruction_list) {
+            logger.warn(`Task ${taskId} has no instructions.`);
+            return res.status(400).json({ message: 'Task has no instructions.' });
+        }
+
+        let instructions;
+        try {
+            instructions = JSON.parse(instruction_list);
+        } catch (parseError) {
+            logger.error(`Failed to parse instruction list for task ${taskId}:`, parseError);
+            return res.status(500).json({ message: 'Invalid instruction list format.' });
+        }
+
+        if (!Array.isArray(instructions) || instructions.length === 0) {
+            logger.warn(`Task ${taskId} has an empty instruction list.`);
+            return res.status(400).json({ message: 'Task has no valid instructions.' });
+        }
+
+        // Step 2: Check if another task for the same robot is already running
+        const checkActiveTaskSQL = `SELECT task_id FROM task WHERE robot_id = ? AND state = 1`;
+
+        db.query(checkActiveTaskSQL, [robot_id], (err, activeResults) => {
+            if (err) {
+                logger.error(`Database error while checking active task for robot ${robot_id}:`, err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            if (activeResults.length > 0) {
+                const activeTaskId = activeResults[0].task_id;
+                logger.warn(`Robot ${robot_id} already has an active task (ID: ${activeTaskId}). Cannot resume a stopped task.`);
+                return res.status(400).json({
+                    message: `Robot ${robot_id} is already running task ID ${activeTaskId}. Please complete that task before resuming.`
+                });
+            }
+
+            // Step 3: No active task exists, update task state to running
+            const updateTaskSQL = `UPDATE task SET state = 1 WHERE task_id = ?`;
+
+            db.query(updateTaskSQL, [taskId], (err) => {
+                if (err) {
+                    logger.error(`Database error while updating task ${taskId} to running:`, err);
+                    return res.status(500).json({ message: 'Failed to update task state' });
+                }
+
+                logger.info(`Task ${taskId} resumed from instruction index ${current_instruction_index}. Continuing queue.`);
+
+                // Step 4: Start queueing the instructions from the saved index
+                queueTaskInstructions(taskId, robot_id, instructions, current_instruction_index);
+
+                return res.json({ message: `Task ${taskId} resumed successfully from instruction index ${current_instruction_index}.` });
+            });
+        });
+    });
+};
+
+
+module.exports = { resumeTask, stopTask, startTask, getAllLocations, getCoordinatesByLocation, removeAllRobotLocations, saveRobotLocation, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };

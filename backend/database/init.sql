@@ -319,7 +319,7 @@ CREATE TABLE `robot` (
 
 LOCK TABLES `robot` WRITE;
 /*!40000 ALTER TABLE `robot` DISABLE KEYS */;
-INSERT INTO `robot` VALUES (1,'Mini','10.0.2.1',30000,'','2023-03-16 11:16:43',0,60,100,100,0,0),(2,'Keenon','10.0.2.2',30000,'','2023-03-17 11:28:36',0,40,100,100,0,1),(3,'Ros simulate robot 3 ','10.0.2.15',8000,'','2023-03-17 21:28:38',0,30,100,70,0,0),(4,'Ros simulate robot 4','10.0.2.15',8001,'','2023-03-17 21:29:15',0,30,100,50,0,0),(5,'Ros simulate robot 5 ','10.0.2.15',8002,'','2023-03-17 21:29:17',0,30,100,30,0,0),(6,'Mini 6 Western','172.30.116.30',30000,'','2024-09-06 18:39:01',0,50,5,10,1,0),(7,'Keenon 7 Western','10.0.2.3',30000,'','2023-03-16 12:19:39',0,50,80,10,0,0),(8,'Mini 8 Van','10.0.2.4',30000,'','2024-11-16 15:39:48',0,60,97,20,0,0),(9,'Keenon 9 Van','10.0.2.5',30000,'','2023-03-16 18:21:25',0,57,89,30,0,0),(10,'Mini2 10 Western','172.30.33.145',30000,'','2024-02-03 16:24:46',0,35,100,10,0,0),(11,'Autoxing','8892301101768sw',3000,'','2024-03-27 03:06:25',1,50,100,100,1,0),(12,'Mini 12 Western','192.168.1.77',30000,'','2024-05-21 21:12:57',0,50,100,100,1,0),(13,'Mini 10','10.0.2.6',3000,'MC1TCNC0100220068717','2024-05-24 16:01:05',0,0,100,100,0,0),(14,'Keenon 14','10.0.2.14',3000,'','2024-05-29 18:01:25',0,0,100,100,0,0),(15,'Mini 15','10.0.2.7',3000,'','2024-05-29 14:57:39',0,0,100,100,0,0),(16,'Keenon 16','172.30.40.248',3000,'','2024-05-29 18:01:01',0,0,100,100,0,0);
+INSERT INTO `robot` VALUES (6,'Mini 6 Western','172.30.116.30',30000,'','2024-09-06 18:39:01',0,50,5,10,1,0);
 /*!40000 ALTER TABLE `robot` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -443,7 +443,7 @@ CREATE TABLE `task` (
 
 LOCK TABLES `task` WRITE;
 /*!40000 ALTER TABLE `task` DISABLE KEYS */;
-INSERT INTO `task` VALUES (1,'task1',1,0,'[\"navigation:startNavigation:point 2\",\"navigation:startNavigation:point 2\"]',NULL,'2023-03-16 08:45:21',NULL,NULL,0),(2,'task2',11,2,NULL,NULL,'2025-02-20 13:35:07','2025-01-01 09:27:49',NULL,0),(3,'task3',1,-1,NULL,NULL,NULL,NULL,NULL,0),(4,'task4',2,0,NULL,NULL,NULL,NULL,NULL,0),(5,'task5',3,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO `task` VALUES (1,'task1',6,0,'[\"navigation:startNavigation:frontendTest_1\"]',NULL,'2023-03-16 08:45:21',NULL,'2025-03-16 19:09:02',0),(2,'task2',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\"]',NULL,'2025-02-20 13:35:07','','2025-03-16 19:09:02',0),(3,'task3',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\",\"navigation:startNavigation:frontendTest_1\"]',NULL,'2025-02-20 13:35:07',NULL,'2025-03-16 19:09:02',0);
 /*!40000 ALTER TABLE `task` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -485,4 +485,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-16 17:07:05
+-- Dump completed on 2025-03-16 19:13:16

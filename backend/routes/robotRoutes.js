@@ -11,6 +11,9 @@ const {
   deleteRobot,
   getRobotLocation,
   addInstructionToTask,
+  startTask,
+  stopTask,
+  resumeTask,
 
   // Callback functions
   getRobotCallbacks,
@@ -34,6 +37,9 @@ router.use('/protected/robot', authenticateUser);
 router.get('/protected/robot/tasks', getRobotTasks);
 router.post('/protected/robot/task/create', createTask);
 router.delete('/protected/robot/task/:taskId/delete', deleteTask);
+router.post('/protected/robot/task/:taskId/stop', stopTask);
+router.post('/protected/robot/task/:taskId/start', startTask);
+router.post('/protected/robot/task/:taskId/resume', resumeTask);
 
 // 🤖 **Robot Routes**
 router.get('/protected/robot/robots', getAllRobots);
