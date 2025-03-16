@@ -1,7 +1,6 @@
 package com.robonav.app.activities;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,25 +19,24 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateRobotActivity extends AppCompatActivity {
+public class CreateTaskActivity extends AppCompatActivity {
 
-    private EditText robotModelEditText, ipAddressEditText, portEditText;
-    private Button submitRobotButton;
+    private EditText taskNameEditText, robotIdEditText;
+    private Button submitTaskButton;
     private String token;
-    private static final String CREATE_ROBOT_URL = ConfigManager.getBaseUrl() + "/api/protected/robot/create";
+    private static final String CREATE_TASK_URL = ConfigManager.getBaseUrl() + "/api/protected/task/create";
 
     private static Toast activeToast; // Global Toast instance to prevent queuing
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_robot);
+        setContentView(R.layout.activity_create_task);
 
         // Initialize UI elements
-        robotModelEditText = findViewById(R.id.robotModelEditText);
-        ipAddressEditText = findViewById(R.id.ipAddressEditText);
-        portEditText = findViewById(R.id.portEditText);
-        submitRobotButton = findViewById(R.id.submitRobotButton);
+        taskNameEditText = findViewById(R.id.taskNameEditText);
+        robotIdEditText = findViewById(R.id.robotIdEditText);
+        submitTaskButton = findViewById(R.id.submitTaskButton);
 
         // Retrieve token from SharedPreferences
         token = getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString("JWT_TOKEN", null);
@@ -54,47 +52,45 @@ public class CreateRobotActivity extends AppCompatActivity {
         ImageView closeButton = findViewById(R.id.closeButton);
         closeButton.setOnClickListener(v -> finish()); // Exit the activity when clicked
 
-        // Click listener to create robot
-        submitRobotButton.setOnClickListener(v -> createRobot());
+        // Click listener to create task
+        submitTaskButton.setOnClickListener(v -> createTask());
     }
 
-    private void createRobot() {
-        String robotModel = robotModelEditText.getText().toString().trim();
-        String ipAddress = ipAddressEditText.getText().toString().trim();
-        String port = portEditText.getText().toString().trim();
+    private void createTask() {
+        String taskName = taskNameEditText.getText().toString().trim();
+        String robotId = robotIdEditText.getText().toString().trim();
 
-        if (robotModel.isEmpty() || ipAddress.isEmpty() || port.isEmpty()) {
+        if (taskName.isEmpty() || robotId.isEmpty()) {
             showToast("Please fill in all fields");
             return;
         }
 
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Creating robot...");
+        progressDialog.setMessage("Creating task...");
         progressDialog.show();
 
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("type", robotModel);
-            jsonBody.put("ip_add", ipAddress);
-            jsonBody.put("port", port);
-        } catch (JSONException e) {
+            jsonBody.put("name", taskName);
+            jsonBody.put("robot_id", Integer.parseInt(robotId));
+        } catch (JSONException | NumberFormatException e) {
             e.printStackTrace();
             progressDialog.dismiss();
-            showToast("Error creating JSON request");
+            showToast("Invalid input format");
             return;
         }
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, CREATE_ROBOT_URL, jsonBody,
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, CREATE_TASK_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
-                    showToast("Robot created successfully");
+                    showToast("Task created successfully");
                     finish();
                 },
                 error -> {
                     progressDialog.dismiss();
 
-                    String errorMessage = "Error creating robot";
+                    String errorMessage = "Error creating task";
                     if (error.networkResponse != null) {
                         try {
                             String responseBody = new String(error.networkResponse.data, "UTF-8");
@@ -126,7 +122,7 @@ public class CreateRobotActivity extends AppCompatActivity {
         if (activeToast != null) {
             activeToast.cancel(); // Cancel previous toast if it exists
         }
-        activeToast = Toast.makeText(CreateRobotActivity.this, message, Toast.LENGTH_SHORT);
+        activeToast = Toast.makeText(CreateTaskActivity.this, message, Toast.LENGTH_SHORT);
         activeToast.show();
     }
 }

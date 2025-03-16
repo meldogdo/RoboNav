@@ -4,33 +4,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import com.robonav.app.activities.CreateRobotActivity;
-import com.robonav.app.interfaces.OnUpdateListener;
-import com.robonav.app.utilities.ConfigManager;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.robonav.app.R;
-import com.robonav.app.adapters.RobotAdapter;
-import com.robonav.app.adapters.TaskAdapter;
-import com.robonav.app.models.Robot;
-import com.robonav.app.models.Task;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-
+import com.robonav.app.R;
+import com.robonav.app.activities.CreateRobotActivity;
+import com.robonav.app.activities.CreateTaskActivity;
+import com.robonav.app.adapters.RobotAdapter;
+import com.robonav.app.adapters.TaskAdapter;
+import com.robonav.app.interfaces.OnUpdateListener;
+import com.robonav.app.models.Robot;
+import com.robonav.app.models.Task;
+import com.robonav.app.utilities.ConfigManager;
 import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,15 +39,17 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
     private TaskAdapter taskAdapter;
     private List<Robot> robotList;
     private List<Task> taskList;
-
     private String token;
-    private Button createRobotButton;
+    private Button createRobotButton, createTaskButton;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == getActivity().RESULT_OK) {
-            onUpdate(); // Refresh HomeFragment
+            onUpdate(); // Refresh HomeFragment when a robot is created
+        }
+        if (requestCode == 2 && resultCode == getActivity().RESULT_OK) {
+            onUpdate(); // Refresh HomeFragment when a task is created
         }
     }
 
@@ -63,21 +60,30 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
         robotRecyclerView = rootView.findViewById(R.id.robot_recycler_view);
         taskRecyclerView = rootView.findViewById(R.id.task_recycler_view);
-        // Find button in layout
-        createRobotButton = rootView.findViewById(R.id.createRobotButton);
 
-        // Set click listener to navigate to Create Robot screen
+        // Find buttons in layout
+        createRobotButton = rootView.findViewById(R.id.createRobotButton);
+        createTaskButton = rootView.findViewById(R.id.createTaskButton);
+
+        // Click listener for Create Robot button
         createRobotButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CreateRobotActivity.class);
             startActivityForResult(intent, 1);
         });
+
+        // Click listener for Create Task button
+        createTaskButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), CreateTaskActivity.class);
+            startActivityForResult(intent, 2);
+        });
+
         // Initialize lists
         robotList = new ArrayList<>();
         taskList = new ArrayList<>();
 
-        // Define your adapters upfront
-        robotAdapter = new RobotAdapter(getContext(), robotList, taskList,this);
-        taskAdapter = new TaskAdapter(getContext(), taskList, robotList,this );
+        // Define adapters
+        robotAdapter = new RobotAdapter(getContext(), robotList, taskList, this);
+        taskAdapter = new TaskAdapter(getContext(), taskList, robotList, this);
 
         robotRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         robotRecyclerView.setAdapter(robotAdapter);
@@ -89,11 +95,11 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
         swipeRefreshLayout.setOnRefreshListener(this::loadData);
 
         // Trigger the refresh on initial load
-        swipeRefreshLayout.setRefreshing(true); // Start the refreshing animation
-        loadData(); // Load the data after starting the refresh
+        swipeRefreshLayout.setRefreshing(true);
+        loadData();
 
         SharedPreferences prefs = requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
-        token = prefs.getString("JWT_TOKEN", null); // Returns null if not found
+        token = prefs.getString("JWT_TOKEN", null);
 
         return rootView;
     }
@@ -107,9 +113,7 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
         robotAdapter.notifyDataSetChanged();
         taskAdapter.notifyDataSetChanged();
 
-
         String robotUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/robots";
-
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
         // Load robot data first
@@ -120,17 +124,16 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
                             Robot robot = new Robot(response.getJSONObject(i));
                             robotList.add(robot);
                         }
-
                         // After loading robots, load tasks
-                        loadTasks(taskList, taskAdapter);
+                        loadTasks();
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 },
                 error -> {
                     error.printStackTrace();
-                    swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                    swipeRefreshLayout.setRefreshing(false);
                 }
         ) {
             @Override
@@ -141,17 +144,12 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
             }
         };
 
-        // Add robot request to the queue
         queue.add(robotRequest);
-
-        // Start swipe refresh and prevent it from stopping until both requests finish
         swipeRefreshLayout.setRefreshing(true);
     }
 
-    private void loadTasks(List<Task> taskList, TaskAdapter taskAdapter) {
+    private void loadTasks() {
         String taskUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/tasks";
-
-        // Load task data after robots are loaded
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
                 response -> {
                     try {
@@ -159,19 +157,17 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
                             Task task = new Task(response.getJSONObject(i));
                             taskList.add(task);
                         }
-
-                        // Notify both adapters that the data has been updated
                         taskAdapter.notifyDataSetChanged();
-                        robotAdapter.notifyDataSetChanged(); // In case robot list size has changed
-                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing after both requests are complete
+                        robotAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 },
                 error -> {
                     error.printStackTrace();
-                    swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                    swipeRefreshLayout.setRefreshing(false);
                 }
         ) {
             @Override
@@ -182,7 +178,6 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
             }
         };
 
-        // Add task request to the queue
         RequestQueue queue = Volley.newRequestQueue(requireContext());
         queue.add(taskRequest);
     }

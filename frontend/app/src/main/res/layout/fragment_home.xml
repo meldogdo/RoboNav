@@ -1,70 +1,85 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/swipe_refresh_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray_dark"
-        tools:context=".fragments.UtilitiesFragment">
+        android:background="@color/gray_dark">
 
-        <TextView
-            android:id="@+id/title_robot_tasks"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Active Tasks"
-            android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.074"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/robot_recycler_view" />
-
+        <!-- Robot Info Title -->
         <TextView
             android:id="@+id/title_robot_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
             android:text="Robot Information"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.074"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Create Robot Button -->
         <Button
             android:id="@+id/createRobotButton"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="24dp"
+            android:layout_marginEnd="16dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:text="Create Robot"
             android:textColor="@color/white"
             android:backgroundTint="@color/blue_dark"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/title_robot_info"
-            app:layout_constraintBottom_toBottomOf="@id/title_robot_info" />
+            app:layout_constraintBottom_toBottomOf="@id/title_robot_info"
+            app:layout_constraintTop_toTopOf="@id/title_robot_info" />
 
+        <!-- RecyclerView for Robot Information -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/robot_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:padding="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_robot_info"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title_robot_info" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Active Tasks Title -->
+        <TextView
+            android:id="@+id/title_robot_tasks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:text="Active Tasks"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/robot_recycler_view" />
+
+        <!-- Create Task Button (NEW) -->
+        <Button
+            android:id="@+id/createTaskButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="Create Task"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/blue_dark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/title_robot_tasks"
+            app:layout_constraintTop_toTopOf="@id/title_robot_tasks" />
+
+        <!-- RecyclerView for Tasks -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/task_recycler_view"
             android:layout_width="match_parent"
@@ -72,12 +87,10 @@
             android:layout_marginTop="8dp"
             android:background="@color/gray_medium"
             android:padding="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title_robot_tasks"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

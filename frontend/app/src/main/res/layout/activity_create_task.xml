@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray_dark"
-    tools:context=".activities.CreateRobotActivity">
+    tools:context=".activities.CreateTaskActivity">
 
     <!-- Close Button (X) -->
     <ImageView
@@ -43,7 +43,7 @@
                 android:id="@+id/titleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Create Robot"
+                android:text="Create Task"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/white"
@@ -51,26 +51,26 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Robot Model Label -->
+            <!-- Task Name Label -->
             <TextView
-                android:id="@+id/robotModelLabel"
+                android:id="@+id/taskNameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Robot Model"
+                android:text="Task Name"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
-            <!-- Robot Model Input -->
+            <!-- Task Name Input -->
             <EditText
-                android:id="@+id/robotModelEditText"
+                android:id="@+id/taskNameEditText"
                 android:layout_width="279dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
-                android:hint="Enter Robot Model"
+                android:hint="Enter task name"
                 android:inputType="text"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
@@ -78,78 +78,49 @@
                 android:textColorHint="@color/gray_high_contrast"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/robotModelLabel" />
+                app:layout_constraintTop_toBottomOf="@id/taskNameLabel" />
 
-            <!-- IP Address Label -->
+            <!-- Robot ID Label -->
             <TextView
-                android:id="@+id/ipAddressLabel"
+                android:id="@+id/robotIdLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IP Address"
+                android:text="Robot ID"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:layout_marginTop="15dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/robotModelEditText" />
+                app:layout_constraintTop_toBottomOf="@id/taskNameEditText" />
 
-            <!-- IP Address Input -->
+            <!-- Robot ID Input -->
             <EditText
-                android:id="@+id/ipAddressEditText"
+                android:id="@+id/robotIdEditText"
                 android:layout_width="279dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
-                android:hint="Enter IP Address"
-                android:inputType="text"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_high_contrast"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ipAddressLabel" />
-
-            <!-- Port Label -->
-            <TextView
-                android:id="@+id/portLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Port"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:layout_marginTop="15dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ipAddressEditText" />
-
-            <!-- Port Input -->
-            <EditText
-                android:id="@+id/portEditText"
-                android:layout_width="279dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Enter Port Number"
+                android:hint="Enter Robot ID"
                 android:inputType="number"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
                 android:textColor="@color/white"
                 android:textColorHint="@color/gray_high_contrast"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/robotIdLabel"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/portLabel" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Create Robot Button -->
+            <!-- Submit Button -->
             <Button
-                android:id="@+id/submitRobotButton"
+                android:id="@+id/submitTaskButton"
                 android:layout_width="279dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:backgroundTint="@color/blue_dark"
-                android:text="Create Robot"
+                android:text="Create Task"
                 android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/robotIdEditText"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/portEditText" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

@@ -51,6 +51,7 @@
         <activity android:name="com.robonav.app.activities.ResetPasswordActivity" />
         <activity android:name="com.robonav.app.activities.ChangePasswordActivity"/>
         <activity android:name="com.robonav.app.activities.CreateRobotActivity" />
+        <activity android:name="com.robonav.app.activities.CreateTaskActivity" />
 
     </application>
 
