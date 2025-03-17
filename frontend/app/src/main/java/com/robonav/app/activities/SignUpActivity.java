@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.DefaultRetryPolicy;
 import com.robonav.app.utilities.ConfigManager;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +21,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.utilities.VolleySingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +37,8 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText confirmPasswordEditText;
     private Toast currentToast; // Store the latest toast reference
 
+    private Button signUpButton;
+
     private static final String REGISTER_URL = ConfigManager.getBaseUrl() + "/api/open/users/register";
     
     @Override
@@ -45,8 +50,8 @@ public class SignUpActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
-        Button signUpButton = findViewById(R.id.signUpButton);
         TextView loginTextView = findViewById(R.id.loginTextView);
+        signUpButton = findViewById(R.id.signUpButton);
 
         // Apply underline to "Login"
         String fullText = "Already have an account? Login";
@@ -62,18 +67,26 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
+        if (signUpButton.isEnabled()) {
+            signUpButton.setEnabled(false);  // Prevent multiple clicks
+        } else {
+            return; // Prevent duplicate calls
+        }
+
         String username = usernameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-        if (!areFieldsValid(username, email, password, confirmPassword)) return;
+        if (!areFieldsValid(username, email, password, confirmPassword)) {
+            signUpButton.setEnabled(true); // Re-enable if validation fails
+            return;
+        }
 
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Registering...");
         progressDialog.show();
 
-        // Create JSON request body
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("username", username);
@@ -83,28 +96,26 @@ public class SignUpActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Send JSON request
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REGISTER_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
+                    signUpButton.setEnabled(true);  // Re-enable after success
+
                     try {
                         Toast.makeText(SignUpActivity.this, response.getString("message"), Toast.LENGTH_SHORT).show();
-
-                        // Redirect to login page and pass username
                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                         intent.putExtra("username", username);
                         startActivity(intent);
                         finish();
-
                     } catch (JSONException e) {
                         Toast.makeText(SignUpActivity.this, "Error parsing response", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
                     progressDialog.dismiss();
+                    signUpButton.setEnabled(true);  // Re-enable after failure
 
                     String errorMessage = "Registration failed. Try again.";
-
                     if (error.networkResponse != null) {
                         try {
                             String responseBody = new String(error.networkResponse.data, "UTF-8");
@@ -116,18 +127,25 @@ public class SignUpActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-
                     showToast(errorMessage);
                 }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json"); // Ensure JSON request
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
         };
 
-        RequestQueue queue = Volley.newRequestQueue(this);
+        // Explicitly Set Retry Policy
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                20000,
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        request.setTag("registerRequest");
+        RequestQueue queue = VolleySingleton.getInstance(this).getRequestQueue();
+        queue.cancelAll("registerRequest");  // Cancel any ongoing registration requests
         queue.add(request);
     }
 

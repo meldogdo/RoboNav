@@ -32,16 +32,24 @@ app.get('/health', (req, res) => {
     res.json({ status: 'Server is running' });
 });
 
-// Auto-cleanup expired OTPs every hour
+// Auto-cleanup expired OTPs and unconfirmed users every hour
 setInterval(() => {
+    // Delete users who have not confirmed their email before expiration
+    db.query(
+        `DELETE FROM users 
+        WHERE id IN (SELECT user_id FROM email_confirmations WHERE expires_at < NOW())`,
+        (err, result) => {
+            if (err) console.error('Error deleting unconfirmed users:', err);
+            else console.log(`${result.affectedRows} unconfirmed users deleted`);
+        }
+    );
+
+    // Delete expired password reset tokens separately
     db.query('DELETE FROM password_reset_tokens WHERE expires_at < NOW()', (err) => {
         if (err) console.error('Error clearing expired tokens:', err);
         else console.log('Expired reset tokens cleared');
     });
-    db.query('DELETE FROM email_confirmations WHERE expires_at < NOW()', (err) => {
-        if (err) console.error('Error clearing expired email confirmations:', err);
-        else console.log('Expired email confirmations cleared');
-    });
-}, 3600000); 
+
+}, 3600000); // Runs every hour (3600000 ms)
 
 module.exports = app;

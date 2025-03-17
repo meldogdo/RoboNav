@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; 
+const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
 const CLIENT_ID = process.env.CLIENT_ID;
 const EMAIL_USER = process.env.EMAIL_USER;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
@@ -43,4 +43,13 @@ async function createTransporter() {
   });
 }
 
-module.exports = { createTransporter };
+// 🔹 Generate a 6-digit OTP
+function generateOTP(length = 6) {
+  let otp = '';
+  for (let i = 0; i < length; i++) {
+    otp += Math.floor(Math.random() * 10); // Generate a random digit (0-9)
+  }
+  return otp;
+}
+
+module.exports = { createTransporter, generateOTP };

@@ -11,12 +11,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
 import com.robonav.app.utilities.ConfigManager;
+import com.robonav.app.utilities.VolleySingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,6 +79,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             return;
         }
 
+        // Disable submit button to prevent multiple requests
+        submitButton.setEnabled(false);
+
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Sending reset code...");
         progressDialog.show();
@@ -91,6 +96,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REQUEST_RESET_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
+                    submitButton.setEnabled(true);  // Re-enable after success
 
                     try {
                         String message = response.getString("message");
@@ -103,12 +109,10 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     resetCodeEditText.setVisibility(View.VISIBLE);
                     verifyButton.setVisibility(View.VISIBLE);
                     resetCodeLabel.setVisibility(View.VISIBLE);
-
-                    // Disable submit button to prevent multiple requests
-                    submitButton.setEnabled(false);
                 },
                 error -> {
                     progressDialog.dismiss();
+                    submitButton.setEnabled(true);  // Re-enable after failure
 
                     String errorMessage = "Error sending reset code";
 
@@ -127,7 +131,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     showToast(errorMessage);
                 });
 
-        RequestQueue queue = Volley.newRequestQueue(this);
+        // Explicitly set retry policy (No automatic retries)
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000, // Timeout in milliseconds (10 seconds)
+                0, // Maximum number of retries (0 = no retries)
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Use Singleton RequestQueue to manage requests efficiently
+        RequestQueue queue = VolleySingleton.getInstance(this).getRequestQueue();
+        queue.cancelAll("resetRequest");  // Cancel any ongoing reset requests
+        request.setTag("resetRequest");
         queue.add(request);
     }
 
@@ -139,6 +152,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             showToast("Enter your email and reset code");
             return;
         }
+
+        // Disable the verify button to prevent multiple submissions
+        verifyButton.setEnabled(false);
 
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Verifying reset code...");
@@ -155,6 +171,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, VERIFY_RESET_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
+                    verifyButton.setEnabled(true);  // Re-enable button after success
+
                     try {
                         if (response.has("token")) {
                             String token = response.getString("token");
@@ -175,6 +193,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 },
                 error -> {
                     progressDialog.dismiss();
+                    verifyButton.setEnabled(true);  // Re-enable button after failure
 
                     String errorMessage = "Invalid or expired reset code";
 
@@ -193,7 +212,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     showToast(errorMessage);
                 });
 
-        RequestQueue queue = Volley.newRequestQueue(this);
+        // Explicitly set retry policy (No automatic retries)
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000, // Timeout in milliseconds (10 seconds)
+                0, // Maximum number of retries (0 = no retries)
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Use Singleton RequestQueue and cancel previous verification attempts
+        RequestQueue queue = VolleySingleton.getInstance(this).getRequestQueue();
+        queue.cancelAll("verifyResetRequest");  // Cancel any ongoing verify reset requests
+        request.setTag("verifyResetRequest");
         queue.add(request);
     }
 

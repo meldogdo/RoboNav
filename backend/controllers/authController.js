@@ -202,8 +202,8 @@ const requestPasswordReset = async (req, res) => {
 
     logger.info(`Processing password reset request for email: ${email}`);
 
-    // Check if email exists in DB
-    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+    // Check if email exists and is confirmed in DB
+    db.query('SELECT email, confirmed FROM users WHERE email = ?', [email], (err, results) => {
         if (err) {
             logger.error(`Database query error while checking email: ${email}`, err);
             return res.status(500).json({ message: 'Database error', error: err });
@@ -213,7 +213,20 @@ const requestPasswordReset = async (req, res) => {
             return res.status(404).json({ message: 'Email not found' });
         }
 
-        logger.info(`Email found in database: ${email}`);
+        const user = results[0];
+
+        // Check confirmation status
+        if (user.confirmed === 0) {
+            logger.warn(`Password reset denied for unconfirmed email: ${email}`);
+            return res.status(403).json({ message: 'Email is not confirmed. Please confirm your email before resetting your password.' });
+        }
+
+        if (user.confirmed === 2) {
+            logger.warn(`Password reset denied for disabled account: ${email}`);
+            return res.status(403).json({ message: 'This account is disabled. Please contact support for assistance.' });
+        }
+
+        logger.info(`Email confirmed for password reset: ${email}`);
 
         // Generate a 6-digit OTP and expiration time
         const resetCode = generateOTP();
