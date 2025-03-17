@@ -9,6 +9,7 @@ dotenv.config();
 
 const app = express();
 const db = require('./config/db');
+
 // Middleware
 app.use(cors({
     origin: '*', 
@@ -39,15 +40,15 @@ setInterval(() => {
         `DELETE FROM users 
         WHERE id IN (SELECT user_id FROM email_confirmations WHERE expires_at < NOW())`,
         (err, result) => {
-            if (err) console.error('Error deleting unconfirmed users:', err);
-            else console.log(`${result.affectedRows} unconfirmed users deleted`);
+            if (err) logger.info('Error deleting unconfirmed users:', err);
+            else logger.info(`${result.affectedRows} unconfirmed users deleted`);
         }
     );
 
     // Delete expired password reset tokens separately
     db.query('DELETE FROM password_reset_tokens WHERE expires_at < NOW()', (err) => {
-        if (err) console.error('Error clearing expired tokens:', err);
-        else console.log('Expired reset tokens cleared');
+        if (err) logger.info('Error clearing expired tokens:', err);
+        else logger.info('Expired reset tokens cleared');
     });
 
 }, 3600000); // Runs every hour (3600000 ms)
