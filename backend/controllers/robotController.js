@@ -31,108 +31,118 @@ const getRobotPosition = (req, res) => {
     });
 };
 
-const saveRobotLocation = (req, res) => {
-    const { robotId, locationName } = req.body;
+const getLocationsByRobotId = (req, res) => {
+    const { robotId } = req.params;
 
-    if (!robotId || !locationName) {
-        return res.status(400).json({ message: 'Robot ID and location name are required' });
+    if (!robotId || isNaN(robotId)) {
+        return res.status(400).json({ message: 'Valid Robot ID is required' });
     }
 
-    const fetchLocationSQL = `
-        SELECT latitude, longitude FROM robot_location 
-        WHERE robot_id = ? 
-        ORDER BY timestamp DESC 
-        LIMIT 1;
-    `;
+    const sql = `SELECT loc_id, name FROM location WHERE robot_id = ?`;
 
-    db.query(fetchLocationSQL, [robotId], (err, results) => {
+    db.query(sql, [robotId], (err, results) => {
         if (err) {
-            logger.error(`Error fetching robot ${robotId} location:`, err);
+            logger.error(`Error fetching locations for robot ID ${robotId}:`, err);
             return res.status(500).json({ message: 'Database error' });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ message: 'No recorded location for this robot' });
+            return res.status(404).json({ message: `No locations found for robot ID ${robotId}.` });
         }
 
-        const { latitude, longitude } = results[0];
+        logger.info(`Fetched ${results.length} location(s) for robot ID ${robotId}.`);
 
-        const insertLocationSQL = `
-            INSERT INTO location (name, latitude, longitude, robot_id) 
-            VALUES (?, ?, ?, ?);
-        `;
+        res.status(200).json(results);
+    });
+};
 
-        db.query(insertLocationSQL, [locationName, latitude, longitude, robotId], (err) => {
-            if (err) {
-                logger.error(`Error saving location ${locationName} for robot ${robotId}:`, err);
-                return res.status(500).json({ message: 'Database error' });
-            }
+const removeRobotLocationById = (req, res) => {
+    const { locId } = req.params;
 
-            res.status(201).json({ message: `Location '${locationName}' saved successfully.` });
+    if (!locId || isNaN(locId)) {
+        return res.status(400).json({ message: 'Valid Location ID is required' });
+    }
+
+    const sql = `DELETE FROM location WHERE loc_id = ?`;
+
+    db.query(sql, [locId], (err, result) => {
+        if (err) {
+            logger.error(`Error deleting location with location ID ${locId}:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        logger.info(`Deleted ${result.affectedRows} location(s) with location ID ${locId}.`);
+
+        res.status(200).json({
+            message: result.affectedRows > 0
+                ? `Location with ID ${locId} removed.`
+                : `No location found with location ID ${locId}.`
         });
     });
 };
 
-const removeAllRobotLocations = (req, res) => {
-    const { robotId } = req.params;
-
-    if (!robotId) {
-        return res.status(400).json({ message: 'Robot ID is required' });
-    }
-
-    const sql = `DELETE FROM location WHERE robot_id = ?`;
-
-    db.query(sql, [robotId], (err, result) => {
-        if (err) {
-            logger.error(`Error deleting locations for robot ${robotId}:`, err);
-            return res.status(500).json({ message: 'Database error' });
-        }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'No locations found for this robot' });
-        }
-
-        res.json({ message: `All locations removed for robot ${robotId}.` });
-    });
-};
-
 const getCoordinatesByLocation = (req, res) => {
-    const { locationName } = req.params;
+    const { locId } = req.params;
 
-    if (!locationName) {
-        return res.status(400).json({ message: 'Location name is required' });
+    if (!locId) {
+        return res.status(400).json({ message: 'Location ID is required' });
     }
 
-    const sql = `SELECT latitude, longitude FROM location WHERE name = ?`;
+    const sql = `SELECT x, y, z, theta, name, robot_id FROM location WHERE loc_id = ?`;
 
-    db.query(sql, [locationName], (err, results) => {
+    db.query(sql, [locId], (err, results) => {
         if (err) {
-            logger.error(`Error fetching coordinates for location ${locationName}:`, err);
+            logger.error(`Error fetching coordinates for location ID '${locId}':`, err);
             return res.status(500).json({ message: 'Database error' });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ message: 'Location not found' });
+            return res.status(404).json({ message: `Location ID '${locId}' not found.` });
         }
 
-        res.json(results[0]);
+        logger.info(`Fetched coordinates for location ID '${locId}'.`);
+
+        const { x, y, z, theta, name, robot_id } = results[0];
+
+        res.json({
+            locId,
+            locationName: name,
+            robotId: robot_id,
+            coordinates: { x, y, z, theta }
+        });
     });
 };
 
+
 const getAllLocations = (req, res) => {
-    const sql = `SELECT name, latitude, longitude FROM location`;
+    const sql = `
+        SELECT loc_id, robot_id, name, x, y, z, theta 
+        FROM location 
+        ORDER BY robot_id ASC;
+    `;
 
     db.query(sql, (err, results) => {
         if (err) {
-            logger.error('Error fetching all locations:', err);
+            logger.error('Database error while fetching all locations:', err);
             return res.status(500).json({ message: 'Database error' });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ message: 'No locations found' });
+            logger.warn('No locations found.');
+            return res.status(200).json([]); // Return an empty array instead of 404
         }
 
-        res.json(results);
+        logger.info(`Successfully retrieved ${results.length} locations.`);
+
+        res.json({
+            totalLocations: results.length,
+            locations: results.map(({ loc_id, robot_id, name, x, y, z, theta }) => ({
+                locId: loc_id,
+                robotId: robot_id,
+                locationName: name,
+                coordinates: { x, y, z, theta }
+            }))
+        });
     });
 };
 
@@ -891,5 +901,49 @@ const resumeTask = (req, res) => {
     });
 };
 
+const saveCurrentRobotPosition = (req, res) => {
+    const { robotId, locationName } = req.body;
 
-module.exports = { resumeTask, stopTask, startTask, getAllLocations, getCoordinatesByLocation, removeAllRobotLocations, saveRobotLocation, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };
+    if (!robotId || !locationName) {
+        return res.status(400).json({ message: 'Robot ID and location name are required' });
+    }
+
+    // Fetch the latest position of the robot
+    const fetchPositionSQL = `
+        SELECT x, y, z, theta 
+        FROM robot_location 
+        WHERE robot_id = ? 
+        ORDER BY r_loc_id DESC 
+        LIMIT 1;
+    `;
+
+    db.query(fetchPositionSQL, [robotId], (err, results) => {
+        if (err) {
+            logger.error(`Error fetching robot ${robotId} position:`, err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No recorded position for this robot' });
+        }
+
+        const { x, y, z, theta } = results[0];
+
+        // Insert the latest position into the location table
+        const insertLocationSQL = `
+            INSERT INTO location (robot_id, x, y, z, theta, name) 
+            VALUES (?, ?, ?, ?, ?, ?);
+        `;
+
+        db.query(insertLocationSQL, [robotId, x, y, z, theta, locationName], (err) => {
+            if (err) {
+                logger.error(`Error saving location ${locationName} for robot ${robotId}:`, err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            res.status(201).json({ message: `Location '${locationName}' saved successfully.` });
+        });
+    });
+};
+
+module.exports = { getLocationsByRobotId, saveCurrentRobotPosition, resumeTask, stopTask, startTask, getAllLocations, getCoordinatesByLocation, removeRobotLocationById, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };

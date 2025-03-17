@@ -42,40 +42,6 @@ public class FragmentUtils {
 
         }
     }
-    public static void saveLocation(Robot robot, Context context, NestedScrollView scrollView, View rootView) {
-        try {
-            // Step 1: Load existing locations.json
-            String locationJson;
-            File file = new File(context.getFilesDir(), "locations.json");
-            JSONArray locations;
-
-            if (file.exists()) {
-                locationJson = JsonUtils.loadJSONFromFile(context, "locations.json");
-                locations = new JSONArray(locationJson);
-            } else {
-                locations = new JSONArray();
-            }
-
-            // Step 2: Create new location object
-            JSONObject newLocation = new JSONObject();
-            newLocation.put("name", "Checkpoint for " + robot.getName());
-            newLocation.put("coordinates", robot.getLocationCoordinates());
-            newLocation.put("robots", new JSONArray().put(robot.getId()));
-
-            // Step 3: Add the new location to the array
-            locations.put(newLocation);
-
-            // Step 4: Save updated JSON array back to locations.json
-            JsonUtils.saveJSONToFile(context, "locations.json", locations.toString());
-
-            // Step 5: Notify user and update UI
-            showMessage("Location saved successfully.",context);
-            appendOutput("Saved location for " + robot.getName() + " at coordinates: " + robot.getLocationCoordinates(), scrollView, rootView);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showMessage("Error saving location: " + e.getMessage(),context);
-        }
-    }
     // Helper method to validate coordinates format and range
     public static boolean isValidCoordinates(String coordinates) {
         // Split coordinates by comma

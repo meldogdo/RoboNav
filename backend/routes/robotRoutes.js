@@ -2,28 +2,29 @@ const express = require('express');
 const {
   // Task-related functions
   getRobotTasks,
+  startTask,
+  stopTask,
+  resumeTask,
   createTask,
   deleteTask,
+  addInstructionToTask,
 
   // Robot-related functions
   getAllRobots,
   createRobot,
   deleteRobot,
   getRobotLocation,
-  addInstructionToTask,
-  startTask,
-  stopTask,
-  resumeTask,
 
   // Callback functions
   getRobotCallbacks,
 
-  // Utility functions (Added missing routes)
+  // Utility functions 
   getRobotPosition,
-  saveRobotLocation,
-  removeAllRobotLocations,
+  saveCurrentRobotPosition,
+  removeRobotLocationById,
   getCoordinatesByLocation,
-  getAllLocations
+  getAllLocations,
+  getLocationsByRobotId
 } = require('../controllers/robotController');
 
 const { authenticateUser } = require('../middleware/authMiddleware');
@@ -51,11 +52,14 @@ router.get('/protected/robot/:robotId/location', getRobotLocation);
 router.post('/protected/robot/task/instruction', addInstructionToTask);
 router.get('/protected/robot/callbacks', getRobotCallbacks);
 
-// 🗺️ **Location & Position Routes (Added Missing Ones)**
+// 🗺️ **Location & Position Routes**
 router.get('/protected/robot/:robotId/position', getRobotPosition);
-router.post('/protected/robot/save-location', saveRobotLocation);
-router.delete('/protected/robot/:robotId/remove-locations', removeAllRobotLocations);
-router.get('/protected/robot/location/:locationName', getCoordinatesByLocation);
+router.post('/protected/robot/save-current-position', saveCurrentRobotPosition);
+router.delete('/protected/location/:locId', removeRobotLocationById);
+router.get('/protected/robot/location/:locId', getCoordinatesByLocation);
+router.get('/protected/robot/:robotId/locations', getLocationsByRobotId);
+
+
 router.get('/protected/robot/locations', getAllLocations);
 
 module.exports = router;

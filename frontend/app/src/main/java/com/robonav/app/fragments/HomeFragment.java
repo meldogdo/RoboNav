@@ -43,6 +43,16 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
     private Button createRobotButton, createTaskButton;
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh data when the fragment becomes visible
+        if (!swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(true);
+            loadData();
+        }
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == getActivity().RESULT_OK) {
@@ -93,10 +103,6 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
 
         // Set swipe refresh listener to reload data
         swipeRefreshLayout.setOnRefreshListener(this::loadData);
-
-        // Trigger the refresh on initial load
-        swipeRefreshLayout.setRefreshing(true);
-        loadData();
 
         SharedPreferences prefs = requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
         token = prefs.getString("JWT_TOKEN", null);
