@@ -5,49 +5,47 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Title -->
-
-    <!-- Robot Dropdown -->
+    <!-- Robot Selection Dropdown -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select Robot"
-        android:layout_marginBottom="4dp"
-        android:textSize="16sp"
-        android:textColor="@color/white" />
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:layout_marginBottom="4dp" />
 
     <Spinner
         android:id="@+id/robot_dropdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:background="@color/white"
+        android:background="@android:color/white"
         android:minHeight="48dp" />
 
-    <!-- Robot Location Information -->
+    <!-- Location Selection Dropdown -->
     <TextView
-        android:id="@+id/robot_location_name"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Location Name: "
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
+        android:text="Select Location"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:layout_marginBottom="4dp" />
 
-    <TextView
-        android:id="@+id/robot_location_coordinates"
+    <Spinner
+        android:id="@+id/location_dropdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="Coordinates: "
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
+        android:background="@android:color/white"
+        android:minHeight="48dp" />
 
-    <!-- Check Position Button -->
+    <!-- Remove Location Button -->
     <Button
-        android:id="@+id/btn_check_position"
+        android:id="@+id/btn_remove_location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Check Position"
-        android:backgroundTint="@color/blue_dark" />
+        android:text="Remove Location"
+        android:backgroundTint="@color/blue_dark"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp" />
 </LinearLayout>
