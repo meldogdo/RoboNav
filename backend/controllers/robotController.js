@@ -161,8 +161,8 @@ const deleteTask = (req, res) => {
 
         const { state } = results[0];
 
-        // Allow deletion if task is Not Started (0) or Completed (2)
-        if (state === 0 || state === 2) {
+        // Allow deletion if task is Not Started (0) or Completed (2) or Stopped (3)
+        if (state === 0 || state === 2 || state === 3 ) {
             const deleteTaskSQL = `DELETE FROM task WHERE task_id = ?`;
             db.query(deleteTaskSQL, [taskId], (err) => {
                 if (err) {

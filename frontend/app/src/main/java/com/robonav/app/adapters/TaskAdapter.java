@@ -241,24 +241,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         Button resumeButton = popupView.findViewById(R.id.resume_task_button); // New button for resuming
 
         // Ensure correct button visibility based on task state
-        updateTaskPopupUI(task, startButton, stopButton, resumeButton, progressStatus);
+        updateTaskPopupUI(task, startButton, stopButton, resumeButton, deleteButton, progressStatus);
 
         // Start Task Button Click Listener
         startButton.setOnClickListener(v -> {
-            startTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, progressStatus);
-            popupWindow.dismiss();
+            startTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton,deleteButton,progressStatus);
         });
 
         // Stop Task Button Click Listener
         stopButton.setOnClickListener(v -> {
-            stopTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, progressStatus);
-            popupWindow.dismiss();
+            stopTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, deleteButton,progressStatus);
         });
 
         // Resume Task Button Click Listener
         resumeButton.setOnClickListener(v -> {
-            resumeTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, progressStatus);
-            popupWindow.dismiss();
+            resumeTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton,deleteButton, progressStatus);
         });
 
         // Delete Button Click Listener
@@ -342,7 +339,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 y >= location[1] && y <= location[1] + view.getHeight();
     }
 
-    private void startTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, TextView progressStatus) {
+    private void startTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, Button deleteButton, TextView progressStatus) {
         String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/start";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
@@ -355,6 +352,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         startTaskButton.setVisibility(View.GONE);
                         resumeTaskButton.setVisibility(View.GONE); // Hide Resume button if it was stopped before
                         stopTaskButton.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.GONE); // Hide Delete Task when Active
                         progressStatus.setText("Active");
 
                         // Notify update listener if needed
@@ -390,7 +388,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         queue.add(request);
     }
 
-    private void stopTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, TextView progressStatus) {
+    private void stopTask(int taskId, Button startTaskButton, Button stopTaskButton, Button deleteButton, Button resumeTaskButton, TextView progressStatus) {
         String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/stop";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
@@ -403,6 +401,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         startTaskButton.setVisibility(View.GONE);
                         stopTaskButton.setVisibility(View.GONE);
                         resumeTaskButton.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.VISIBLE);
+
                         progressStatus.setText("Stopped");
 
                         // Notify update listener if needed
@@ -438,7 +438,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         queue.add(request);
     }
 
-    private void resumeTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, TextView progressStatus) {
+    private void resumeTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, Button deleteButton, TextView progressStatus) {
         String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/resume";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
@@ -451,6 +451,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         startTaskButton.setVisibility(View.GONE);
                         stopTaskButton.setVisibility(View.VISIBLE);
                         resumeTaskButton.setVisibility(View.GONE);
+                        deleteButton.setVisibility(View.GONE); // Hide Delete Task when Resumed
                         progressStatus.setText("Active");
 
                         // Notify update listener if needed
@@ -486,7 +487,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         queue.add(request);
     }
 
-    private void updateTaskPopupUI(Task task, Button startButton, Button stopButton, Button resumeButton, TextView progressStatus) {
+    private void updateTaskPopupUI(Task task, Button startButton, Button stopButton, Button resumeButton,Button deleteButton, TextView progressStatus) {
         switch (task.getState()) {
             case "0": // Not Started
                 startButton.setVisibility(View.VISIBLE);
@@ -496,6 +497,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 break;
             case "1": // Active
                 startButton.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.GONE);
                 stopButton.setVisibility(View.VISIBLE);
                 resumeButton.setVisibility(View.GONE);
                 progressStatus.setText("Active");
