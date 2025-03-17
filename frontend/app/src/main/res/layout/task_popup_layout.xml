@@ -90,7 +90,7 @@
             android:textColor="@color/black"
             android:textSize="16sp" />
 
-        <!-- Date Created Section -->
+        <!-- Date Completed Section -->
         <TextView
             android:id="@+id/end_time_title"
             android:layout_width="wrap_content"
@@ -120,6 +120,7 @@
             android:orientation="vertical"
             android:gravity="center">
 
+            <!-- Start Task Button (Visible when status is 0 - Not Started) -->
             <Button
                 android:id="@+id/start_task_button"
                 android:layout_width="wrap_content"
@@ -130,6 +131,29 @@
                 android:padding="12dp"
                 android:visibility="visible" />
 
+            <!-- Stop Task Button (Visible when status is 1 - Active) -->
+            <Button
+                android:id="@+id/stop_task_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop Task"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/red_dark"
+                android:padding="12dp"
+                android:visibility="gone" />
+
+            <!-- Resume Task Button (Visible when status is 3 - Stopped) -->
+            <Button
+                android:id="@+id/resume_task_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Resume Task"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/blue_dark"
+                android:padding="12dp"
+                android:visibility="gone" />
+
+            <!-- Delete Task Button -->
             <Button
                 android:id="@+id/delete_task_button"
                 android:layout_width="wrap_content"
@@ -138,8 +162,7 @@
                 android:textColor="@color/white"
                 android:backgroundTint="@color/red_dark"
                 android:padding="12dp"
-                android:layout_marginTop="8dp"/>
-<!--                android:visibility="gone" -->
+                android:layout_marginTop="8dp" />
 
         </LinearLayout>
 

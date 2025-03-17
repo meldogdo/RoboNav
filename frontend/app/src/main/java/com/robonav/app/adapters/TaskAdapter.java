@@ -175,15 +175,19 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private void updateTaskStatus(TaskViewHolder holder, Task task) {
         if (task.getState().equals("1")) {
             holder.taskProgressTextView.setText("Status: Active");
-            holder.taskIconImageView.setImageResource(R.drawable.bot);
+            holder.taskIconImageView.setImageResource(R.drawable.ic_active);
             holder.taskIconImageView.setVisibility(View.VISIBLE);
         } else if (task.getState().equals("0")) {
             holder.taskProgressTextView.setText("Status: Not Started");
-            holder.taskIconImageView.setImageResource(R.drawable.ic_queue);
+            holder.taskIconImageView.setImageResource(R.drawable.ic_waiting);
             holder.taskIconImageView.setVisibility(View.VISIBLE);
         } else if (task.getState().equals("2")) {
             holder.taskProgressTextView.setText("Status: Complete");
             holder.taskIconImageView.setImageResource(R.drawable.ic_task);
+            holder.taskIconImageView.setVisibility(View.VISIBLE);
+        }else if (task.getState().equals("3")) {
+            holder.taskProgressTextView.setText("Status: Stopped");
+            holder.taskIconImageView.setImageResource(R.drawable.ic_paused);
             holder.taskIconImageView.setVisibility(View.VISIBLE);
         }
     }
@@ -232,6 +236,36 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView responsibleRobotView = popupView.findViewById(R.id.responsible_robot);
         TextView dateStarted = popupView.findViewById(R.id.date_started); // New TextView
         Button deleteButton = popupView.findViewById(R.id.delete_task_button);
+        Button startButton = popupView.findViewById(R.id.start_task_button);
+        Button stopButton = popupView.findViewById(R.id.stop_task_button);
+        Button resumeButton = popupView.findViewById(R.id.resume_task_button); // New button for resuming
+
+        // Ensure correct button visibility based on task state
+        updateTaskPopupUI(task, startButton, stopButton, resumeButton, progressStatus);
+
+        // Start Task Button Click Listener
+        startButton.setOnClickListener(v -> {
+            startTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, progressStatus);
+            popupWindow.dismiss();
+        });
+
+        // Stop Task Button Click Listener
+        stopButton.setOnClickListener(v -> {
+            stopTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, progressStatus);
+            popupWindow.dismiss();
+        });
+
+        // Resume Task Button Click Listener
+        resumeButton.setOnClickListener(v -> {
+            resumeTask(Integer.parseInt(task.getId()), startButton, stopButton, resumeButton, progressStatus);
+            popupWindow.dismiss();
+        });
+
+        // Delete Button Click Listener
+        deleteButton.setOnClickListener(v -> {
+            deleteTask(Integer.parseInt(task.getId()), position);
+            popupWindow.dismiss();
+        });
 
         titleView.setText(task.getName());
         responsibleRobotView.setText((responsibleRobot != null ? responsibleRobot.getName() : "Unknown"));
@@ -275,11 +309,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             return false;
         });
 
-        deleteButton.setOnClickListener(v -> {
-            deleteTask(Integer.parseInt(task.getId()), position);
-            popupWindow.dismiss();
-        });
-
         // Apply slide-up animation
         popupView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_up));
 
@@ -311,6 +340,179 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         float y = event.getRawY();
         return x >= location[0] && x <= location[0] + view.getWidth() &&
                 y >= location[1] && y <= location[1] + view.getHeight();
+    }
+
+    private void startTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, TextView progressStatus) {
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/start";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
+                response -> {
+                    try {
+                        String message = response.getString("message");
+                        showMessage(message, context);
+
+                        // Update UI to reflect task has started
+                        startTaskButton.setVisibility(View.GONE);
+                        resumeTaskButton.setVisibility(View.GONE); // Hide Resume button if it was stopped before
+                        stopTaskButton.setVisibility(View.VISIBLE);
+                        progressStatus.setText("Active");
+
+                        // Notify update listener if needed
+                        if (onUpdateListener != null) {
+                            onUpdateListener.onUpdate();
+                        }
+
+                    } catch (JSONException e) {
+                        showMessage("Task started successfully", context);
+                    }
+                },
+                error -> {
+                    try {
+                        String errorMsg = new String(error.networkResponse.data);
+                        JSONObject errorJson = new JSONObject(errorMsg);
+                        String message = errorJson.getString("message");
+                        showMessage(message, context);
+                    } catch (Exception e) {
+                        showMessage("Failed to start task", context);
+                    }
+                    error.printStackTrace();
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
+
+    private void stopTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, TextView progressStatus) {
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/stop";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
+                response -> {
+                    try {
+                        String message = response.getString("message");
+                        showMessage(message, context);
+
+                        // Update UI to reflect that the task is stopped
+                        startTaskButton.setVisibility(View.GONE);
+                        stopTaskButton.setVisibility(View.GONE);
+                        resumeTaskButton.setVisibility(View.VISIBLE);
+                        progressStatus.setText("Stopped");
+
+                        // Notify update listener if needed
+                        if (onUpdateListener != null) {
+                            onUpdateListener.onUpdate();
+                        }
+
+                    } catch (JSONException e) {
+                        showMessage("Task stopped successfully", context);
+                    }
+                },
+                error -> {
+                    try {
+                        String errorMsg = new String(error.networkResponse.data);
+                        JSONObject errorJson = new JSONObject(errorMsg);
+                        String message = errorJson.getString("message");
+                        showMessage(message, context);
+                    } catch (Exception e) {
+                        showMessage("Failed to stop task", context);
+                    }
+                    error.printStackTrace();
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
+
+    private void resumeTask(int taskId, Button startTaskButton, Button stopTaskButton, Button resumeTaskButton, TextView progressStatus) {
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/task/" + taskId + "/resume";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
+                response -> {
+                    try {
+                        String message = response.getString("message");
+                        showMessage(message, context);
+
+                        // Update UI to reflect that the task is resumed (active)
+                        startTaskButton.setVisibility(View.GONE);
+                        stopTaskButton.setVisibility(View.VISIBLE);
+                        resumeTaskButton.setVisibility(View.GONE);
+                        progressStatus.setText("Active");
+
+                        // Notify update listener if needed
+                        if (onUpdateListener != null) {
+                            onUpdateListener.onUpdate();
+                        }
+
+                    } catch (JSONException e) {
+                        showMessage("Task resumed successfully", context);
+                    }
+                },
+                error -> {
+                    try {
+                        String errorMsg = new String(error.networkResponse.data);
+                        JSONObject errorJson = new JSONObject(errorMsg);
+                        String message = errorJson.getString("message");
+                        showMessage(message, context);
+                    } catch (Exception e) {
+                        showMessage("Failed to resume task", context);
+                    }
+                    error.printStackTrace();
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
+
+    private void updateTaskPopupUI(Task task, Button startButton, Button stopButton, Button resumeButton, TextView progressStatus) {
+        switch (task.getState()) {
+            case "0": // Not Started
+                startButton.setVisibility(View.VISIBLE);
+                stopButton.setVisibility(View.GONE);
+                resumeButton.setVisibility(View.GONE);
+                progressStatus.setText("Not Started");
+                break;
+            case "1": // Active
+                startButton.setVisibility(View.GONE);
+                stopButton.setVisibility(View.VISIBLE);
+                resumeButton.setVisibility(View.GONE);
+                progressStatus.setText("Active");
+                break;
+            case "2": // Completed
+                startButton.setVisibility(View.GONE);
+                stopButton.setVisibility(View.GONE);
+                resumeButton.setVisibility(View.GONE);
+                progressStatus.setText("Completed");
+                break;
+            case "3": // Stopped
+                startButton.setVisibility(View.GONE);
+                stopButton.setVisibility(View.GONE);
+                resumeButton.setVisibility(View.VISIBLE);
+                progressStatus.setText("Stopped");
+                break;
+        }
     }
 }
 
