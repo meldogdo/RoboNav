@@ -188,9 +188,9 @@ const deleteTask = (req, res) => {
         }
 
         // Prevent deletion of Running tasks (state = 1)
-        logger.warn(`Task ID ${taskId} is still running. Stop the task before deleting.`);
+        logger.warn(`Task ID ${taskId} is running. Please stop it first.`);
         return res.status(400).json({
-            message: `Task ID ${taskId} is still running. Please stop the task before deleting.`
+            message: `Task ID ${taskId} is running. Please stop it first.`
         });
     });
 };
@@ -250,7 +250,7 @@ const startTask = (req, res) => {
                 const activeTaskId = activeResults[0].task_id;
                 logger.warn(`Robot ${robot_id} already has an active task (ID: ${activeTaskId}). Cannot start a new task.`);
                 return res.status(400).json({
-                    message: `Robot ${robot_id} is already running task ID ${activeTaskId}. Please complete that task before starting a new one.`
+                    message: `Robot ${robot_id} is busy with Task ${activeTaskId}. Complete it first.`
                 });
             }
 
@@ -525,7 +525,7 @@ const stopTask = (req, res) => {
                 }
 
                 logger.info(`Task ${taskId} marked as stopped at index ${current_instruction_index}.`);
-                res.json({ message: `Task ${taskId} has been stopped. Progress saved at instruction index ${current_instruction_index}.` });
+                res.json({ message: `Task ${taskId} stopped. Progress saved.` });
             });
         });
     });
@@ -556,7 +556,7 @@ const deleteRobot = (req, res) => {
         if (results[0].count > 0) {
             logger.warn(`Cannot delete robot ID ${robotId} - it has pending or active tasks.`);
             return res.status(403).json({
-                message: `Cannot delete robot ID ${robotId}. It has tasks that are either not started or still running. Complete or delete those tasks first.`
+                message: `Cannot delete robot ID ${robotId} - it has pending or active tasks.`
             });
         }
 
@@ -900,7 +900,7 @@ const resumeTask = (req, res) => {
                 const activeTaskId = activeResults[0].task_id;
                 logger.warn(`Robot ${robot_id} already has an active task (ID: ${activeTaskId}). Cannot resume a stopped task.`);
                 return res.status(400).json({
-                    message: `Robot ${robot_id} is already running task ID ${activeTaskId}. Please complete that task before resuming.`
+                    message: `Robot ${robot_id} is running task ID ${activeTaskId}. Finish it first.`
                 });
             }
 
@@ -918,7 +918,7 @@ const resumeTask = (req, res) => {
                 // Step 4: Start queueing the instructions from the saved index
                 queueTaskInstructions(taskId, robot_id, instructions, current_instruction_index);
 
-                return res.json({ message: `Task ${taskId} resumed successfully from instruction index ${current_instruction_index}.` });
+                return res.json({ message: `Task ${taskId} resumed from step ${current_instruction_index}.` });
             });
         });
     });

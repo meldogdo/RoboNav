@@ -18,8 +18,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class FragmentUtils {
+    private static Toast activeToast; // Single instance for all classes
+
     public static void showMessage(String message, Context context) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        if (activeToast != null) {
+            activeToast.cancel(); // Cancel previous toast if it exists
+        }
+        activeToast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+        activeToast.show();
     }
     public static void appendOutput(String message, NestedScrollView scrollView, View rootView) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
