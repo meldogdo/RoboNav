@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText passwordEditText;
     private Toast currentToast; // Store the latest toast reference
 
+    private String storedUsername;
     private static final String LOGIN_URL = ConfigManager.getBaseUrl() + "/api/open/users/login";
 
     @Override
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         // Check token validity before initializing the UI
         if (isTokenValid()) {
             Intent intent = new Intent(this, HomeActivity.class);
+            intent.putExtra("username", storedUsername); // Pass extracted username
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
@@ -180,27 +182,34 @@ public class MainActivity extends AppCompatActivity {
             return false; // No token stored
         }
 
-        // Token format validation
+        // Validate JWT format
         String[] parts = token.split("\\.");
         if (parts.length != 3) {
             return false; // Invalid JWT format
         }
 
-        // Decode and check expiration
         try {
+            // Decode payload to extract username
             String payload = new String(android.util.Base64.decode(parts[1], android.util.Base64.DEFAULT));
             JSONObject payloadJson = new JSONObject(payload);
             long exp = payloadJson.optLong("exp", 0);
             long currentTime = System.currentTimeMillis() / 1000;
+
             if (exp <= currentTime) {
                 prefs.edit().remove("JWT_TOKEN").apply();
+                return false; // Token expired
             }
-            return exp > currentTime; // Token is valid
+
+            // Extract and store username
+            storedUsername = payloadJson.optString("username", "");
+            return true; // Token is valid
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
 
     // Validate username and password
     private boolean areInputsValid(String username, String password) {

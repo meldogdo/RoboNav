@@ -103,8 +103,9 @@
             app:layout_constraintTop_toBottomOf="@id/title_robot_tasks"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_default="spread"
-            android:fillViewport="true">
-
+            android:fillViewport="true"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false">
             <!-- TextView inside the NestedScrollView -->
             <TextView
                 android:id="@+id/output_text_view"
@@ -112,11 +113,9 @@
                 android:layout_height="wrap_content"
                 android:background="@color/gray_medium"
                 android:padding="8dp"
-                android:scrollbars="vertical"
                 android:textColor="@color/gray_high_contrast"
                 android:textSize="16sp" />
         </androidx.core.widget.NestedScrollView>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
