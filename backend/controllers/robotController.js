@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const logger = require('../utils/logger');
+const { format } = require('date-fns');
 
 // Get the last known position of a robot
 const getRobotPosition = (req, res) => {
@@ -430,26 +431,40 @@ const createTask = (req, res) => {
         return res.status(400).json({ message: 'Missing required fields: name, robot_id' });
     }
 
-    // Default values
-    const state = 0; // Default task state (e.g., Not Started)
-    const timestamp = new Date(); // Current timestamp
+    // Check if the robot_id exists in the database
+    const checkRobotQuery = `SELECT robot_id FROM robot WHERE robot_id = ?`;
 
-    // SQL query to insert new task
-    const sql = `
-        INSERT INTO task (name, robot_id, state, timeStamp)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    db.query(sql, [name, robot_id, state, timestamp], (err, result) => {
+    db.query(checkRobotQuery, [robot_id], (err, results) => {
         if (err) {
-            logger.error('Database error while inserting task:', err);
+            logger.error('Database error while checking robot ID:', err);
             return res.status(500).json({ message: 'Database error' });
         }
 
-        logger.info(`New task created with ID: ${result.insertId}`);
-        res.status(201).json({
-            message: 'Task created successfully',
-            task_id: result.insertId
+        if (results.length === 0) {
+            logger.warn(`Invalid robot ID: ${robot_id}`);
+            return res.status(400).json({ message: 'Invalid robot_id: Robot does not exist' });
+        }
+
+        // Robot ID exists, proceed with task creation
+        const state = 0; // Default task state (e.g., Not Started)
+        const timestamp = new Date(); // Current timestamp
+
+        const insertTaskQuery = `
+            INSERT INTO task (name, robot_id, state, timeStamp)
+            VALUES (?, ?, ?, ?)
+        `;
+
+        db.query(insertTaskQuery, [name, robot_id, state, timestamp], (err, result) => {
+            if (err) {
+                logger.error('Database error while inserting task:', err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+
+            logger.info(`New task created with ID: ${result.insertId}`);
+            res.status(201).json({
+                message: 'Task created successfully',
+                task_id: result.insertId
+            });
         });
     });
 };
@@ -733,38 +748,46 @@ const getRobotLocation = (req, res) => {
     });
 };
 
-// Get the 30 most recent robot callbacks
+// Get robot callbacks by ID or fetch all limited to 25 most recent records
 const getRobotCallbacks = (req, res) => {
-    logger.info('Fetching the 30 most recent callbacks...');
+    const { robotId } = req.query;  
+    logger.info(`Fetching callbacks for robot ID: ${robotId || 'ALL'}`);
 
-    const query = `
+    let query = `
         SELECT robot_id, callback, ctime
         FROM callback_rec
-        ORDER BY cb_id DESC
-        LIMIT 30
     `;
 
-    db.query(query, (err, results) => {
+    if (robotId) {
+        query += ` WHERE robot_id = ?`;  
+    }
+
+    query += ` ORDER BY ctime DESC LIMIT 25`;  
+
+    db.query(query, robotId ? [robotId] : [], (err, results) => {
         if (err) {
             logger.error('Database error while fetching callbacks:', err);
             return res.status(500).json({ message: 'Database error', error: err });
         }
 
         if (results.length === 0) {
-            logger.warn('No callbacks found.');
+            logger.warn(`No callbacks found for robot ID: ${robotId || 'ALL'}`);
             return res.status(404).json({ message: 'No callbacks found' });
         }
 
         // Format results
-        const callbackMessages = results.map(callback =>
-            `Robot ${callback.robot_id}: ${callback.callback} [${callback.ctime}]`
-        );
+        const callbackMessages = results.map((callback, index) => {
+            const formattedTime = format(new Date(callback.ctime), 'yyyy-MM-dd HH:mm:ss');
+
+            // Append double newline only if it's NOT the last message
+            return `Robot ID: ${callback.robot_id}\nCallback: ${callback.callback}\nTime: ${formattedTime}`
+                + (index < results.length - 1 ? "\n\n" : ""); 
+        });
 
         logger.info(`Successfully retrieved ${callbackMessages.length} callbacks.`);
         res.json({ message: 'Callbacks retrieved', data: callbackMessages });
     });
 };
-
 
 // Send robot instructions
 const addInstructionToTask = (req, res) => {

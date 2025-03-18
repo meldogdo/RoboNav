@@ -12,7 +12,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +48,12 @@ import java.util.Map;
 
 public class UtilitiesFragment extends Fragment {
 
-    private Spinner actionSpinner;
+    private Spinner actionSpinner, robotCallbacksSpinner;
+
     private View dynamicContentContainer;
     private NestedScrollView scrollView;
+
+    private ImageButton refreshButton;
     private View view;
     private Toast currentToast; // Store the latest toast reference
 
@@ -60,14 +67,46 @@ public class UtilitiesFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_utilities, container, false);
-
         scrollView = view.findViewById(R.id.output_scroll_view);
         actionSpinner = view.findViewById(R.id.action_spinner);
+        robotCallbacksSpinner = view.findViewById(R.id.robot_callbacks_spinner);
         dynamicContentContainer = view.findViewById(R.id.dynamic_content_container);
+        refreshButton = view.findViewById(R.id.refresh_button); // Find the refresh button
+
+        // Set up refresh button click listener
+        refreshButton.setOnClickListener(v -> {
+            String selectedRobot = robotCallbacksSpinner.getSelectedItem().toString(); // Get the selected robot
+            handleRobotSelection(selectedRobot); // Refresh the API call
+            showMessage("Refreshing callbacks...", requireContext()); // Show feedback
+        });
+
         return view;
     }
 
+    private void appendOutputMessage(String message) {
+        TextView outputTextView = view.findViewById(R.id.output_text_view);
+        NestedScrollView scrollView = view.findViewById(R.id.output_scroll_view);
+
+        // Append new message
+        String currentText = outputTextView.getText().toString();
+        String updatedText = currentText.isEmpty() ? message : currentText + "\n" + message;
+
+        outputTextView.setText(updatedText);
+
+        // Ensure UI updates before scrolling
+        scrollView.post(() -> {
+            scrollView.fullScroll(View.FOCUS_DOWN);
+            outputTextView.invalidate(); // Force update UI
+        });
+    }
+
+    private void clearOutput() {
+        TextView outputTextView = view.findViewById(R.id.output_text_view);
+        outputTextView.setText(""); // Clears previous messages
+    }
+
     private void setupDropdownMenu() {
+        // Actions Spinner
         String[] actions = {
                 "Save Robot's Current Location",
                 "Remove Robot's Location",
@@ -77,7 +116,6 @@ public class UtilitiesFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, actions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         actionSpinner.setAdapter(adapter);
-
         actionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -86,10 +124,164 @@ public class UtilitiesFragment extends Fragment {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Optional: Clear dynamic content if nothing is selected
                 clearDynamicContent();
             }
         });
+
+        // Robot Callbacks Spinner
+        fetchRobotsForDropdown();
+    }
+
+    private void fetchRobotsForDropdown() {
+        String robotUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/robots";
+        String token = requireContext().getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString("JWT_TOKEN", null);
+
+        if (token == null) {
+            showMessage("Authentication error: No token found.", requireContext());
+            return;
+        }
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
+                response -> {
+                    List<String> robotNames = new ArrayList<>();
+                    robotNames.add("All Robots");  // Default option
+
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject robot = response.getJSONObject(i);
+                            robotNames.add(robot.getString("name"));
+                        }
+
+                        // Populate dropdown with robot names
+                        ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
+                        robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        robotCallbacksSpinner.setAdapter(robotAdapter);
+
+                        // Fetch all robots' callbacks initially
+                        handleRobotSelection("All Robots");
+
+
+                        // Set default selection and listener
+                        robotCallbacksSpinner.setSelection(0);  // Ensure default is 'All Robots'
+                        robotCallbacksSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                String selectedRobot = robotNames.get(position);
+                                handleRobotSelection(selectedRobot);
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        showMessage("Failed to parse robot data.", requireContext());
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    showMessage("Failed to fetch robots. Check your connection.", requireContext());
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        robotRequest.setRetryPolicy(new DefaultRetryPolicy(
+                20000,  // Timeout in milliseconds
+                0,      // No retries
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        queue.add(robotRequest);
+    }
+
+    private void handleRobotSelection(String selectedRobot) {
+        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/callbacks";
+
+        if (!selectedRobot.equals("All Robots")) {
+            // Extract ID from "Robot #ID" format
+            String[] parts = selectedRobot.split("#");
+            if (parts.length > 1) {
+                String robotId = parts[1].trim(); // Get the ID part
+
+                try {
+                    String encodedRobotId = URLEncoder.encode(robotId, "UTF-8");
+                    url += "?robotId=" + encodedRobotId;
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    showMessage("Encoding error: Unable to fetch robot callbacks.", requireContext());
+                    return;
+                }
+            } else {
+                showMessage("Invalid robot format. Please select a valid robot.", requireContext());
+                return;
+            }
+        }
+        fetchRobotCallbacks(url);
+    }
+
+    private void fetchRobotCallbacks(String url) {
+        String token = requireContext().getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString("JWT_TOKEN", null);
+        if (token == null) {
+            showMessage("Authentication error: No token found.", requireContext());
+            return;
+        }
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        // Clear output before fetching new data
+        clearOutput();
+
+        JsonObjectRequest callbackRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONArray data = response.getJSONArray("data");
+
+                        if (data.length() == 0) {
+                            appendOutputMessage("No callbacks found.");
+                            return;
+                        }
+
+                        // Append each formatted message with exactly two newlines between messages
+                        for (int i = 0; i < data.length(); i++) {
+                            String message = data.getString(i);
+                            appendOutputMessage(message);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        showMessage("Failed to parse callback data.", requireContext());
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    showMessage("Failed to fetch callbacks. Check your connection.", requireContext());
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        callbackRequest.setRetryPolicy(new DefaultRetryPolicy(
+                20000,  // Timeout in milliseconds
+                0,      // No retries
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        queue.add(callbackRequest);
     }
 
     private void handleActionSelection(String action) {

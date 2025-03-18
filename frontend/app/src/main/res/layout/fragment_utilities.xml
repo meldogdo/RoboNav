@@ -55,26 +55,55 @@
             android:id="@+id/title_robot_tasks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Robot Callbacks"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="8dp"
+            android:text="Callback Records"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dynamic_content_container" />
+
+        <Spinner
+            android:id="@+id/robot_callbacks_spinner"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:drawable/editbox_background"
+            android:hint="Loading..."
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toStartOf="@+id/refresh_button"
+            app:layout_constraintStart_toEndOf="@+id/title_robot_tasks"
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+
+        <ImageButton
+            android:id="@+id/refresh_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="18dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/refresh"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/output_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="499dp"
+            android:layout_height="0dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title_robot_tasks">
+            app:layout_constraintTop_toBottomOf="@id/title_robot_tasks"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_default="spread"
+            android:fillViewport="true">
 
             <!-- TextView inside the NestedScrollView -->
             <TextView
@@ -82,12 +111,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/gray_medium"
-                android:minHeight="499dp"
                 android:padding="8dp"
                 android:scrollbars="vertical"
                 android:textColor="@color/gray_high_contrast"
                 android:textSize="16sp" />
         </androidx.core.widget.NestedScrollView>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
