@@ -146,28 +146,29 @@ public class FragmentUtils {
 
 
     public static int areInputsValid(@Nullable String username, @Nullable String password, @Nullable String email) {
-        if ((username == null || username.isEmpty()) ||
-                (password != null && password.isEmpty()) ||
-                (email != null && email.isEmpty())) {
+        // Check if at least one input is provided
+        if ((username == null || username.isEmpty()) &&
+                (password == null || password.isEmpty()) &&
+                (email == null || email.isEmpty())) {
             return EMPTY_FIELDS;
         }
-        if (username != null && !username.matches("^[a-zA-Z0-9]{4,20}$")) {
+
+        // Validate username if it's provided
+        if (username != null && !username.isEmpty() && !username.matches("^[a-zA-Z0-9]{4,20}$")) {
             return INVALID_USERNAME;
         }
-        if (password != null && !password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$")) {
+
+        // Validate password if it's provided
+        if (password != null && !password.isEmpty() && !password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$")) {
             return INVALID_PASSWORD;
         }
-        if (email != null && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+
+        // Validate email if it's provided
+        if (email != null && !email.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             return INVALID_EMAIL;
         }
 
-        return VALID; // All inputs are valid
+        return VALID; // All provided inputs are valid
     }
-
-
-
-
-
-
 
 }

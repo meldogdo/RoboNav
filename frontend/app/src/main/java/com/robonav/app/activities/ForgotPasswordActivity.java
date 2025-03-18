@@ -4,6 +4,7 @@ import static com.robonav.app.utilities.FragmentUtils.EMPTY_FIELDS;
 import static com.robonav.app.utilities.FragmentUtils.INVALID_EMAIL;
 import static com.robonav.app.utilities.FragmentUtils.VALID;
 import static com.robonav.app.utilities.FragmentUtils.areInputsValid;
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -90,7 +91,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     showToast("Invalid email format");
                     break;
             }
-            return;
+            return; // Stop further execution if invalid
         }
 
         // Disable submit button to prevent multiple requests
@@ -147,7 +148,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         // Explicitly set retry policy (No automatic retries)
         request.setRetryPolicy(new DefaultRetryPolicy(
-                10000, // Timeout in milliseconds (10 seconds)
+                20000, // Timeout in milliseconds (10 seconds)
                 0, // Maximum number of retries (0 = no retries)
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
