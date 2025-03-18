@@ -1,28 +1,24 @@
 package com.robonav.app.fragments;
 
-import static com.robonav.app.utilities.FragmentUtils.appendOutput;
-import static com.robonav.app.utilities.FragmentUtils.isValidCoordinates;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
-import static com.robonav.app.utilities.JsonUtils.loadCallbacks;
 import static com.robonav.app.utilities.JsonUtils.loadLocationDetails;
-import static com.robonav.app.utilities.JsonUtils.loadRobotNames;
-import static com.robonav.app.utilities.JsonUtils.sendRobotInstruction;
+import static com.robonav.app.utilities.JsonUtils.loadRobotTasks;
+import static com.robonav.app.utilities.JsonUtils.sendInstructionToTask;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView;
@@ -36,16 +32,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class NavigationFragment extends Fragment {
 
-    private Spinner robotDropdown, locationDropdown;
-    private TextView locationCoordinatesTextView;
-    private NestedScrollView scrollView;
-    private List<String> locationNames;  // Declare it here to be used in both places
-    private ArrayAdapter<String> locationAdapter;  // Declare it here so it can be reused
-
-    private Map<String, String> locationCoordinatesMap = new HashMap<>();
+    private static Spinner taskDropdown;
+    private static Spinner locationDropdown;
+    private static TextView fulfilledBy;
+    private static TextView coordinates;
+    private Button addInstruction;
+    private static List<String> locationNames;
+    private static List<String> taskNames;
+    private static ArrayAdapter<String> locationAdapter;
+    private static ArrayAdapter<String> taskAdapter;
+    private static HashMap<String, Pair<String, String>> storedTasks;
+    private static Map<String, String> locationCoordinates;
+    private static String currentTaskId;
+    private static String currentRobotId;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -54,283 +57,228 @@ public class NavigationFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_navigation, container, false);
 
         // Initialize components
-        scrollView = view.findViewById(R.id.output_scroll_view);
-        robotDropdown = view.findViewById(R.id.robot_dropdown);
+        taskDropdown = view.findViewById(R.id.task_dropdown);
         locationDropdown = view.findViewById(R.id.pre_existing_location_dropdown);
-        locationCoordinatesTextView = view.findViewById(R.id.input_coordinates);
-        Button btnNavigate = view.findViewById(R.id.btn_navigate);
-        ImageButton refreshButton = view.findViewById(R.id.refresh_button);
+        fulfilledBy = view.findViewById(R.id.current_robot);
+        coordinates = view.findViewById(R.id.location_coordinates);
+        addInstruction = view.findViewById(R.id.btn_add_instruction);
 
         // Initialize locationNames here
         locationNames = new ArrayList<>();
-        locationNames.add("{Please Select an Option}"); // Default option
+        taskNames = new ArrayList<>();
 
         // Initialize locationAdapter
         locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
         locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationDropdown.setAdapter(locationAdapter);
 
-        // Disable location dropdown and coordinates input initially
-        locationDropdown.setEnabled(false);
-        locationCoordinatesTextView.setEnabled(false);
+        // Task adapter
+        taskAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, taskNames);
+        taskAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        taskDropdown.setAdapter(taskAdapter);
 
-        // Load robot names into the dropdown asynchronously
-        loadRobotNames(requireContext()).thenAccept(robotNames -> {
-            // When robot names are loaded, update the adapter
-            ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
-            robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            robotDropdown.setAdapter(robotAdapter);
-        }).exceptionally(ex -> {
-            // Handle any errors during the network request
-            ex.printStackTrace();
-            return null;
-        });
+        //Fetching and storing tasks
+        fetchAndStoreRobotTasks(requireContext());
 
-        // Load callback messages asynchronously
-        loadCallbacks(requireContext()).thenAccept(callbackMessages -> {
-            // Convert the callback messages into a String with newlines
-            StringBuilder callbackText = new StringBuilder();
-            for (String message : callbackMessages) {
-                callbackText.append(message).append("\n\n");
-            }
-
-            // Ensure UI updates are done on the main thread
-            requireActivity().runOnUiThread(() -> {
-                // Populate the TextView inside the ScrollView
-                TextView outputTextView = requireView().findViewById(R.id.output_text_view);
-                outputTextView.setText(callbackText.toString());
-
-                // Scroll to the top of the ScrollView
-                ScrollView scrollView = requireView().findViewById(R.id.output_scroll_view);
-                scrollView.post(() -> scrollView.fullScroll(View.FOCUS_UP));
-            });
-        }).exceptionally(ex -> {
-            // Handle any errors during the network request
-            ex.printStackTrace();
-            return null;
-        });
-
-        // Set the button click listener
-        btnNavigate.setOnClickListener(v -> {
-            String selectedRobot = robotDropdown.getSelectedItem().toString();
-            String selectedLocation = locationDropdown.getSelectedItem().toString();
-            String coordinates = locationCoordinatesTextView.getText().toString().trim();  // Get the coordinates entered
-            // Build the message based on the location choice
-            String message;
-
-            if (selectedLocation.equals("{Please Select an Option}")) {
-                // Show a toast message if coordinates are not entered
-                showMessage("Please Select an Option", requireContext());
-                return;  // Exit the method to prevent further action
-            }
-
-            // Check if "Use Coordinates" is selected and coordinates are empty
-            else if (selectedLocation.equals("[Use Coordinates]") && coordinates.isEmpty()) {
-                // Show a toast message if coordinates are not entered
-                showMessage("Please enter coordinates", requireContext());
-                return;  // Exit the method to prevent further action
-            }
-
-            // Validate coordinates if "[Use Coordinates]" is selected
-            else if (selectedLocation.equals("[Use Coordinates]") && !isValidCoordinates(coordinates)) {
-                // Show a toast message if coordinates are invalid
-                showMessage("Invalid coordinates. Enter as 'latitude, longitude' within valid ranges.", requireContext());
-                return;  // Exit the method to prevent further action
-            }
-
-            else if (selectedLocation.equals("[Use Coordinates]")) {
-                String robotId = selectedRobot.replaceAll("[^0-9]", ""); // Extract robot ID
-                message = "navigation:startNavigation:" + coordinates;
-
-                // Call sendRobotInstruction and handle response
-                sendRobotInstruction(requireContext(), robotId, message)
-                        .thenAccept(response -> {
-                            // Handle success response
-                            // You can do any additional work here after a successful instruction, like updating the UI
-                        })
-                        .exceptionally(ex -> {
-                            // Handle any error that occurred during the request
-                            return null;
-                        });
-                refreshButton.performClick();
-            } else {
-                String robotId = selectedRobot.replaceAll("[^0-9]", ""); // Extract robot ID
-                message = "navigation:startNavigation:" + selectedLocation;
-
-                // Call sendRobotInstruction and handle response
-                sendRobotInstruction(requireContext(), robotId, message)
-                        .thenAccept(response -> {
-                            // Handle success response
-                            // You can do any additional work here after a successful instruction, like updating the UI
-                        })
-                        .exceptionally(ex -> {
-                            // Handle any error that occurred during the request
-                            return null;
-                        });
-                refreshButton.performClick();
-            }
-        });
-
-
-        refreshButton.setOnClickListener(v -> {
-            TextView outputTextView = requireView().findViewById(R.id.output_text_view);
-            // Clear the current content in the ScrollView
-            outputTextView.setText("");  // Clears the TextView inside ScrollView
-
-            // Reload callback messages
-            loadCallbacks(requireContext()).thenAccept(callbackMessages -> {
-                // Convert the callback messages into a String with newlines
-                StringBuilder callbackText = new StringBuilder();
-                for (String message : callbackMessages) {
-                    callbackText.append(message).append("\n\n");
-                }
-
-                // Ensure UI updates are done on the main thread
-                requireActivity().runOnUiThread(() -> {
-                    // Populate the TextView inside the ScrollView with new data
-                    outputTextView.setText(callbackText.toString());
-
-                    // Scroll to the top of the ScrollView
-                    scrollView.post(() -> scrollView.fullScroll(View.FOCUS_UP));
-                });
-            }).exceptionally(ex -> {
-                // Handle any errors during the network request
-                ex.printStackTrace();
-                return null;
-            });
-        });
-
-
-        // Handle robot selection and enable location dropdown or coordinates input
-        robotDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        //Task dropdown listener
+        taskDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                // Enable location dropdown and coordinates input once a robot is selected
-                locationDropdown.setEnabled(true);
-                locationCoordinatesTextView.setEnabled(true);
+                // Get the selected task name
+                String selectedTask = taskDropdown.getSelectedItem().toString();
 
-                // Clear location and coordinates inputs
-                locationDropdown.setSelection(0);  // Set "No Location" initially
-                locationCoordinatesTextView.setText("");  // Clear coordinates
+                // Check if the map contains the selected task
+                if (storedTasks != null && storedTasks.containsKey(selectedTask)) {
+                    // Retrieve task details
+                    Pair<String, String> taskDetails = storedTasks.get(selectedTask);
+
+                    if (taskDetails != null) {
+                        // Get Task ID and Robot ID
+                        currentTaskId = taskDetails.first;
+                        currentRobotId = taskDetails.second;
+                        fulfilledBy.setText("Fulfilled By: Robot #" + currentRobotId);
+                        coordinates.setText("Coordinates: ");
+                        fetchAndPopulateLocationSpinner(requireContext(), currentRobotId);
+                    } else {
+                    }
+                } else {
+                }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-                // Handle case where nothing is selected
             }
         });
 
-        // Set the listener for when a location is selected
-        // Set the listener for when a location is selected
         locationDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 // Get the selected location name
-                String selectedLocation = locationDropdown.getSelectedItem().toString();
+                String selectedLocation = parentView.getItemAtPosition(position).toString();
 
-                // Check if the selected location is "[Use Coordinates]"
-                if (selectedLocation.equals("[Use Coordinates]")) {
-                    // If "[Use Coordinates]" is selected, allow manual input of coordinates
-                    locationCoordinatesTextView.setEnabled(true);
-                    locationCoordinatesTextView.setText("");  // Clear any existing coordinates
-                } else {
-                    // If a predefined location is selected, get the coordinates from the map
-                    String coordinates = locationCoordinatesMap.get(selectedLocation);
+                // Log or use the selected location as needed
+                Log.d("LocationSelected", "Selected Location: " + selectedLocation);
 
-                    if (coordinates != null) {
-                        // Populate the coordinates section with the corresponding coordinates
-                        locationCoordinatesTextView.setText(coordinates);
-                    } else {
-                        // If no coordinates are found for the selected location, clear the coordinates section
-                        locationCoordinatesTextView.setText("");
-                    }
+                // You can now use the selected location to fetch coordinates or perform other actions
+                String currentCoordinates = locationCoordinates.get(selectedLocation);
+                Log.d("LocationCoordinates", "Coordinates: " + coordinates);
+                updateCoordinates(currentCoordinates);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+            }
+        });
 
-                    // Disable editing if coordinates are pre-defined
-                    locationCoordinatesTextView.setEnabled(false);
+        addInstruction.setOnClickListener(v -> {
+            if (currentTaskId == null) {
+                showMessage("No task selected", requireContext());
+                return;
+            }
+
+            String selectedLocation = (String) locationDropdown.getSelectedItem();
+            if (selectedLocation == null || !locationCoordinates.containsKey(selectedLocation)) {
+                showMessage("Invalid location selected.", requireContext());
+                return;
+            }
+
+            String instruction = "navigation:startNavigation:" + selectedLocation;
+
+            sendInstructionToTask(requireContext(), currentTaskId, instruction)
+                    .thenAccept(response -> {
+                        // Do nothing or handle success
+                    })
+                    .exceptionally(e -> {
+                        return null;
+                    });
+        });
+        return view;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchAndStoreRobotTasks(requireContext());
+    }
+    public static void fetchAndStoreRobotTasks(Context context) {
+        CompletableFuture<HashMap<String, Pair<String, String>>> future = loadRobotTasks(context);
+
+        future.thenAccept(taskMap -> {
+            // Store the result in a local HashMap
+            storedTasks = new HashMap<>(taskMap);
+
+            // Example: Print stored tasks
+            for (Map.Entry<String, Pair<String, String>> entry : storedTasks.entrySet()) {
+                String taskName = entry.getKey();  // Now the key is taskName
+                String taskId = entry.getValue().first;  // taskId is stored in the Pair's first element
+                String robotId = entry.getValue().second;  // robotId is stored in the Pair's second element
+
+                Log.d("TaskData", "Task Name: " + taskName + ", Task ID: " + taskId + ", Robot ID: " + robotId);
+            }
+            populateTaskSpinner(storedTasks, context);
+        }).exceptionally(e -> {
+            Log.e("TaskError", "Error fetching tasks", e);
+            return null;
+        });
+    }
+    private static void populateTaskSpinner(HashMap<String, Pair<String, String>> storedTasks, Context context) {
+        // Clear the existing items in the spinner
+        taskNames.clear();
+
+        // Iterate over the map and add task names to the list
+        for (Map.Entry<String, Pair<String, String>> entry : storedTasks.entrySet()) {
+            String taskName = entry.getKey();  // Use taskName as the key
+            taskNames.add(taskName);
+        }
+
+        // Notify the adapter that data has changed so it can refresh the spinner
+        taskAdapter.notifyDataSetChanged();
+
+        if (!taskNames.isEmpty()) {
+            taskDropdown.setSelection(0);
+        }
+
+        // Get the selected task name
+        String selectedTask = taskDropdown.getSelectedItem().toString();
+
+        // Check if the map contains the selected task
+        if (storedTasks != null && storedTasks.containsKey(selectedTask)) {
+            // Retrieve task details
+            Pair<String, String> taskDetails = storedTasks.get(selectedTask);
+
+            if (taskDetails != null) {
+                // Get Task ID and Robot ID
+                currentTaskId = taskDetails.first;
+                currentRobotId = taskDetails.second;
+                fulfilledBy.setText("Fulfilled By: Robot #" + currentRobotId);
+                coordinates.setText("Coordinates: ");
+                fetchAndPopulateLocationSpinner(context, currentRobotId);
+            } else {
+            }
+        } else {
+        }
+    }
+    public static void fetchAndPopulateLocationSpinner(Context context, String robotId) {
+        // Create a new map to store location name and coordinates
+        locationCoordinates = new HashMap<>();
+
+        CompletableFuture<List<JSONObject>> future = loadLocationDetails(context, robotId);
+
+        future.thenAccept(locationDetails -> {
+            // Clear the existing items in the spinner
+            locationNames.clear();
+
+            // Iterate over the location details and add location names to the list
+            for (JSONObject location : locationDetails) {
+                try {
+                    String locationName = location.getString("location_name");
+                    locationNames.add(locationName);
+
+                    // Add location name and coordinates (latitude, longitude) to the map
+                    String coordinates = location.getString("location_coordinates");
+                    locationCoordinates.put(locationName, coordinates);
+                } catch (JSONException e) {
+                    Log.e("LocationError", "Error extracting location name", e);
                 }
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // If nothing is selected, clear the coordinates section
-                locationCoordinatesTextView.setText("");
+            Log.d("LocationCoordinates", "Map contents: " + locationCoordinates.toString());
+
+            // Notify the adapter that data has changed so it can refresh the spinner
+            locationAdapter.notifyDataSetChanged();
+
+            // Check if the spinner has items and populate the coordinates with the first item if available
+            if (!locationNames.isEmpty()) {
+                locationDropdown.setSelection(0);
+                String firstLocationName = locationNames.get(0);
+                String currentCoordinates = locationCoordinates.get(firstLocationName);
+                updateCoordinates(currentCoordinates);
             }
-        });
 
-        // Set the touch listener for the robot dropdown to update when expanded
-        robotDropdown.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                // When the dropdown is opened (touched), update the robot names
-                loadRobotNames(requireContext()).thenAccept(robotNames -> {
-                    // Update the adapter with new robot names
-                    ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, robotNames);
-                    robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    robotDropdown.setAdapter(robotAdapter);
-                }).exceptionally(ex -> {
-                    // Handle any errors during the loading of robot names
-                    ex.printStackTrace();
-                    return null;
-                });
+        }).exceptionally(e -> {
+            Log.e("LocationError", "Error fetching location details", e);
+            return null;
+        });
+    }
+    private static void updateCoordinates(String currentCoordinates) {
+        // Split the coordinates string by the comma
+        String[] coordinateParts = currentCoordinates.split(",");
+
+        if (coordinateParts.length == 2) {
+            try {
+                // Parse both parts as double
+                double latitude = Double.parseDouble(coordinateParts[0]);
+                double longitude = Double.parseDouble(coordinateParts[1]);
+
+                // Format both latitude and longitude to 3 decimal places
+                String formattedLatitude = String.format("%.3f", latitude);
+                String formattedLongitude = String.format("%.3f", longitude);
+
+                // Set the formatted coordinates in the TextView
+                coordinates.setText("Coordinates: " + formattedLatitude + ", " + formattedLongitude);
+            } catch (NumberFormatException e) {
+                Log.e("LocationError", "Invalid coordinate format", e);
+                // Handle the error if the coordinates are invalid (optional)
             }
-            return false;
-        });
-
-        // Set the touch listener for the location dropdown to update when expanded
-        locationDropdown.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                // When the dropdown is opened (touched), update the location names
-                String selectedRobot = robotDropdown.getSelectedItem().toString();
-                String robotId = selectedRobot.replaceAll("[^0-9]", ""); // Extract robot ID
-
-                loadLocationDetails(requireContext(), robotId).thenAccept(locationDetails -> {
-                    // Initialize a list to hold location names
-                    List<String> newLocationNames = new ArrayList<>();
-                    newLocationNames.add("{Please Select an Option}");
-                    newLocationNames.add("[Use Coordinates]");
-
-                    // If location details are empty, don't add any further locations
-                    if (locationDetails.isEmpty()) {
-
-                    } else {
-                        // Iterate over the location details and add names
-                        for (JSONObject location : locationDetails) {
-                            try {
-
-                                String name = location.getString("location_name");
-
-
-                                // Adding name to newLocationNames
-                                newLocationNames.add(name);
-
-                                // Check if the location has coordinates and retrieve them
-                                if (location.has("location_coordinates")) {
-                                    String coordinates = location.getString("location_coordinates");
-                                    // Populate your map with the location name and coordinates
-                                    locationCoordinatesMap.put(name, coordinates);
-                                } else {
-                                }
-                            } catch (JSONException e) {
-
-                            }
-                        }
-                    }
-
-                    // Now update the location adapter on the main thread
-                    requireActivity().runOnUiThread(() -> {
-                        // Update the adapter with new names
-                        ArrayAdapter<String> locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, newLocationNames);
-                        locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        locationDropdown.setAdapter(locationAdapter);
-                    });
-
-                }).exceptionally(ex -> {
-                    // Handle any errors during the loading of location details
-                    return null;
-                });
-            }
-            return false;
-        });
-        return view;
-
+        } else {
+            Log.e("LocationError", "Invalid coordinates format");
+        }
     }
 }

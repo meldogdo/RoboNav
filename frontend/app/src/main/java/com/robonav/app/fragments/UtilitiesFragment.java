@@ -104,7 +104,7 @@ public class UtilitiesFragment extends Fragment {
             case "Save Robot's Current Location":
                 inflateContent(R.layout.dynamic_save_robots_current_location);
 
-                robotDropdown = dynamicContentContainer.findViewById(R.id.robot_dropdown);
+                robotDropdown = dynamicContentContainer.findViewById(R.id.task_dropdown);
                 EditText inputLocationName = dynamicContentContainer.findViewById(R.id.input_location_name);
                 Button btnSaveLocation = dynamicContentContainer.findViewById(R.id.btn_save_location);
 
@@ -260,7 +260,7 @@ public class UtilitiesFragment extends Fragment {
             case "Remove Robot's Location":
                 inflateContent(R.layout.dynamic_remove_robots_location);
 
-                robotDropdown = dynamicContentContainer.findViewById(R.id.robot_dropdown);
+                robotDropdown = dynamicContentContainer.findViewById(R.id.task_dropdown);
                 locationDropdown = dynamicContentContainer.findViewById(R.id.location_dropdown);
                 Button btnRemoveLocation = dynamicContentContainer.findViewById(R.id.btn_remove_location);
 
