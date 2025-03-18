@@ -32,7 +32,7 @@ import com.android.volley.toolbox.Volley;
 import com.robonav.app.utilities.ConfigManager;
 import com.robonav.app.R;
 import com.robonav.app.models.Robot;
-
+import static com.robonav.app.utilities.FragmentUtils.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -222,7 +222,7 @@ public class UtilitiesFragment extends Fragment {
                     return;
                 }
             } else {
-                showMessage("Invalid robot format. Please select a valid robot.", requireContext());
+                showMessage("Invalid robot format. Try again.", requireContext());
                 return;
             }
         }
@@ -385,8 +385,9 @@ public class UtilitiesFragment extends Fragment {
                     }
 
                     String newLocationName = inputLocationName.getText().toString().trim();
-                    if (newLocationName.isEmpty()) {
-                        showMessage("Please enter a location name.", requireContext());
+
+                    if (!isValidLocationName(newLocationName)) {
+                        showMessage("Location must be 3-50 alphanumeric characters, spaces or underscores.", requireContext());
                         return;
                     }
 
@@ -437,15 +438,9 @@ public class UtilitiesFragment extends Fragment {
                         }
                     };
 
-                    // Apply retry policy (single attempt)
-                    saveLocationRequest.setRetryPolicy(new DefaultRetryPolicy(
-                            20000,  // Timeout in milliseconds
-                            0,      // No retries
-                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                    ));
-
                     queue.add(saveLocationRequest);
                 });
+
 
                 break;
 
@@ -771,14 +766,6 @@ public class UtilitiesFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View view = inflater.inflate(layoutResId, (ViewGroup) dynamicContentContainer, false);
         ((ViewGroup) dynamicContentContainer).addView(view);
-    }
-    // Toast helper method to prevent toast queue buildup
-    private void showToast(String message) {
-        if (currentToast != null) {
-            currentToast.cancel();  // Cancel the previous toast if it exists
-        }
-        currentToast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT);
-        currentToast.show();
     }
 
 

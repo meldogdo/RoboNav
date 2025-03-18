@@ -1,5 +1,13 @@
 package com.robonav.app.activities;
 
+
+import static com.robonav.app.utilities.FragmentUtils.EMPTY_FIELDS;
+import static com.robonav.app.utilities.FragmentUtils.INVALID_PASSWORD;
+import static com.robonav.app.utilities.FragmentUtils.INVALID_USERNAME;
+import static com.robonav.app.utilities.FragmentUtils.VALID;
+import static com.robonav.app.utilities.FragmentUtils.areInputsValid;
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
+
 import com.robonav.app.utilities.ConfigManager;
 
 import android.app.ProgressDialog;
@@ -19,6 +27,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.utilities.FragmentUtils;
+import com.robonav.app.utilities.FragmentUtils.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +100,24 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d(TAG, "Login button clicked. Username: " + username);
 
-            if (!areInputsValid(username, password)) return;
+            int validationCode = areInputsValid(username, password,null);
+
+            if (validationCode != VALID) {
+                switch (validationCode) {
+                    case EMPTY_FIELDS:
+                        FragmentUtils.showMessage("Please fill in all fields", this);
+                        break;
+                    case INVALID_USERNAME:
+                        FragmentUtils.showMessage("Invalid username. Must be 4-20 alphanumeric characters.", this);
+                        break;
+                    case INVALID_PASSWORD:
+                        FragmentUtils.showMessage("Invalid password. Must be 6-20 characters.", this);
+                        break;
+
+                }
+                return; // Stop further execution if invalid
+            }
+
 
             ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setMessage("Logging in...");
@@ -208,37 +235,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             return false;
         }
-    }
-
-
-    // Validate username and password
-    private boolean areInputsValid(String username, String password) {
-        Log.d(TAG, "Validating inputs: " + username + " / " + password);
-
-        if (username.isEmpty() || password.isEmpty()) {
-            showToast("Please fill in both fields");
-            return false;
-        }
-
-        if (!isValidUsername(username)) {
-            showToast("Username must be between 4-20 alphanumeric characters.");
-            return false;
-        }
-
-        if (!isValidPassword(password)) {
-            showToast("Invalid password format.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isValidUsername(String username) {
-        return username.matches("^[a-zA-Z0-9]{4,20}$");
-    }
-
-    private boolean isValidPassword(String password) {
-        return password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$");
     }
 
     // Toast helper method to prevent toast queue buildup

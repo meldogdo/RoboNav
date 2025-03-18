@@ -1,5 +1,10 @@
 package com.robonav.app.activities;
 
+import static com.robonav.app.utilities.FragmentUtils.EMPTY_FIELDS;
+import static com.robonav.app.utilities.FragmentUtils.INVALID_EMAIL;
+import static com.robonav.app.utilities.FragmentUtils.VALID;
+import static com.robonav.app.utilities.FragmentUtils.areInputsValid;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -73,9 +78,18 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     // Function to send reset code
     private void requestResetCode() {
         email = emailEditText.getText().toString().trim();
+    // Validate email using areInputsValid
+        int validationCode = areInputsValid(null, null, email);
 
-        if (email.isEmpty()) {
-            showToast("Please enter your email");
+        if (validationCode != VALID) {
+            switch (validationCode) {
+                case EMPTY_FIELDS:
+                    showToast("Please enter your email");
+                    break;
+                case INVALID_EMAIL:
+                    showToast("Invalid email format");
+                    break;
+            }
             return;
         }
 

@@ -4,31 +4,33 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
+import com.android.volley.*;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
 import com.robonav.app.utilities.ConfigManager;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import static com.robonav.app.utilities.FragmentUtils.*;
 
 public class CreateTaskActivity extends AppCompatActivity {
 
-    private EditText taskNameEditText, robotIdEditText;
+    private EditText taskNameEditText;
+    private Spinner robotSpinner;
     private Button submitTaskButton;
     private String token;
     private static final String CREATE_TASK_URL = ConfigManager.getBaseUrl() + "/api/protected/robot/task/create";
+    private static final String ROBOT_LIST_URL = ConfigManager.getBaseUrl() + "/api/protected/robot/robots";
 
-    private static Toast activeToast; // Global Toast instance to prevent queuing
+    private final Map<String, Integer> robotMap = new HashMap<>(); // Store robot names & IDs
+
+    private static Toast activeToast; // Prevents stacking Toast messages
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +39,12 @@ public class CreateTaskActivity extends AppCompatActivity {
 
         // Initialize UI elements
         taskNameEditText = findViewById(R.id.taskNameEditText);
-        robotIdEditText = findViewById(R.id.robotIdEditText);
+        robotSpinner = findViewById(R.id.robotSpinner);
         submitTaskButton = findViewById(R.id.submitTaskButton);
 
         // Retrieve token from SharedPreferences
         token = getSharedPreferences("APP_PREFS", MODE_PRIVATE).getString("JWT_TOKEN", null);
 
-        // Validate token
         if (token == null || token.isEmpty()) {
             showToast("Session expired. Please log in again.");
             finish();
@@ -54,18 +55,33 @@ public class CreateTaskActivity extends AppCompatActivity {
         ImageView closeButton = findViewById(R.id.closeButton);
         closeButton.setOnClickListener(v -> finish()); // Exit the activity when clicked
 
+        // Fetch robots and populate the dropdown
+        fetchRobotsForDropdown();
+
         // Click listener to create task
         submitTaskButton.setOnClickListener(v -> createTask());
     }
 
-    private static final String TAG = "CreateTask";
-
     private void createTask() {
         String taskName = taskNameEditText.getText().toString().trim();
-        String robotId = robotIdEditText.getText().toString().trim();
+        String selectedRobot = (String) robotSpinner.getSelectedItem(); // Get selected robot name
 
-        if (taskName.isEmpty() || robotId.isEmpty()) {
-            showToast("Please fill in all fields");
+        // Validate task name
+        if (!isValidTaskName(taskName)) {
+            showToast("Task must be 3-50 alphanumeric characters, spaces or underscores.");
+            return;
+        }
+
+
+        if (selectedRobot.equals("Select a Robot")) {
+            showToast("Please select a valid robot.");
+            return;
+        }
+
+        // Ensure the selected robot exists in the map
+        Integer robotId = robotMap.get(selectedRobot);
+        if (robotId == null) {
+            showToast("Invalid Robot Selection");
             return;
         }
 
@@ -76,8 +92,8 @@ public class CreateTaskActivity extends AppCompatActivity {
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("name", taskName);
-            jsonBody.put("robot_id", Integer.parseInt(robotId));
-        } catch (JSONException | NumberFormatException e) {
+            jsonBody.put("robot_id", robotId);
+        } catch (JSONException e) {
             e.printStackTrace();
             progressDialog.dismiss();
             showToast("Invalid input format");
@@ -119,6 +135,51 @@ public class CreateTaskActivity extends AppCompatActivity {
         };
         queue.add(request);
     }
+    // Fetches robots from the database and populates the dropdown
+    private void fetchRobotsForDropdown() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, ROBOT_LIST_URL, null,
+                response -> {
+                    List<String> robotNames = new ArrayList<>();
+                    robotNames.add("Select a Robot");  // Default option
+                    robotMap.clear();
+
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject robot = response.getJSONObject(i);
+                            if (!robot.has("name") || !robot.has("id")) continue;
+
+                            String robotName = robot.getString("name");
+                            int robotId = robot.getInt("id");
+
+                            robotMap.put(robotName, robotId);
+                            robotNames.add(robotName);
+                        }
+
+                        ArrayAdapter<String> robotAdapter = new ArrayAdapter<>(
+                                CreateTaskActivity.this, android.R.layout.simple_spinner_item, robotNames);
+                        robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        robotSpinner.setAdapter(robotAdapter);
+                    } catch (JSONException e) {
+                        showToast("Failed to parse robot data.");
+                    }
+                },
+                error -> {
+                    showToast("Failed to fetch robots. Check your connection.");
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        queue.add(robotRequest);
+    }
+
 
     // Custom method to handle Toast messages
     private void showToast(String message) {

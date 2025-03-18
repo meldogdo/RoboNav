@@ -1,5 +1,7 @@
 package com.robonav.app.activities;
 
+import static com.robonav.app.utilities.FragmentUtils.*;
+
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.widget.Button;
@@ -53,7 +55,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String newPassword = newPasswordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-        if (!arePasswordsValid(oldPassword, newPassword, confirmPassword)) return;
+        if (!arePasswordsValid(newPassword, confirmPassword, oldPassword, this::showToast)) return;
 
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Changing password...");
@@ -109,22 +111,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
-    }
-
-    private boolean arePasswordsValid(String oldPassword, String newPassword, String confirmPassword) {
-        if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showToast("All fields are required");
-            return false;
-        }
-        if (!newPassword.equals(confirmPassword)) {
-            showToast("New passwords do not match");
-            return false;
-        }
-        if (!newPassword.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$")) {
-            showToast("Password must be between 6 and 20 characters.");
-            return false;
-        }
-        return true;
     }
 
     // Toast helper method to prevent toast queue buildup

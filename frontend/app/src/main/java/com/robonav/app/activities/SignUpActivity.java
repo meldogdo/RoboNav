@@ -1,5 +1,9 @@
 package com.robonav.app.activities;
 
+import static com.robonav.app.utilities.FragmentUtils.VALID;
+import static com.robonav.app.utilities.FragmentUtils.areInputsValid;
+import static com.robonav.app.utilities.FragmentUtils.arePasswordsValid;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,7 +44,7 @@ public class SignUpActivity extends AppCompatActivity {
     private Button signUpButton;
 
     private static final String REGISTER_URL = ConfigManager.getBaseUrl() + "/api/open/users/register";
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,8 +81,14 @@ public class SignUpActivity extends AppCompatActivity {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
+        int validationCode = areInputsValid(username, null, email);
 
-        if (!areFieldsValid(username, email, password, confirmPassword)) {
+        if (validationCode != VALID) {  // If validation fails
+            signUpButton.setEnabled(true); // Re-enable if validation fails
+            return;
+        }
+
+        if (!arePasswordsValid(password, confirmPassword, null, this::showToast)) {
             signUpButton.setEnabled(true); // Re-enable if validation fails
             return;
         }
@@ -137,7 +147,6 @@ public class SignUpActivity extends AppCompatActivity {
             }
         };
 
-        // Explicitly Set Retry Policy
         request.setRetryPolicy(new DefaultRetryPolicy(
                 20000,
                 0,
@@ -147,31 +156,6 @@ public class SignUpActivity extends AppCompatActivity {
         RequestQueue queue = VolleySingleton.getInstance(this).getRequestQueue();
         queue.cancelAll("registerRequest");  // Cancel any ongoing registration requests
         queue.add(request);
-    }
-
-    // Validate all fields
-    private boolean areFieldsValid(String username, String email, String password, String confirmPassword) {
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            showToast("Please fill in all fields");
-            return false;
-        }
-        if (!username.matches("^[a-zA-Z0-9]{4,20}$")) {
-            showToast("Username must be between 4-20 alphanumeric characters.");
-            return false;
-        }
-        if (!password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$")) {
-            showToast("Password must be between 6-20 characters.");
-            return false;
-        }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showToast("Please enter a valid email address");
-            return false;
-        }
-        if (!password.equals(confirmPassword)) {
-            showToast("Passwords do not match");
-            return false;
-        }
-        return true;
     }
 
     // Toast helper method to prevent toast queue buildup

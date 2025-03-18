@@ -1,7 +1,7 @@
 package com.robonav.app.fragments;
 
 import static com.robonav.app.utilities.FragmentUtils.appendOutput;
-import static com.robonav.app.utilities.FragmentUtils.isValidCoordinates;
+import static com.robonav.app.utilities.FragmentUtils.*;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
 import static com.robonav.app.utilities.JsonUtils.loadCallbacks;
 import static com.robonav.app.utilities.JsonUtils.loadLocationDetails;
@@ -110,66 +110,51 @@ public class NavigationFragment extends Fragment {
             return null;
         });
 
-        // Set the button click listener
         btnNavigate.setOnClickListener(v -> {
             String selectedRobot = robotDropdown.getSelectedItem().toString();
             String selectedLocation = locationDropdown.getSelectedItem().toString();
             String coordinates = locationCoordinatesTextView.getText().toString().trim();  // Get the coordinates entered
-            // Build the message based on the location choice
-            String message;
 
             if (selectedLocation.equals("{Please Select an Option}")) {
-                // Show a toast message if coordinates are not entered
-                showMessage("Please Select an Option", requireContext());
+                showMessage("Please select a location or use coordinates.", requireContext());
                 return;  // Exit the method to prevent further action
             }
 
-            // Check if "Use Coordinates" is selected and coordinates are empty
-            else if (selectedLocation.equals("[Use Coordinates]") && coordinates.isEmpty()) {
-                // Show a toast message if coordinates are not entered
-                showMessage("Please enter coordinates", requireContext());
-                return;  // Exit the method to prevent further action
+            // Check if "Use Coordinates" is selected
+            if (selectedLocation.equals("[Use Coordinates]")) {
+                // Ensure coordinates are entered
+                if (coordinates.isEmpty()) {
+                    showMessage("Please enter coordinates.", requireContext());
+                    return;
+                }
+
+                // Validate coordinates format and range
+                if (!isValidCoordinates(coordinates)) {
+                    showMessage("Invalid coordinates. Use 'latitude, longitude' within valid ranges.", requireContext());
+                    return;
+                }
             }
 
-            // Validate coordinates if "[Use Coordinates]" is selected
-            else if (selectedLocation.equals("[Use Coordinates]") && !isValidCoordinates(coordinates)) {
-                // Show a toast message if coordinates are invalid
-                showMessage("Invalid coordinates. Enter as 'latitude, longitude' within valid ranges.", requireContext());
-                return;  // Exit the method to prevent further action
-            }
+            // Extract robot ID
+            String robotId = selectedRobot.replaceAll("[^0-9]", "");
 
-            else if (selectedLocation.equals("[Use Coordinates]")) {
-                String robotId = selectedRobot.replaceAll("[^0-9]", ""); // Extract robot ID
-                message = "navigation:startNavigation:" + coordinates;
+            // Construct message
+            String message = selectedLocation.equals("[Use Coordinates]")
+                    ? "navigation:startNavigation:" + coordinates
+                    : "navigation:startNavigation:" + selectedLocation;
 
-                // Call sendRobotInstruction and handle response
-                sendRobotInstruction(requireContext(), robotId, message)
-                        .thenAccept(response -> {
-                            // Handle success response
-                            // You can do any additional work here after a successful instruction, like updating the UI
-                        })
-                        .exceptionally(ex -> {
-                            // Handle any error that occurred during the request
-                            return null;
-                        });
-                refreshButton.performClick();
-            } else {
-                String robotId = selectedRobot.replaceAll("[^0-9]", ""); // Extract robot ID
-                message = "navigation:startNavigation:" + selectedLocation;
+            // Send navigation command
+            sendRobotInstruction(requireContext(), robotId, message)
+                    .thenAccept(response -> {
+                        // Handle success response
+                    })
+                    .exceptionally(ex -> {
+                        return null;
+                    });
 
-                // Call sendRobotInstruction and handle response
-                sendRobotInstruction(requireContext(), robotId, message)
-                        .thenAccept(response -> {
-                            // Handle success response
-                            // You can do any additional work here after a successful instruction, like updating the UI
-                        })
-                        .exceptionally(ex -> {
-                            // Handle any error that occurred during the request
-                            return null;
-                        });
-                refreshButton.performClick();
-            }
+            refreshButton.performClick();
         });
+
 
 
         refreshButton.setOnClickListener(v -> {
