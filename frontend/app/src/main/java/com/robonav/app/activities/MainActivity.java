@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.SharedPreferences;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -37,6 +38,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Check token validity before initializing the UI
+        if (isTokenValid()) {
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
 
         Log.d(TAG, "onCreate: MainActivity started");
@@ -161,6 +170,36 @@ public class MainActivity extends AppCompatActivity {
             RequestQueue queue = Volley.newRequestQueue(this);
             queue.add(request);
         });
+    }
+
+    private boolean isTokenValid() {
+        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+        String token = prefs.getString("JWT_TOKEN", null);
+
+        if (token == null || token.isEmpty()) {
+            return false; // No token stored
+        }
+
+        // Token format validation
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) {
+            return false; // Invalid JWT format
+        }
+
+        // Decode and check expiration
+        try {
+            String payload = new String(android.util.Base64.decode(parts[1], android.util.Base64.DEFAULT));
+            JSONObject payloadJson = new JSONObject(payload);
+            long exp = payloadJson.optLong("exp", 0);
+            long currentTime = System.currentTimeMillis() / 1000;
+            if (exp <= currentTime) {
+                prefs.edit().remove("JWT_TOKEN").apply();
+            }
+            return exp > currentTime; // Token is valid
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // Validate username and password
