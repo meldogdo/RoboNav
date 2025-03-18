@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,7 +47,9 @@ import java.util.Map;
 
 public class UtilitiesFragment extends Fragment {
 
+
     private Spinner actionSpinner, robotCallbacksSpinner;
+
 
     private View dynamicContentContainer;
     private NestedScrollView scrollView;
@@ -71,6 +72,7 @@ public class UtilitiesFragment extends Fragment {
         actionSpinner = view.findViewById(R.id.action_spinner);
         robotCallbacksSpinner = view.findViewById(R.id.robot_callbacks_spinner);
         dynamicContentContainer = view.findViewById(R.id.dynamic_content_container);
+
         refreshButton = view.findViewById(R.id.refresh_button); // Find the refresh button
 
         // Set up refresh button click listener
@@ -79,6 +81,7 @@ public class UtilitiesFragment extends Fragment {
             handleRobotSelection(selectedRobot); // Refresh the API call
             showMessage("Refreshing callbacks...", requireContext()); // Show feedback
         });
+
 
         return view;
     }
@@ -131,6 +134,7 @@ public class UtilitiesFragment extends Fragment {
         // Robot Callbacks Spinner
         fetchRobotsForDropdown();
     }
+
 
     private void fetchRobotsForDropdown() {
         String robotUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/robots";
@@ -297,6 +301,7 @@ public class UtilitiesFragment extends Fragment {
                 inflateContent(R.layout.dynamic_save_robots_current_location);
 
                 robotDropdown = dynamicContentContainer.findViewById(R.id.robot_dropdown);
+
                 EditText inputLocationName = dynamicContentContainer.findViewById(R.id.input_location_name);
                 Button btnSaveLocation = dynamicContentContainer.findViewById(R.id.btn_save_location);
 
@@ -366,6 +371,7 @@ public class UtilitiesFragment extends Fragment {
                     }
                 };
 
+
                 // Apply retry policy (single request attempt)
                 robotRequest.setRetryPolicy(new DefaultRetryPolicy(
                         20000,  // Timeout in milliseconds
@@ -374,6 +380,7 @@ public class UtilitiesFragment extends Fragment {
                 ));
 
                 queue.add(robotRequest);
+
 
                 // Handle "Save Location" button click
                 btnSaveLocation.setOnClickListener(v -> {
@@ -385,6 +392,7 @@ public class UtilitiesFragment extends Fragment {
                     }
 
                     String newLocationName = inputLocationName.getText().toString().trim();
+
 
                     if (!isValidLocationName(newLocationName)) {
                         showMessage("Location must be 3-50 alphanumeric characters, spaces or underscores.", requireContext());
@@ -398,10 +406,12 @@ public class UtilitiesFragment extends Fragment {
                         return;
                     }
 
+
                     String robotId = parts[1].trim(); // Get the ID part
 
                     // API URL
                     String saveLocationUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/save-current-position";
+
 
                     // Create JSON body
                     JSONObject requestBody = new JSONObject();
@@ -438,8 +448,10 @@ public class UtilitiesFragment extends Fragment {
                         }
                     };
 
+
                     queue.add(saveLocationRequest);
                 });
+
 
 
                 break;
@@ -447,7 +459,9 @@ public class UtilitiesFragment extends Fragment {
             case "Remove Robot's Location":
                 inflateContent(R.layout.dynamic_remove_robots_location);
 
+
                 robotDropdown = dynamicContentContainer.findViewById(R.id.robot_dropdown);
+
                 locationDropdown = dynamicContentContainer.findViewById(R.id.location_dropdown);
                 Button btnRemoveLocation = dynamicContentContainer.findViewById(R.id.btn_remove_location);
 
@@ -554,9 +568,11 @@ public class UtilitiesFragment extends Fragment {
                         queue.add(locationRequest);
                     }
 
+
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
+
 
                 // Handle "Remove Location" button click
                 btnRemoveLocation.setOnClickListener(v -> {
@@ -611,6 +627,7 @@ public class UtilitiesFragment extends Fragment {
 
                     queue.add(removeLocationRequest);
                 });
+
 
                 break;
 
@@ -752,6 +769,7 @@ public class UtilitiesFragment extends Fragment {
                 queue.add(locationsRequest);
 
                 break;
+
 
             default:
                 break;

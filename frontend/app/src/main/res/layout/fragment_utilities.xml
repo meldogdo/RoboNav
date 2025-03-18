@@ -55,9 +55,11 @@
             android:id="@+id/title_robot_tasks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+
             android:layout_marginStart="18dp"
             android:layout_marginTop="8dp"
             android:text="Callback Records"
+
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"

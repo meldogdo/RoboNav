@@ -1,10 +1,13 @@
 package com.robonav.app.utilities;
 
-
-
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import android.util.Pair;
+
+
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -97,6 +100,115 @@ public class JsonUtils {
         return future;  // Return the CompletableFuture
     }
 
+    public static CompletableFuture<HashMap<String, Pair<String, String>>> loadRobotTasks(Context context) {
+        CompletableFuture<HashMap<String, Pair<String, String>>> future = new CompletableFuture<>();
+        HashMap<String, Pair<String, String>> taskMap = new HashMap<>();
+
+        String taskUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/tasks";
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
+                response -> {
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject taskObj = response.getJSONObject(i);
+                            String id = taskObj.getString("id");
+                            String name = taskObj.getString("name");
+                            String robotId = taskObj.getString("robot");
+
+                            // Change the key from 'id' to 'name'
+                            taskMap.put(name, new Pair<>(id, robotId)); // Now name is the key
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        future.completeExceptionally(e);
+                        return;
+                    }
+                    future.complete(taskMap);
+                },
+                error -> {
+                    error.printStackTrace();
+                    future.completeExceptionally(error);
+                }
+        ) {
+            @Override
+            public java.util.Map<String, String> getHeaders() {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getTokenFromPrefs(context));
+                return headers;
+            }
+        };
+
+        // Add the request to the queue
+        queue.add(taskRequest);
+        return future;
+    }
+
+
+    public static CompletableFuture<Boolean> sendInstructionToTask(Context context, String taskId, String instruction) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+        String instructionUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/task/instruction";
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("task_id", taskId);
+            requestBody.put("instruction", instruction);
+        } catch (JSONException e) {
+            future.completeExceptionally(e);
+            return future;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, instructionUrl, requestBody,
+                response -> {
+                    // Task instruction successfully sent
+                    future.complete(true);
+                    showMessage("Instruction queued successfully.", context);
+                },
+                error -> {
+                    if (error.networkResponse != null) {
+                        int statusCode = error.networkResponse.statusCode;
+                        String responseBody = new String(error.networkResponse.data);
+
+                        String message = "Unexpected error.";
+                        switch (statusCode) {
+                            case 400:
+                                if (responseBody.contains("Task not found or has already started")) {
+                                    message = "Task not found or already started.";
+                                }
+                                break;
+                        }
+                        showMessage(message, context);
+                    }
+                    future.completeExceptionally(new Exception("Failed to send instruction to task."));
+                }) {
+
+            @Override
+            public java.util.Map<String, String> getHeaders() {
+                HashMap<String, String> headers = new HashMap<>();
+                String token = getTokenFromPrefs(context);
+                headers.put("Authorization", "Bearer " + token);
+                headers.put("Content-Type", "application/json");
+
+                return headers;
+            }
+        };
+
+        queue.add(request);
+        return future;
+    }
+
+
+
+
+
+
+
+
+
+
+
     // Helper method to convert JSON array of tasks to List<String>
     public static List<String> jsonArrayToList(JSONArray jsonArray) throws JSONException {
         List<String> taskList = new ArrayList<>();
@@ -107,6 +219,7 @@ public class JsonUtils {
         }
         return taskList;
     }
+
 
     public static CompletableFuture<List<JSONObject>> loadLocationDetails(Context context, String robotId) {
         CompletableFuture<List<JSONObject>> future = new CompletableFuture<>();

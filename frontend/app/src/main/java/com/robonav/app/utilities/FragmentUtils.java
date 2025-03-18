@@ -59,6 +59,7 @@ public class FragmentUtils {
     }
 
 
+
     /**
          * Validates a robot model name.
          */
@@ -151,6 +152,7 @@ public class FragmentUtils {
                 (password == null || password.isEmpty()) &&
                 (email == null || email.isEmpty())) {
             return EMPTY_FIELDS;
+
         }
 
         // Validate username if it's provided

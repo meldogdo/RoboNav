@@ -45,11 +45,13 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
     @Override
     public void onResume() {
         super.onResume();
+
         // Refresh data when the fragment becomes visible
         if (!swipeRefreshLayout.isRefreshing()) {
             swipeRefreshLayout.setRefreshing(true);
             loadData();
         }
+
     }
 
     @Override
