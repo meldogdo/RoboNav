@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `robot_info` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `robot_info`;
+CREATE DATABASE  IF NOT EXISTS `roboNav_robot_info` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `roboNav_robot_info`;
 -- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: robot_info
+-- Host: 127.0.0.1    Database: roboNav_robot_info
 -- ------------------------------------------------------
 -- Server version	8.0.41
 
