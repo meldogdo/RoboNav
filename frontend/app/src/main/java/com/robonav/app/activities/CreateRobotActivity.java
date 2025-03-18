@@ -19,7 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
-
+import static com.robonav.app.utilities.FragmentUtils.*;
 public class CreateRobotActivity extends AppCompatActivity {
 
     private EditText robotModelEditText, ipAddressEditText, portEditText;
@@ -63,8 +63,17 @@ public class CreateRobotActivity extends AppCompatActivity {
         String ipAddress = ipAddressEditText.getText().toString().trim();
         String port = portEditText.getText().toString().trim();
 
-        if (robotModel.isEmpty() || ipAddress.isEmpty() || port.isEmpty()) {
-            showToast("Please fill in all fields");
+        // Validate fields
+        if (!isValidRobotModel(robotModel)) {
+            showToast("Model must be 3-50 alphanumeric characters, spaces or underscores.");
+            return;
+        }
+        if (!isValidIpAddress(ipAddress)) {
+            showToast("Invalid IP. Enter a valid IPv4 (e.g., 192.168.1.1).");
+            return;
+        }
+        if (!isValidPort(port)) {
+            showToast("Invalid port. Enter a number between 1 and 65535.");
             return;
         }
 
@@ -122,7 +131,6 @@ public class CreateRobotActivity extends AppCompatActivity {
 
         queue.add(request);
     }
-
     // Custom method to handle Toast messages
     private void showToast(String message) {
         if (activeToast != null) {

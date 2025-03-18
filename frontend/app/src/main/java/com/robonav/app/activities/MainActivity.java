@@ -1,5 +1,13 @@
 package com.robonav.app.activities;
 
+
+import static com.robonav.app.utilities.FragmentUtils.EMPTY_FIELDS;
+import static com.robonav.app.utilities.FragmentUtils.INVALID_PASSWORD;
+import static com.robonav.app.utilities.FragmentUtils.INVALID_USERNAME;
+import static com.robonav.app.utilities.FragmentUtils.VALID;
+import static com.robonav.app.utilities.FragmentUtils.areInputsValid;
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
+
 import com.robonav.app.utilities.ConfigManager;
 
 import android.app.ProgressDialog;
@@ -12,12 +20,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.SharedPreferences;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.utilities.FragmentUtils;
+import com.robonav.app.utilities.FragmentUtils.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,11 +43,21 @@ public class MainActivity extends AppCompatActivity {
     private EditText passwordEditText;
     private Toast currentToast; // Store the latest toast reference
 
+    private String storedUsername;
     private static final String LOGIN_URL = ConfigManager.getBaseUrl() + "/api/open/users/login";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Check token validity before initializing the UI
+        if (isTokenValid()) {
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.putExtra("username", storedUsername); // Pass extracted username
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
 
         Log.d(TAG, "onCreate: MainActivity started");
@@ -79,7 +100,24 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d(TAG, "Login button clicked. Username: " + username);
 
-            if (!areInputsValid(username, password)) return;
+            int validationCode = areInputsValid(username, password,null);
+
+            if (validationCode != VALID) {
+                switch (validationCode) {
+                    case EMPTY_FIELDS:
+                        FragmentUtils.showMessage("Please fill in all fields", this);
+                        break;
+                    case INVALID_USERNAME:
+                        FragmentUtils.showMessage("Invalid username. Must be 4-20 alphanumeric characters.", this);
+                        break;
+                    case INVALID_PASSWORD:
+                        FragmentUtils.showMessage("Invalid password. Must be 6-20 characters.", this);
+                        break;
+
+                }
+                return; // Stop further execution if invalid
+            }
+
 
             ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setMessage("Logging in...");
@@ -163,34 +201,40 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Validate username and password
-    private boolean areInputsValid(String username, String password) {
-        Log.d(TAG, "Validating inputs: " + username + " / " + password);
+    private boolean isTokenValid() {
+        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+        String token = prefs.getString("JWT_TOKEN", null);
 
-        if (username.isEmpty() || password.isEmpty()) {
-            showToast("Please fill in both fields");
-            return false;
+        if (token == null || token.isEmpty()) {
+            return false; // No token stored
         }
 
-        if (!isValidUsername(username)) {
-            showToast("Username must be between 4-20 alphanumeric characters.");
-            return false;
+        // Validate JWT format
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) {
+            return false; // Invalid JWT format
         }
 
-        if (!isValidPassword(password)) {
-            showToast("Invalid password format.");
+        try {
+            // Decode payload to extract username
+            String payload = new String(android.util.Base64.decode(parts[1], android.util.Base64.DEFAULT));
+            JSONObject payloadJson = new JSONObject(payload);
+            long exp = payloadJson.optLong("exp", 0);
+            long currentTime = System.currentTimeMillis() / 1000;
+
+            if (exp <= currentTime) {
+                prefs.edit().remove("JWT_TOKEN").apply();
+                return false; // Token expired
+            }
+
+            // Extract and store username
+            storedUsername = payloadJson.optString("username", "");
+            return true; // Token is valid
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
-
-        return true;
-    }
-
-    private boolean isValidUsername(String username) {
-        return username.matches("^[a-zA-Z0-9]{4,20}$");
-    }
-
-    private boolean isValidPassword(String password) {
-        return password.matches("^[A-Za-z0-9@#!$%^&*()_+={}\\[\\]:;\"'<>,.?/`~|-]{6,20}$");
     }
 
     // Toast helper method to prevent toast queue buildup

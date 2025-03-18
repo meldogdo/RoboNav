@@ -80,34 +80,32 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/taskNameLabel" />
 
-            <!-- Robot ID Label -->
+            <!-- Robot Selection Label -->
             <TextView
                 android:id="@+id/robotIdLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Robot ID"
+                android:text="Select Robot"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:layout_marginTop="15dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/taskNameEditText" />
 
-            <!-- Robot ID Input -->
-            <EditText
-                android:id="@+id/robotIdEditText"
-                android:layout_width="279dp"
+            <!-- Robot Selection Spinner -->
+            <Spinner
+                android:id="@+id/robotSpinner"
+                android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Enter Robot ID"
-                android:inputType="number"
+                android:background="@color/white"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
                 android:textColor="@color/white"
                 android:textColorHint="@color/gray_high_contrast"
-                app:layout_constraintTop_toBottomOf="@id/robotIdLabel"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/robotIdLabel" />
 
             <!-- Submit Button -->
             <Button
@@ -118,7 +116,7 @@
                 android:backgroundTint="@color/blue_dark"
                 android:text="Create Task"
                 android:textColor="@color/white"
-                app:layout_constraintTop_toBottomOf="@id/robotIdEditText"
+                app:layout_constraintTop_toBottomOf="@id/robotSpinner"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 

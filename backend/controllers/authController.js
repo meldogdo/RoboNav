@@ -77,7 +77,7 @@ const registerUser = async (req, res) => {
                                 logger.error('Error sending email confirmation:', error);
                                 return res.status(500).json({ message: 'Error sending email', error });
                             }
-                            res.status(201).json({ message: 'User registered successfully. Please check your email to confirm your account.' });
+                            res.status(201).json({ message: 'Registration successful. Check your email to confirm.' });
                         });
                     } catch (emailError) {
                         logger.error('Error setting up email transporter:', emailError);
@@ -161,13 +161,13 @@ const loginUser = (req, res) => {
         // Check if account is disabled
         if (user.confirmed === 2) {
             logger.warn(`Disabled account login attempt: ${username}`);
-            return res.status(403).json({ message: 'Your account has been disabled by an administrator' });
+            return res.status(403).json({ message: 'Account disabled. Contact support.' });
         }
 
         // Check if email is confirmed
         if (user.confirmed === 0) {
             logger.warn(`Unconfirmed account login attempt: ${username}`);
-            return res.status(401).json({ message: 'Please confirm your email before logging in' });
+            return res.status(401).json({ message: 'Confirm your email before logging in' });
         }
 
         try {
@@ -218,12 +218,12 @@ const requestPasswordReset = async (req, res) => {
         // Check confirmation status
         if (user.confirmed === 0) {
             logger.warn(`Password reset denied for unconfirmed email: ${email}`);
-            return res.status(403).json({ message: 'Email is not confirmed. Please confirm your email before resetting your password.' });
+            return res.status(403).json({ message: 'Confirm your email before resetting.' });
         }
 
         if (user.confirmed === 2) {
             logger.warn(`Password reset denied for disabled account: ${email}`);
-            return res.status(403).json({ message: 'This account is disabled. Please contact support for assistance.' });
+            return res.status(403).json({ message: 'This account is disabled. Please contact support.' });
         }
 
         logger.info(`Email confirmed for password reset: ${email}`);

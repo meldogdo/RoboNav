@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import static com.robonav.app.utilities.FragmentUtils.*;
 
 public class ResetPasswordActivity extends AppCompatActivity {
 
@@ -52,7 +53,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
         String newPassword = newPasswordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-        if (!arePasswordsValid(newPassword, confirmPassword)) return;
+        if (!arePasswordsValid(newPassword, confirmPassword, null, this::showToast)) return;
 
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Updating password...");
@@ -115,22 +116,6 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
-    }
-
-    private boolean arePasswordsValid(String newPassword, String confirmPassword) {
-        if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showToast("Please fill in both fields");
-            return false;
-        }
-        if (!newPassword.equals(confirmPassword)) {
-            showToast("Passwords do not match");
-            return false;
-        }
-        if (newPassword.length() < 6 || newPassword.length() > 20) {
-            showToast("Password must be between 6 and 20 characters.");
-            return false;
-        }
-        return true;
     }
 
     // Toast helper method to prevent toast queue buildup

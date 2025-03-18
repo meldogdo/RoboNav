@@ -1,5 +1,9 @@
 package com.robonav.app.fragments;
 
+
+import static com.robonav.app.utilities.FragmentUtils.appendOutput;
+import static com.robonav.app.utilities.FragmentUtils.*;
+
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
 import static com.robonav.app.utilities.JsonUtils.loadLocationDetails;
 import static com.robonav.app.utilities.JsonUtils.loadRobotTasks;
@@ -12,8 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+
 import android.util.Log;
 import android.util.Pair;
+
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,6 +78,7 @@ public class NavigationFragment extends Fragment {
         locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
         locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationDropdown.setAdapter(locationAdapter);
+
 
         // Task adapter
         taskAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, taskNames);

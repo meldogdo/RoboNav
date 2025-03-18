@@ -1,13 +1,13 @@
 package com.robonav.app.utilities;
 
-
-
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
 import android.util.Pair;
+
+
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -144,6 +144,7 @@ public class JsonUtils {
         return future;
     }
 
+
     public static CompletableFuture<Boolean> sendInstructionToTask(Context context, String taskId, String instruction) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
@@ -218,6 +219,7 @@ public class JsonUtils {
         }
         return taskList;
     }
+
 
     public static CompletableFuture<List<JSONObject>> loadLocationDetails(Context context, String robotId) {
         CompletableFuture<List<JSONObject>> future = new CompletableFuture<>();
