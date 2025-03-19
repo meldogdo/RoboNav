@@ -17,12 +17,14 @@ This repository contains the complete **RoboNav** system, including both the **f
   - `Nodemon` for live server reloading during development.  
   - `Kill-Port` for freeing up ports before restarting the server.  
 
-### **Frontend:**
-- **Framework:** Android (Java, XML)
-- **Networking:** Volley (for API calls)
-- **UI Components:** EditText, TextView, RecyclerView, Toasts
-- **Authentication:** JWT (retrieved from backend)
-- **Error Handling:** Custom error messages parsed from API responses
+### **Frontend**
+- **Framework:** `Android (Java, XML)` – Native Android development using Java with XML for UI layouts.  
+- **Networking:** `Volley` – Handles API requests and responses efficiently.  
+- **UI Components:** `EditText`, `TextView`, `RecyclerView`, `Toasts` – Standard Android UI elements for user interaction.  
+- **Authentication:** `JWT (JSON Web Token)` – Token-based authentication retrieved from the backend and securely stored using `EncryptedSharedPreferences`.  
+- **Error Handling:** Custom error messages parsed from API responses for better UX.  
+- **Dependency Management:** `Gradle` – Handles third-party libraries and project configurations.  
+- **JSON Parsing:** `org.json` – Parses API responses into structured data.  
 
 ---
 
@@ -63,19 +65,44 @@ This repository contains the complete **RoboNav** system, including both the **f
 │
 │── /frontend
 │   │── /app/src/main/java/com/robonav/app
-│   │   ├── activities/       # Main app screens (Login, Signup, Dashboard)
-│   │   ├── adapters/         # Custom adapters for RecyclerViews & lists
-│   │   ├── fragments/        # Modular UI components for better UX
-│   │   ├── interfaces/       # API callbacks & event handling
+│   │   ├── activities/       # App screens for navigation & user interaction
+│   │   │   ├── ChangePasswordActivity    # Allows users to change their password
+│   │   │   ├── CreateRobotActivity       # Screen to register a new robot
+│   │   │   ├── CreateTaskActivity        # Screen to create tasks for robots
+│   │   │   ├── ForgotPasswordActivity    # Handles password reset requests
+│   │   │   ├── HomeActivity              # Initial login screen
+│   │   │   ├── MainActivity              # Main dashboard containing navigation
+│   │   │   ├── ResetPasswordActivity     # Handles resetting password after verification
+│   │   │   ├── SignUpActivity            # User registration screen
+│   │   │
+│   │   ├── adapters/         # Custom adapters for mapping backend data to UI components
+│   │   │   ├── RobotAdapter  # Handles displaying robots in lists/RecyclerView
+│   │   │   ├── TaskAdapter   # Handles displaying tasks in lists/RecyclerView
+│   │   │
+│   │   ├── fragments/        # Modular UI components for navigation & content
+│   │   │   ├── HomeFragment          # Displays main home dashboard functionality
+│   │   │   ├── NavigationFragment    # Manages navigation controls & UI
+│   │   │   ├── UtilitiesFragment     # Contains additional user tools & features
+│   │   │
+│   │   ├── interfaces/       # Event listeners for UI updates
+│   │   │   ├── OnUpdateListener  # Handles updating data on specific events
+│   │   │
 │   │   ├── models/           # Data models representing API responses
-│   │   ├── utilities/        # Helper functions (Validation, API Requests, etc.)
+│   │   │   ├── Robot    # Defines robot structure as a Java object
+│   │   │   ├── Task     # Defines task structure as a Java object
+│   │   │
+│   │   ├── utilities/        # Helper functions for various app features
+│   │   │   ├── ConfigManager        # Reads `config.properties` for backend URL & settings
+│   │   │   ├── FragmentUtils        # Manages fragment transitions & UI functions
+│   │   │   ├── JsonUtils            # Converts JSON API responses into Java models
+│   │   │   ├── VolleySingleton      # Ensures single API request instance when needed
 │   │
-│   │── /app/src/main/res/layout    # XML UI layouts for activities & fragments
-│   │
-│   │── /app/src/main/res/drawable  # Icon assets
+│   │── /app/src/main/res/layout/       # XML UI layouts for activities & fragments
+│   │── /app/src/main/res/drawable/     # Image assets (icons, backgrounds, etc.)
+│   │── /app/src/main/assets/config.properties  # Backend server IP, port, and protocol (HTTP/HTTPS)
 │
-│   │── AndroidManifest.xml         # Android app permissions & settings
-│   │── build.gradle                # Gradle configuration & dependencies
+│   │── AndroidManifest.xml         # Defines app permissions, activities, and services
+│   │── build.gradle                # Gradle dependencies and project configurations
 │   │── settings.gradle             # Project-level Gradle settings
 │
 │── README.md  # This documentation
@@ -206,11 +233,7 @@ cd RoboNav/frontend
 2. Select **Open an Existing Project**.
 3. Navigate to `RoboNav/frontend` and open it.
 
-### **3. Build & Run**
-1. Ensure **USB debugging** is enabled on your Android device or use the Android Emulator.
-2. Click **Run (▶️)** in Android Studio.
-
-### **4. Configure API URL**
+### **3. Configure API URL**
 By default, the app fetches the backend URL from a configuration file:
 
 #### **Edit `/app/src/main/res/raw/config.properties`**
@@ -220,17 +243,72 @@ BACKEND_IP=10.0.2.2
 BACKEND_PORT=8080
 USE_HTTPS=false
 ```
-- Modify `BACKEND_IP` to match your backend host.
-- Change `BACKEND_PORT` if your backend runs on a different port.
-- Set `USE_HTTPS=true` if using HTTPS instead of HTTP.
+- **`BACKEND_IP`** → Change this to match your backend server's IP.  
+- **`BACKEND_PORT`** → Adjust this if your backend is running on a different port.  
+- **`USE_HTTPS`** → Set to `true` if your backend uses HTTPS.  
 
-If the backend is running on **HTTP** locally, use the default `10.0.2.2` as the hostname.
+**For Local Backend on Emulator**  
+If using an **Android Emulator**, keep `BACKEND_IP=10.0.2.2` (this routes to `localhost`).  
 
-## Features
-- **User Authentication** (Register, Login, JWT-based sessions)
-- **Robot Management** (View tasks, locations, and callbacks)
-- **Instruction Handling** (Send instructions to robots)
-- **Map Upload & Retrieval** (Upload and retrieve robot map files)
+**For Local Backend on a Real Device**  
+If testing on a **physical device**, update `BACKEND_IP` to your **computer's local network IP** (e.g., `192.168.x.x`).  
+
+### **4. Build & Run**
+1. Ensure **USB debugging** is enabled on your Android device or use the Android Emulator.
+2. Click **Run (▶️)** in Android Studio.
+
+
+## **App Overview & Features**
+
+### **1. Authentication & User Management**
+- **Login:**  
+  - The app starts with `MainActivity`, which immediately opens `HomeActivity` (Login Screen).  
+  - Users can log in using **admin/password** as default credentials or create a new account.  
+- **Registration:**  
+  - Users register by providing an **email, username, and password**.  
+  - A **confirmation link** is sent via email, and clicking it enables login.  
+- **Forgot Password:**  
+  - Users can request a **one-time password (OTP)** via email if they forget their password.  
+  - Entering the OTP logs the user in and allows them to set a new password.  
+- **Post-Login Actions:**  
+  - Upon logging in, users are directed to `HomeFragment`, where they can **log out** or **change their password**.
+
+---
+
+### **2. Home Fragment (Main Dashboard)**
+- **Robot & Task Management:**
+  - The **HomeFragment** displays two sliders: **one for robots** and **one for tasks**.
+  - Users can create **robots** or **tasks** using respective buttons.  
+  - Clicking a **robot** or **task** opens a **popup** with actions:  
+    - **For Robots:** View details and delete.  
+    - **For Tasks:** Start, stop, resume, delete (depending on its current state).  
+    - **Task Details:** Displays **currently queued instructions**, providing insight into what the robot will execute next.  
+- **Automatic Data Refresh:**
+  - When switching between fragments or performing **CRUD operations** (create, delete, update), the UI automatically refreshes.
+
+---
+
+### **3. Navigation Fragment (Task Execution)**
+- **Task Selection & Navigation:**
+  - Users select a **task from a dropdown** and **assign locations** to it.  
+  - Tasks created in `HomeFragment` contain only a **name and robot ID** (a shell task).  
+  - After selecting a **task and location**, users press the **"Queue Navigation"** button to add the location to the task’s execution queue.  
+- **Executing a Task:**
+  - Returning to `HomeFragment`, the user can **start, stop, resume, or delete a task**.  
+  - **Resume** continues from the last recorded execution step.  
+  - Tasks can only be deleted when **completed, stopped, or not started**.  
+
+---
+
+### **4. Utilities Fragment (Location Management)**
+- **Location-Based Utilities:**
+  - `UtilitiesFragment` provides **three location management tools**:
+    1. **Save Current Robot Location:** Saves the robot’s current coordinates.  
+    2. **Delete a Robot’s Locations:** Remove specific stored locations.  
+    3. **Get Coordinates of a Location:** Retrieve GPS data for a saved location.  
+- **System Callbacks:**
+  - An **output box** displays real-time **system callbacks** from all robots.  
+  - Users can **filter callbacks** to view logs for a **specific robot**.
 
 ---
 
