@@ -798,6 +798,46 @@ const getRobotCallbacks = (req, res) => {
     });
 };
 
+// Get 25 most recent instructions based for either all or a specific robot
+const getRecentInstructions = (req, res) => {
+    const { robotId } = req.query;
+    logger.info(`Fetching recent instructions for robot ID: ${robotId || 'ALL'}`);
+
+    let query = `
+        SELECT ins_id, robot_id, instruction, status, ctime
+        FROM ins_send
+    `;
+
+    if (robotId) {
+        query += ` WHERE robot_id = ?`;
+    }
+
+    query += ` ORDER BY ctime DESC LIMIT 25`;
+
+    db.query(query, robotId ? [robotId] : [], (err, results) => {
+        if (err) {
+            logger.error('Database error while fetching instructions:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (results.length === 0) {
+            logger.warn(`No instructions found for robot ID: ${robotId || 'ALL'}`);
+            return res.status(404).json({ message: 'No instructions found' });
+        }
+
+        // Format results
+        const instructionMessages = results.map((instruction, index) => {
+            const formattedTime = format(new Date(instruction.ctime), 'yyyy-MM-dd HH:mm:ss');
+
+            return `Instruction ID: ${instruction.ins_id}\nRobot ID: ${instruction.robot_id}\nInstruction: ${instruction.instruction}\nStatus: ${instruction.status}\nTime: ${formattedTime}`
+                + (index < results.length - 1 ? "\n\n" : "");
+        });
+
+        logger.info(`Successfully retrieved ${instructionMessages.length} instructions.`);
+        res.json({ message: 'Instructions retrieved', data: instructionMessages });
+    });
+};
+
 // Send robot instructions
 const addInstructionToTask = (req, res) => {
     const { task_id, instruction } = req.body;
@@ -983,6 +1023,7 @@ const saveCurrentRobotPosition = (req, res) => {
 module.exports = {
     getLocationsByRobotId,
     saveCurrentRobotPosition,
+    getRecentInstructions,
     resumeTask,
     stopTask,
     startTask,

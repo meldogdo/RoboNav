@@ -209,8 +209,12 @@ npm start
 - `GET /api/protected/robot/:robotId/locations` → List all locations assigned to a robot  
 - `GET /api/protected/robot/locations` → Retrieve all saved locations  
 
-### **Robot Callback Routes (Protected)**
-- `GET /api/protected/robot/callbacks` → Retrieve callback events from robots  
+### **Robot Callback & Instruction Routes (Protected)**
+- `GET /api/protected/robot/callbacks` → Retrieve the 25 most recent callback events from all robots.
+- `GET /api/protected/robot/callbacks?robotId={robotId}` →  Retrieve the 25 most recent callback events for a specific robot (`robotId` is required).
+- `GET /api/protected/robot/instructions` → Retrieve the 25 most recent instructions sent to all robots.
+- `GET /api/protected/robot/instructions?robotId={robotId}` → Retrieve the 25 most recent instructions for a specific robot (`robotId` is required).
+
 
 ## **Logging & Error Handling**
 The project uses **Winston** for structured logging to track application events and errors.  
