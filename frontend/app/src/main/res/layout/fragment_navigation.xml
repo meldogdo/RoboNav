@@ -11,9 +11,7 @@
         android:layout_height="wrap_content"
         tools:context=".fragments.UtilitiesFragment">
 
-        <!-- Title: Navigation -->
-
-        <!-- Dynamic content container -->
+        <!-- Title: Instruction Queue -->
         <TextView
             android:id="@+id/title_map_info"
             android:layout_width="wrap_content"
@@ -21,7 +19,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
 
-            android:text="@string/instruction_queue"
+            android:text="Instruction Queue"
 
             android:textColor="@color/white"
             android:textSize="24sp"
@@ -29,6 +27,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Dynamic content container -->
         <FrameLayout
             android:id="@+id/dynamic_content_container"
             android:layout_width="match_parent"
@@ -57,21 +56,25 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:background="@color/white"
-                    android:minHeight="48dp" />
+
+                    android:minHeight="40dp"
+                    android:layout_marginBottom="8dp" />
+
 
                 <TextView
                     android:id="@+id/current_robot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/fulfilled_by"
-                    android:textColor="@android:color/darker_gray"
-                    />
+
+                    android:text="Fulfilled By:"
+                    android:textColor="@android:color/darker_gray" />
+
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="16dp"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -87,54 +90,105 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:background="@color/white"
-                    android:minHeight="48dp" />
+
+                    android:minHeight="40dp"
+                    android:layout_marginBottom="8dp" />
+
 
                 <TextView
                     android:id="@+id/location_coordinates"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/coordinates"
-                    android:textColor="@color/high_contrast_gray_dark"
-                    />
+
+                    android:text="Coordinates:"
+                    android:textColor="@android:color/darker_gray" />
+
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="16dp"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/btn_add_instruction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/blue_dark"
-                    android:text="@string/queue_instruction"
-                    android:textColor="@android:color/white"
-                    android:layout_gravity="center_horizontal"
-                    android:paddingHorizontal="32dp"/>
+
+                    android:text="Queue Instruction"
+                    android:textColor="@android:color/white" />
+
 
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Title: Stop Navigation -->
+        <TextView
+            android:id="@+id/title_robot_tasks_nav"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="8dp"
+            android:text="Instructions"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dynamic_content_container" />
 
-        <!-- Stop navigation container -->
+        <Spinner
+            android:id="@+id/robot_callbacks_spinner_nav"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:drawable/editbox_background"
+            android:hint="Loading..."
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toStartOf="@+id/refresh_button_nav"
+            app:layout_constraintStart_toEndOf="@+id/title_robot_tasks_nav"
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
 
-        <!-- Title: Output Messages -->
-
-        <!-- Refresh Button -->
+        <ImageButton
+            android:id="@+id/refresh_button_nav"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="18dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/refresh"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
 
         <!-- Output ScrollView -->
-
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/output_scroll_view"
+            android:id="@+id/output_scroll_view_nav"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
+            android:fadeScrollbars="false"
+            android:fillViewport="true"
+            android:scrollbars="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/robot_callbacks_spinner_nav">
 
+            <!-- TextView inside the NestedScrollView -->
+            <TextView
+                android:id="@+id/output_text_view_nav"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/gray_medium"
+                android:padding="8dp"
+                android:textColor="@color/gray_high_contrast"
+                android:textSize="16sp" />
+        </androidx.core.widget.NestedScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -79,7 +79,11 @@ public class RobotAdapter extends RecyclerView.Adapter<RobotAdapter.RobotViewHol
         holder.locationTextView.setText("Location: " + robot.getLocationName());
 
         Task activeTask = Robot.getTaskInProgress(robot, taskList);
-        holder.taskTextView.setText(activeTask != null ? "Task: " + activeTask.getName() : "Task: None");
+        if (activeTask != null) {
+            holder.taskTextView.setText("Task: " + activeTask.getName());
+        } else {
+            holder.taskTextView.setText("Task: None");
+        }
 
         int batteryPercentage = robot.getBattery();
         holder.batteryTextView.setText(robot.getIsCharging() == 1 ?
