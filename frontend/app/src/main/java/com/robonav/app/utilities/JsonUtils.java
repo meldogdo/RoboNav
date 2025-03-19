@@ -1,5 +1,6 @@
 package com.robonav.app.utilities;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,7 +9,7 @@ import android.util.Log;
 import android.util.Pair;
 
 
-
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -198,6 +200,63 @@ public class JsonUtils {
         queue.add(request);
         return future;
     }
+
+    public static CompletableFuture<List<String>> fetchRecentInstructions(Context context, String robotId) {
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+
+        String instructionsUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/instructions";
+        if (robotId != null && !robotId.isEmpty()) {
+            instructionsUrl += "?robotId=" + robotId;  // Adding robotId as a query parameter if specified
+        }
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String token = getTokenFromPrefs(context);
+        if (token == null) {
+            future.completeExceptionally(new Exception("Authentication error: No token found."));
+            return future;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, instructionsUrl, null,
+                response -> {
+                    try {
+                        JSONArray data = response.getJSONArray("data");
+
+                        if (data.length() == 0) {
+                            future.complete(Collections.emptyList());  // No instructions found
+                            return;
+                        }
+
+                        List<String> instructionMessages = new ArrayList<>();
+                        for (int i = 0; i < data.length(); i++) {
+                            String message = data.getString(i);
+                            instructionMessages.add(message);
+                        }
+
+                        future.complete(instructionMessages);  // Return the list of instructions
+                    } catch (JSONException e) {
+                        future.completeExceptionally(new Exception("Failed to parse instruction data.", e));
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    future.completeExceptionally(new Exception("Failed to fetch recent instructions. Check your connection.", error));
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);  // Adding the token to the request headers
+                return headers;
+            }
+        };
+
+        // Add the request to the queue
+        queue.add(request);
+
+        return future;
+    }
+
+
 
 
 

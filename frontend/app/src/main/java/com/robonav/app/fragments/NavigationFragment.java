@@ -5,7 +5,9 @@ import static com.robonav.app.utilities.FragmentUtils.appendOutput;
 import static com.robonav.app.utilities.FragmentUtils.*;
 
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
+import static com.robonav.app.utilities.JsonUtils.fetchRecentInstructions;
 import static com.robonav.app.utilities.JsonUtils.loadLocationDetails;
+import static com.robonav.app.utilities.JsonUtils.loadRobotNames;
 import static com.robonav.app.utilities.JsonUtils.loadRobotTasks;
 import static com.robonav.app.utilities.JsonUtils.sendInstructionToTask;
 
@@ -14,6 +16,7 @@ import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 
@@ -26,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView;
@@ -35,6 +39,8 @@ import com.robonav.app.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,20 +50,22 @@ import java.util.concurrent.CompletableFuture;
 public class NavigationFragment extends Fragment {
 
     private static Spinner taskDropdown;
-    private static Spinner locationDropdown;
-    private static TextView fulfilledBy;
+    private static Spinner locationDropdown,instructionSpinner;
+    private static TextView fulfilledBy, outputTextView;
     private static TextView coordinates;
     private Button addInstruction;
-    private static List<String> locationNames;
+    private static List<String> locationNames, instructionNames;
     private static List<String> taskNames;
-    private static ArrayAdapter<String> locationAdapter;
+    private static ArrayAdapter<String> locationAdapter, instructionAdapter;
     private static ArrayAdapter<String> taskAdapter;
     private static HashMap<String, Pair<String, String>> storedTasks;
     private static Map<String, String> locationCoordinates;
     private static String currentTaskId;
     private static String currentRobotId;
+    private static NestedScrollView scrollView;
+    private ImageButton refresh;
 
-    @SuppressLint("ClickableViewAccessibility")
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout
@@ -69,10 +77,22 @@ public class NavigationFragment extends Fragment {
         fulfilledBy = view.findViewById(R.id.current_robot);
         coordinates = view.findViewById(R.id.location_coordinates);
         addInstruction = view.findViewById(R.id.btn_add_instruction);
+        outputTextView = view.findViewById(R.id.output_text_view_nav);
+        scrollView = view.findViewById(R.id.output_scroll_view_nav);
+        instructionSpinner = view.findViewById(R.id.robot_callbacks_spinner_nav);
+        refresh = view.findViewById(R.id.refresh_button_nav);
 
         // Initialize locationNames here
         locationNames = new ArrayList<>();
         taskNames = new ArrayList<>();
+
+        // Initialize instructionNames here
+        instructionNames = new ArrayList<>();
+
+        // Initialize instructionAdapter
+        instructionAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, instructionNames);
+        instructionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        instructionSpinner.setAdapter(instructionAdapter);
 
         // Initialize locationAdapter
         locationAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, locationNames);
@@ -87,6 +107,85 @@ public class NavigationFragment extends Fragment {
 
         //Fetching and storing tasks
         fetchAndStoreRobotTasks(requireContext());
+        fetchAndPopulateInstructionSpinner(requireContext());
+
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Trigger your refresh logic here
+                Log.d("Refresh", "Refresh button clicked.");
+
+                // Get the selected instruction from the spinner
+                String selectedInstruction = instructionSpinner.getSelectedItem().toString();
+                Log.d("InstructionSelected", "Selected Instruction: " + selectedInstruction);
+
+                if (selectedInstruction.equals("All Robots")) {
+                    getAndDisplayRecentInstructions(requireContext(), null);
+                } else {
+                    // Extract the number after the '#' symbol
+                    String[] parts = selectedInstruction.split("#");
+
+                    if (parts.length > 1) {
+                        String instructionId = parts[1].trim(); // Get the number after '#'
+
+                        try {
+                            String encodedInstructionId = URLEncoder.encode(instructionId, "UTF-8");
+                            // Call getAndDisplayRecentInstructions with the encoded instruction ID
+                            getAndDisplayRecentInstructions(requireContext(), encodedInstructionId);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                            showMessage("Encoding error: Unable to fetch instruction data.", requireContext());
+                        }
+                    } else {
+                        // Handle case where the instruction format is incorrect
+                        showMessage("Invalid instruction format. Try again.", requireContext());
+                    }
+                }
+            }
+        });
+
+
+        instructionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Get the selected instruction name (if needed for logging or any other purpose)
+                String selectedInstruction = parentView.getItemAtPosition(position).toString();
+                Log.d("InstructionSelected", "Selected Instruction: " + selectedInstruction);
+
+                // Check if the selected instruction is "All Robots"
+                if(selectedInstruction.equals("All Robots")){
+                    getAndDisplayRecentInstructions(requireContext(), null);
+                }
+                else {
+                    // Extract the number after the '#' symbol
+                    String[] parts = selectedInstruction.split("#");
+
+                    if (parts.length > 1) {
+                        String instructionId = parts[1].trim(); // Get the number after '#'
+
+                        try {
+                            String encodedInstructionId = URLEncoder.encode(instructionId, "UTF-8");
+                            // Call getAndDisplayRecentInstructions with the encoded instruction ID
+                            getAndDisplayRecentInstructions(requireContext(), encodedInstructionId);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                            showMessage("Encoding error: Unable to fetch instruction data.", requireContext());
+                        }
+                    } else {
+                        // Handle case where the instruction format is incorrect
+                        showMessage("Invalid instruction format. Try again.", requireContext());
+                    }
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Handle the case when nothing is selected (optional)
+                Log.d("InstructionSelected", "No instruction selected.");
+            }
+        });
+
+
+
 
         //Task dropdown listener
         taskDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -289,4 +388,61 @@ public class NavigationFragment extends Fragment {
             Log.e("LocationError", "Invalid coordinates format");
         }
     }
+
+    public static void getAndDisplayRecentInstructions(Context context, String robotId) {
+        fetchRecentInstructions(context, robotId).thenAccept(instructions -> {
+            if (instructions.isEmpty()) {
+                showMessage("No recent instructions found.", context);
+            } else {
+                for (String message : instructions) {
+                    appendOutputMessage(message);  // Output each instruction message
+                }
+            }
+        }).exceptionally(ex -> {
+            showMessage(ex.getMessage(), context);  // Handle any exceptions that occur
+            return null;
+        });
+    }
+
+    private static void appendOutputMessage(String message) {
+
+        // Get existing text
+        String currentText = outputTextView.getText().toString().trim(); // Trim to avoid trailing newlines
+
+        // Append the new message at the bottom, ensuring spacing between messages
+        String updatedText = currentText.isEmpty() ? message : currentText + "\n\n" + message;
+
+        outputTextView.setText(updatedText);
+
+        // Ensure UI updates before scrolling
+        scrollView.post(() -> {
+            scrollView.fullScroll(View.FOCUS_UP); // Scroll to the bottom to show the latest message
+            outputTextView.invalidate(); // Force UI update
+        });
+    }
+
+    public static void fetchAndPopulateInstructionSpinner(Context context) {
+        CompletableFuture<List<String>> future = loadRobotNames(context);
+
+        future.thenAccept(robotNames -> {
+            // Clear the existing items in the spinner
+            instructionNames.clear();
+            instructionNames.add("All Robots");
+
+            // Add robot names to the instruction spinner list
+            instructionNames.addAll(robotNames);
+
+            // Notify the adapter that data has changed so it can refresh the spinner
+            instructionAdapter.notifyDataSetChanged();
+
+            if (!instructionNames.isEmpty()) {
+                instructionSpinner.setSelection(0);
+            }
+
+        }).exceptionally(e -> {
+            return null;
+        });
+    }
+
+
 }
