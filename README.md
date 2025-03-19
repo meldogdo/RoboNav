@@ -1,7 +1,16 @@
-# RoboNav Project
+# **RoboNav: Intelligent Robot Navigation & Task Automation**
 
-## Overview
-This repository contains the complete **RoboNav** system, including both the **frontend** (Android app) and **backend** (Express API and MySQL database). The system facilitates robot navigation, task assignment, and map management through a mobile interface.
+## **Overview**  
+RoboNav is an **intelligent task execution and navigation system** designed to enhance the efficiency of **autonomous service robots** used in **hospitality, retail, and logistics**. The project builds upon an **existing infrastructure** of **commercial robots** (e.g., **OrionStar and similar platforms**) that feature **built-in Android-based control systems**, communicating with a **Flask/JavaScript web application** hosted on a shared external server.  
+
+To extend and improve this ecosystem, RoboNav introduces:  
+- A **mobile application** for assigning tasks, queuing navigation requests, and monitoring robot activity.  
+- A **backend service** that facilitates seamless communication between the **mobile app and the existing system**, ensuring real-time updates and secure task execution.  
+- **Automated task execution and multi-robot coordination** for optimizing navigation and workload distribution in high-traffic environments.  
+
+By integrating with the **Flask/JS-based server**, RoboNav ensures **efficient communication** between the **mobile app, robots, and web-based control interface**, improving overall **operational efficiency**.  
+
+This project is developed under the supervision of **Professor Yili Tang**.  
 
 ---
 
