@@ -18,9 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-
             android:text="Instruction Queue"
-
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -46,7 +44,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/select_task"
+                    android:text="Select Task"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -54,22 +52,17 @@
                     android:id="@+id/task_dropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:background="@color/white"
-
                     android:minHeight="40dp"
                     android:layout_marginBottom="8dp" />
-
 
                 <TextView
                     android:id="@+id/current_robot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-
                     android:text="Fulfilled By:"
                     android:textColor="@android:color/darker_gray" />
-
 
                 <View
                     android:layout_width="match_parent"
@@ -80,7 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/select_location"
+                    android:text="Select Location"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -88,21 +81,16 @@
                     android:id="@+id/pre_existing_location_dropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:background="@color/white"
-
                     android:minHeight="40dp"
                     android:layout_marginBottom="8dp" />
-
 
                 <TextView
                     android:id="@+id/location_coordinates"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-
                     android:text="Coordinates:"
                     android:textColor="@android:color/darker_gray" />
-
 
                 <View
                     android:layout_width="match_parent"
@@ -111,13 +99,11 @@
 
                 <Button
                     android:id="@+id/btn_add_instruction"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/blue_dark"
-
                     android:text="Queue Instruction"
                     android:textColor="@android:color/white" />
-
 
             </LinearLayout>
         </FrameLayout>
@@ -128,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
             android:layout_marginTop="8dp"
-            android:text="Instructions"
+            android:text="Callback Records"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
