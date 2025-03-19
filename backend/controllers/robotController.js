@@ -979,4 +979,23 @@ const saveCurrentRobotPosition = (req, res) => {
 };
 
 // Export the controller functions
-module.exports = { getLocationsByRobotId, saveCurrentRobotPosition, resumeTask, stopTask, startTask, getAllLocations, getCoordinatesByLocation, removeRobotLocationById, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };
+module.exports = {
+    getLocationsByRobotId,
+    saveCurrentRobotPosition,
+    resumeTask,
+    stopTask,
+    startTask,
+    getAllLocations,
+    getCoordinatesByLocation,
+    removeRobotLocationById,
+    getRobotPosition,
+    deleteTask,
+    getRobotTasks,
+    getAllRobots,
+    getRobotLocation,
+    getRobotCallbacks,
+    addInstructionToTask,
+    createRobot,
+    deleteRobot,
+    createTask
+  };  

@@ -1,13 +1,15 @@
-require('dotenv').config();
-const jwt = require('jsonwebtoken'); 
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const db = require('../config/db');
-const logger = require('../utils/logger');
-const { generateOTP, createTransporter } = require('../config/auth');
+require('dotenv').config(); // Load environment variables
+const jwt = require('jsonwebtoken'); // JWT for authentication
+const bcrypt = require('bcrypt'); // Bcrypt for password hashing
+const crypto = require('crypto'); // Crypto for secure operations
+const db = require('../config/db'); // Database connection
+const logger = require('../utils/logger'); // Logger for error tracking
+const { generateOTP, createTransporter } = require('../config/auth'); // OTP generation and email transport
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
+const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret'; // Secret key for JWT
 
+
+// User Registration
 const registerUser = async (req, res) => {
     const { username, password, email } = req.body;
 
@@ -22,7 +24,7 @@ const registerUser = async (req, res) => {
                 logger.error('Database error during user registration:', err);
                 return res.status(500).json({ message: 'Database error', error: err });
             }
-
+            
             if (results.length > 0) {
                 let emailExists = false;
                 let usernameExists = false;
@@ -30,7 +32,7 @@ const registerUser = async (req, res) => {
                     if (user.email === email) emailExists = true;
                     if (user.username === username) usernameExists = true;
                 });
-
+            
                 if (emailExists && usernameExists) {
                     return res.status(400).json({ message: 'Email and username already in use' });
                 } else if (emailExists) {
@@ -69,7 +71,7 @@ const registerUser = async (req, res) => {
                         subject: 'Confirm your email',
                         text: `Click the link to confirm your email: ${confirmationLink} (Expires in 24 hours)`
                     };
-
+                    // Set up email transporter
                     try {
                         const transporter = await createTransporter();
                         transporter.sendMail(mailOptions, (error) => {
@@ -95,7 +97,7 @@ const registerUser = async (req, res) => {
 // Email Confirmation
 const confirmEmail = (req, res) => {
     const { token } = req.query;
-
+// Check if token is provided
     if (!token) {
         logger.warn('Email confirmation attempt with no token provided.');
         return res.status(400).json({ message: 'No token provided' });
@@ -113,21 +115,21 @@ const confirmEmail = (req, res) => {
             logger.warn(`Invalid or expired email confirmation token: ${token}`);
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
-
+    // Extract user ID
         const userId = results[0].user_id;
-
+    // Update user's confirmed status
         db.query('UPDATE users SET confirmed = 1 WHERE id = ?', [userId], (err) => {
             if (err) {
                 logger.error(`Database error while updating user confirmation for user ID ${userId}:`, err);
                 return res.status(500).json({ message: 'Error updating user', error: err });
             }
-
+    // Delete email confirmation token
             db.query('DELETE FROM email_confirmations WHERE token = ?', [token], (deleteErr) => {
                 if (deleteErr) {
                     logger.error(`Failed to delete email confirmation token for user ID ${userId}:`, deleteErr);
                 }
             });
-
+            // Send success response
             logger.info(`Email successfully confirmed for user ID ${userId}.`);
             res.status(200).json({ message: 'Email confirmed successfully. You can now log in.' });
         });
@@ -137,7 +139,7 @@ const confirmEmail = (req, res) => {
 // User Login
 const loginUser = (req, res) => {
     const { username, password } = req.body;
-
+    // Check if username and password are provided
     if (!username || !password) {
         logger.warn('Login attempt with missing credentials.');
         return res.status(400).json({ message: 'Username and password are required' });
@@ -194,7 +196,7 @@ const loginUser = (req, res) => {
 // Request Password Reset
 const requestPasswordReset = async (req, res) => {
     const { email } = req.body;
-
+    // Check if email is provided
     if (!email) {
         logger.warn('Password reset request received with missing email.');
         return res.status(400).json({ message: 'Email is required' });
@@ -212,7 +214,7 @@ const requestPasswordReset = async (req, res) => {
             logger.warn(`Password reset attempt for non-existent email: ${email}`);
             return res.status(404).json({ message: 'Email not found' });
         }
-
+        // Extract user
         const user = results[0];
 
         // Check confirmation status
@@ -220,7 +222,7 @@ const requestPasswordReset = async (req, res) => {
             logger.warn(`Password reset denied for unconfirmed email: ${email}`);
             return res.status(403).json({ message: 'Confirm your email before resetting.' });
         }
-
+        // Check if account is disabled
         if (user.confirmed === 2) {
             logger.warn(`Password reset denied for disabled account: ${email}`);
             return res.status(403).json({ message: 'This account is disabled. Please contact support.' });
@@ -255,7 +257,7 @@ const requestPasswordReset = async (req, res) => {
                         subject: 'Password Reset Code',
                         text: `Your password reset code is: ${resetCode}. This code expires in 5 minutes.`,
                     };
-
+                    
                     transporter.sendMail(mailOptions, (error) => {
                         if (error) {
                             logger.error(`Error sending reset email to ${email}:`, error);
@@ -265,7 +267,7 @@ const requestPasswordReset = async (req, res) => {
                         logger.info(`Reset code sent successfully to: ${email}`);
                         res.json({ message: 'Reset code sent to email' });
                     });
-
+                    
                 } catch (emailError) {
                     logger.error(`Error setting up email transporter for ${email}:`, emailError);
                     return res.status(500).json({ message: 'Error setting up email transporter', error: emailError });
@@ -278,7 +280,7 @@ const requestPasswordReset = async (req, res) => {
 // Verify Password Reset
 const verifyReset = (req, res) => {
     const { email, resetCode } = req.body;
-
+    // Check if email and reset code are provided
     if (!email || !resetCode) {
         logger.warn('Password reset verification attempt with missing email or reset code.');
         return res.status(400).json({ message: 'Email and reset code are required' });
@@ -295,7 +297,7 @@ const verifyReset = (req, res) => {
                 logger.error(`Database query error while verifying reset code for ${email}:`, err);
                 return res.status(500).json({ message: 'Database error', error: err });
             }
-
+            // Check if reset code is valid
             if (results.length === 0) {
                 logger.warn(`Invalid or expired reset code attempt for email: ${email}`);
                 return res.status(400).json({ message: 'Invalid or expired reset code' });
@@ -330,6 +332,8 @@ const resetPassword = async (req, res) => {
     const email = req.user.email; // Extract email from authentication middleware
     logger.info(`Password reset attempt for user: ${email}`);
 
+
+    // Hash new password
     try {
         const hashedPassword = await bcrypt.hash(new_password, 10);
 
@@ -349,11 +353,13 @@ const resetPassword = async (req, res) => {
     }
 };
 
-// Change Password
+// Change Password for logged in user
 const changePassword = async (req, res) => {
     const { old_password, new_password } = req.body;
     const userId = req.user.userId; // Extracted from JWT token
 
+
+    // Check if old and new password are provided
     if (!old_password || !new_password) {
         logger.warn(`User ${userId} attempted password change with missing fields.`);
         return res.status(400).json({ message: 'Old and new password are required' });
@@ -367,7 +373,7 @@ const changePassword = async (req, res) => {
             logger.error(`Database error while fetching user ${userId}:`, err);
             return res.status(500).json({ message: 'Database error', error: err });
         }
-
+        // Check if user exists
         if (results.length === 0) {
             logger.warn(`Password change attempt for non-existent user ID: ${userId}`);
             return res.status(404).json({ message: 'User not found' });
@@ -404,6 +410,7 @@ const changePassword = async (req, res) => {
     });
 };
 
+// Export controller functions
 module.exports = {
     registerUser,
     confirmEmail,
