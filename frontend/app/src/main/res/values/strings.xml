@@ -53,7 +53,7 @@
     <string name="location_name">Location Name:</string>
     <string name="enter_the_code">Enter the code</string>
     <string name="send_code">Send Code</string>
-    <string name="enter_reset_code">Enter Reset Code</string>
+    <string name="enter_reset_code">Reset Code</string>
     <string name="email_input_field">Enter your email address</string>
     <string name="robot_information">Robot Information</string>
     <string name="active_tasks">Active Tasks</string>
@@ -89,6 +89,7 @@
     <string name="date_completed">Date Completed</string>
     <string name="task_info">Task Info</string>
     <string name="active">Active</string>
+    <string name="enter_email">Email</string>
 
 
 </resources>
