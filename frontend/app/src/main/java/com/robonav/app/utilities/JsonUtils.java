@@ -40,6 +40,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class JsonUtils {
 
+    // Helper method to get token from SharedPreferences
     private static String getTokenFromPrefs(Context context) {
         SharedPreferences prefs = context.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
         return prefs.getString("JWT_TOKEN", null); // Default to empty string if not found
@@ -239,7 +240,7 @@ public class JsonUtils {
                 },
                 error -> {
                     error.printStackTrace();
-                    future.completeExceptionally(new Exception("Failed to fetch recent instructions. Check your connection.", error));
+                    future.completeExceptionally(new Exception("Failed to retrieve recent instructions. Check connection.", error));
                 }
         ) {
             @Override
@@ -255,18 +256,6 @@ public class JsonUtils {
 
         return future;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Helper method to convert JSON array of tasks to List<String>
     public static List<String> jsonArrayToList(JSONArray jsonArray) throws JSONException {

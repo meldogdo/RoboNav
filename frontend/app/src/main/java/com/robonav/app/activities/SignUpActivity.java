@@ -3,6 +3,7 @@ package com.robonav.app.activities;
 import static com.robonav.app.utilities.FragmentUtils.VALID;
 import static com.robonav.app.utilities.FragmentUtils.areInputsValid;
 import static com.robonav.app.utilities.FragmentUtils.arePasswordsValid;
+import static com.robonav.app.utilities.FragmentUtils.showMessage;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.robonav.app.R;
+import com.robonav.app.utilities.FragmentUtils;
 import com.robonav.app.utilities.VolleySingleton;
 
 import org.json.JSONException;
@@ -81,22 +83,48 @@ public class SignUpActivity extends AppCompatActivity {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
-        int validationCode = areInputsValid(username, null, email);
 
-        if (validationCode != VALID) {  // If validation fails
+        // Validate username, email, and password
+        int validationCode = areInputsValid(username, password, email);
+
+        if (validationCode != VALID) {
             signUpButton.setEnabled(true); // Re-enable if validation fails
+            switch (validationCode) {
+                case FragmentUtils.EMPTY_FIELDS:
+                    showMessage("Please fill in all fields.",this);
+                    break;
+                case FragmentUtils.INVALID_USERNAME:
+                    showMessage("Invalid username. Must be 4-20 alphanumeric characters.",this);
+                    break;
+                case FragmentUtils.INVALID_PASSWORD:
+                    showMessage("Invalid password. Must be 6-20 characters.",this);
+                    break;
+                case FragmentUtils.INVALID_EMAIL:
+                    showMessage("Invalid email address.", this);
+                    break;
+            }
             return;
         }
 
-        if (!arePasswordsValid(password, confirmPassword, null, this::showToast)) {
-            signUpButton.setEnabled(true); // Re-enable if validation fails
+        // Check if passwords match before validating strength
+        if (!password.equals(confirmPassword)) {
+            showMessage("Passwords do not match.", this);
+            signUpButton.setEnabled(true);
             return;
         }
 
+        // Validate password strength
+        if (!arePasswordsValid(password, confirmPassword, null,msg -> showMessage(msg,this) )) {
+            signUpButton.setEnabled(true);
+            return;
+        }
+
+        // Show progress dialog
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Registering...");
         progressDialog.show();
 
+        // Prepare request payload
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("username", username);
@@ -106,24 +134,25 @@ public class SignUpActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        // Create request
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REGISTER_URL, jsonBody,
                 response -> {
                     progressDialog.dismiss();
-                    signUpButton.setEnabled(true);  // Re-enable after success
+                    signUpButton.setEnabled(true);
 
                     try {
-                        Toast.makeText(SignUpActivity.this, response.getString("message"), Toast.LENGTH_SHORT).show();
+                        showMessage(response.getString("message"),this);
                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                         intent.putExtra("username", username);
                         startActivity(intent);
                         finish();
                     } catch (JSONException e) {
-                        Toast.makeText(SignUpActivity.this, "Error parsing response", Toast.LENGTH_SHORT).show();
+                        showMessage("Error parsing response",this);
                     }
                 },
                 error -> {
                     progressDialog.dismiss();
-                    signUpButton.setEnabled(true);  // Re-enable after failure
+                    signUpButton.setEnabled(true);
 
                     String errorMessage = "Registration failed. Try again.";
                     if (error.networkResponse != null) {
@@ -137,7 +166,7 @@ public class SignUpActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-                    showToast(errorMessage);
+                    showMessage(errorMessage,this);
                 }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -147,6 +176,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
         };
 
+        // Set retry policy
         request.setRetryPolicy(new DefaultRetryPolicy(
                 20000,
                 0,

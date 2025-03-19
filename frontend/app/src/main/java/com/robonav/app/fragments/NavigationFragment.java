@@ -130,11 +130,11 @@ public class NavigationFragment extends Fragment {
                             getAndDisplayRecentInstructions(requireContext(), encodedInstructionId);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
-                            showMessage("Encoding error: Unable to fetch instruction data.", requireContext());
+                            showMessage("Encoding error: Cannot retrieve instruction data.", requireContext());
                         }
                     } else {
                         // Handle case where the instruction format is incorrect
-                        showMessage("Invalid instruction format. Try again.", requireContext());
+                        showMessage("Invalid instruction format. Please retry.", requireContext());
                     }
                 }
             }
@@ -169,7 +169,7 @@ public class NavigationFragment extends Fragment {
                         }
                     } else {
                         // Handle case where the instruction format is incorrect
-                        showMessage("Invalid instruction format. Try again.", requireContext());
+                        showMessage("Invalid instruction format. Please retry.", requireContext());
                     }
                 }
             }
