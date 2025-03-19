@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const db = require('../config/db');
 const logger = require('../utils/logger');
 const { generateOTP, createTransporter } = require('../config/auth');
+const moment = require('moment-timezone');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
 
@@ -230,14 +231,14 @@ const requestPasswordReset = async (req, res) => {
 
         // Generate a 6-digit OTP and expiration time
         const resetCode = generateOTP();
-        const expiresAt = new Date(Date.now() + 5 * 60000); // Expires in 5 minutes
+        const expiresAtEST = moment().tz("America/New_York").add(5, 'minutes').format('YYYY-MM-DD HH:mm:ss');
 
         logger.info(`Generated OTP for ${email}: ${resetCode}`);
 
         // Save OTP to DB
         db.query(
             'INSERT INTO password_reset_tokens (email, reset_code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reset_code = ?, expires_at = ?',
-            [email, resetCode, expiresAt, resetCode, expiresAt],
+            [email, resetCode, expiresAtEST, resetCode, expiresAtEST],
             async (err) => {
                 if (err) {
                     logger.error(`Error inserting OTP for ${email}:`, err);
@@ -285,11 +286,15 @@ const verifyReset = (req, res) => {
     }
 
     logger.info(`Verifying reset code for email: ${email}`);
+    const nowEST = moment().tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
 
     // Check if OTP is valid and not expired
     db.query(
-        'SELECT * FROM password_reset_tokens WHERE email = ? AND reset_code = ? AND expires_at > NOW()',
-        [email, resetCode],
+        `SELECT * FROM password_reset_tokens 
+         WHERE email = ? 
+         AND reset_code = ? 
+         AND expires_at > ?`,
+        [email, resetCode, nowEST],
         (err, results) => {
             if (err) {
                 logger.error(`Database query error while verifying reset code for ${email}:`, err);
