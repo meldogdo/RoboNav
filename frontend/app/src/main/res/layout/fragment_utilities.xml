@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Location Utilities"
+            android:text="@string/location_utilities"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -58,7 +58,7 @@
 
             android:layout_marginStart="18dp"
             android:layout_marginTop="8dp"
-            android:text="Callback Records"
+            android:text="@string/callback_records"
 
             android:textColor="#FFFFFF"
             android:textSize="24sp"
@@ -69,12 +69,12 @@
         <Spinner
             android:id="@+id/robot_callbacks_spinner"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:background="@android:drawable/editbox_background"
-            android:hint="Loading..."
+            android:hint="@string/loading"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:visibility="visible"
@@ -89,10 +89,12 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="18dp"
             android:background="@null"
+            android:contentDescription="@string/todo"
             android:scaleType="fitCenter"
             android:src="@drawable/refresh"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container" />
+            app:layout_constraintTop_toBottomOf="@id/dynamic_content_container"
+            tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
 
 
         <androidx.core.widget.NestedScrollView

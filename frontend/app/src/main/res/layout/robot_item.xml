@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="250dp"
     android:layout_height="220dp"
     android:orientation="vertical"
@@ -29,14 +30,15 @@ android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:orientation="horizontal"
 android:layout_marginTop="8dp"
-android:gravity="center_vertical">
+android:gravity="center_vertical"
+    tools:ignore="UseCompoundDrawables">
 
 <ImageView
     android:id="@+id/robot_battery_icon"
     android:layout_width="24dp"
     android:layout_height="24dp"
     android:src="@drawable/ic_battery"
-    android:contentDescription="Battery Icon"
+    android:contentDescription="@string/battery_icon"
     android:layout_marginEnd="8dp" />
 
     <TextView
@@ -52,12 +54,14 @@ android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:orientation="horizontal"
 android:layout_marginTop="8dp"
-android:gravity="center_vertical">
+android:gravity="center_vertical"
+    tools:ignore="UseCompoundDrawables">
 
 <ImageView
     android:id="@+id/robot_task_icon"
     android:layout_width="24dp"
     android:layout_height="24dp"
+    android:importantForAccessibility="no"
     android:src="@drawable/ic_task"
     android:layout_marginEnd="8dp" />
 
@@ -74,12 +78,14 @@ android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:orientation="horizontal"
 android:layout_marginTop="8dp"
-android:gravity="center_vertical">
+android:gravity="center_vertical"
+    tools:ignore="UseCompoundDrawables">
 
 <ImageView
     android:id="@+id/robot_location_icon"
     android:layout_width="24dp"
     android:layout_height="24dp"
+    android:importantForAccessibility="no"
     android:src="@drawable/ic_location"
     android:layout_marginEnd="8dp" />
 

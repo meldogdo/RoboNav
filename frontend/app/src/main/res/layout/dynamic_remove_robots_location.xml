@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Robot"
+        android:text="@string/select_robot"
         android:textColor="@android:color/white"
         android:textSize="14sp"
         android:layout_marginBottom="4dp" />
@@ -28,7 +28,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Location"
+        android:text="@string/select_location"
         android:textColor="@android:color/white"
         android:textSize="14sp"
         android:layout_marginBottom="4dp" />
@@ -44,10 +44,13 @@
     <!-- Remove Location Button -->
     <Button
         android:id="@+id/btn_remove_location"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Remove Location"
+        android:text="@string/remove_location"
         android:backgroundTint="@color/blue_dark"
         android:textColor="@android:color/white"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"
+        android:paddingHorizontal="32dp" />
+
 </LinearLayout>

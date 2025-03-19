@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Task Info"
+            android:text="@string/task_info"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/black" />
@@ -76,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Current Status"
+            android:text="@string/current_status"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -86,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Active"
+            android:text="@string/active"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
@@ -96,7 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Date Completed"
+            android:text="@string/date_completed"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -107,7 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Executing..."
+            android:text="@string/executing"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:visibility="gone" />
@@ -158,7 +158,7 @@
                 android:id="@+id/delete_task_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete Task"
+                android:text="@string/delete_task"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/red_dark"
                 android:padding="12dp"

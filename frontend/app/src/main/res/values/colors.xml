@@ -31,4 +31,10 @@
     <!-- New Additions -->
     <color name="red_dark">#B13A3A</color>
     <color name="green_dark">#298B29</color>
+
+    <color name="high_contrast_white">#F5F5F5</color>
+    <color name="high_contrast_gray">#CCCCCC</color>
+    <color name="high_contrast_gray_dark">#B0B0B0</color>
+
+
 </resources>

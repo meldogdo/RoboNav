@@ -19,7 +19,7 @@
             android:id="@+id/task_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Task: Deliver Supplies"
+            android:text="@string/task_deliver_supplies"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Started: "
+            android:text="@string/started"
             android:textColor="#CCCCCC"
             android:textSize="16sp" />
 
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Progress: Unknown"
+            android:text="@string/progress_unknown"
             android:textColor="#CCCCCC"
             android:textSize="16sp" />
 
@@ -58,5 +58,5 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="end|bottom"
-        android:contentDescription="Task Icon" />
+        android:contentDescription="@string/task_icon" />
 </LinearLayout>

@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Location"
+        android:text="@string/select_location"
         android:layout_marginBottom="4dp"
         android:textSize="16sp"
         android:textColor="@android:color/white" /> <!-- White text -->
@@ -24,11 +24,14 @@
 
     <Button
         android:id="@+id/btn_get_coordinates"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get Coordinates"
+        android:text="@string/get_coordinates"
         android:backgroundTint="@color/blue_dark"
-        android:textColor="@android:color/white" /> <!-- Blue button with white text -->
+        android:textColor="@android:color/white"
+        android:paddingHorizontal="32dp"
+        android:layout_gravity="center_horizontal" />
+
 
     <!-- White text -->
 </LinearLayout>
