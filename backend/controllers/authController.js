@@ -9,9 +9,10 @@ const moment = require('moment-timezone');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
 
+// Register a new user
 const registerUser = async (req, res) => {
     const { username, password, email } = req.body;
-
+    // Check if username, email, and password are provided
     if (!username || !password || !email) {
         return res.status(400).json({ message: 'Username, email, and password are required' });
     }
@@ -114,15 +115,15 @@ const confirmEmail = (req, res) => {
             logger.warn(`Invalid or expired email confirmation token: ${token}`);
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
-    // Extract user ID
+        // Extract user ID
         const userId = results[0].user_id;
-    // Update user's confirmed status
+        // Update user's confirmed status
         db.query('UPDATE users SET confirmed = 1 WHERE id = ?', [userId], (err) => {
             if (err) {
                 logger.error(`Database error while updating user confirmation for user ID ${userId}:`, err);
                 return res.status(500).json({ message: 'Error updating user', error: err });
             }
-    // Delete email confirmation token
+            // Delete email confirmation token
             db.query('DELETE FROM email_confirmations WHERE token = ?', [token], (deleteErr) => {
                 if (deleteErr) {
                     logger.error(`Failed to delete email confirmation token for user ID ${userId}:`, deleteErr);
@@ -146,6 +147,7 @@ const loginUser = (req, res) => {
 
     logger.info(`User login attempt: ${username}`);
 
+    // Check if user exists
     db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
         if (err) {
             logger.error(`Database error during login for user: ${username}`, err);
