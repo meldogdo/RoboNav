@@ -310,6 +310,9 @@ If testing on a **physical device**, update `BACKEND_IP` to your **computer's lo
   - Returning to `HomeFragment`, the user can **start, stop, resume, or delete a task**.  
   - **Resume** continues from the last recorded execution step.  
   - Tasks can only be deleted when **completed, stopped, or not started**.  
+- **Instruction Output:**
+  - An **output box** displays the **25 most recent instructions** executed by a selected robot.  
+  - Users can **filter instructions** by selecting a specific robot from the dropdown.  
 
 ---
 
@@ -320,8 +323,8 @@ If testing on a **physical device**, update `BACKEND_IP` to your **computer's lo
     2. **Delete a Robot’s Locations:** Remove specific stored locations.  
     3. **Get Coordinates of a Location:** Retrieve GPS data for a saved location.  
 - **System Callbacks:**
-  - An **output box** displays real-time **system callbacks** from all robots.  
-  - Users can **filter callbacks** to view logs for a **specific robot**.
+  - An **output box** displays the **25 most recent system callbacks** from all robots.  
+  - Users can **filter callbacks** to view the **25 most recent logs** for a **specific robot**.  
 
 ---
 
