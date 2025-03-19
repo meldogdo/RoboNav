@@ -1,24 +1,19 @@
 package com.robonav.app.utilities;
 
-import android.content.Context;
-import android.util.Log;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class ConfigManager {
-    private static final String TAG = "ConfigManager";
-    private static final String CONFIG_FILE = "config.properties";
-    private static Properties properties = new Properties();
+    private static final Properties properties = new Properties();
 
-    // Load properties from config.properties
-    public static void loadConfig(Context context) {
+    static {
         try {
-            InputStream inputStream = context.getAssets().open(CONFIG_FILE);
-            properties.load(inputStream);
-            inputStream.close();
+            FileInputStream fis = new FileInputStream("config.properties");
+            properties.load(fis);
+            fis.close();
         } catch (IOException e) {
-            Log.e(TAG, "Error loading configuration file", e);
+            System.err.println("Error loading configuration file: " + e.getMessage());
         }
     }
 

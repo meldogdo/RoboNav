@@ -91,16 +91,18 @@ public class UtilitiesFragment extends Fragment {
         TextView outputTextView = view.findViewById(R.id.output_text_view);
         NestedScrollView scrollView = view.findViewById(R.id.output_scroll_view);
 
-        // Append new message
-        String currentText = outputTextView.getText().toString();
-        String updatedText = currentText.isEmpty() ? message : currentText + "\n" + message;
+        // Get existing text
+        String currentText = outputTextView.getText().toString().trim(); // Trim to avoid trailing newlines
+
+        // Append the new message at the bottom, ensuring spacing between messages
+        String updatedText = currentText.isEmpty() ? message : currentText + "\n\n" + message;
 
         outputTextView.setText(updatedText);
 
         // Ensure UI updates before scrolling
         scrollView.post(() -> {
-            scrollView.fullScroll(View.FOCUS_DOWN);
-            outputTextView.invalidate(); // Force update UI
+            scrollView.fullScroll(View.FOCUS_UP); // Scroll to the bottom to show the latest message
+            outputTextView.invalidate(); // Force UI update
         });
     }
 

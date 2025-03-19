@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="Robot Information"
+            android:text="@string/robot_information"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -28,15 +28,15 @@
         <Button
             android:id="@+id/createRobotButton"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="48dp"
             android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/blue_dark"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:text="Create Robot"
+            android:text="@string/create_robot"
             android:textColor="@color/white"
-            android:backgroundTint="@color/blue_dark"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/title_robot_info"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/title_robot_info" />
 
         <!-- RecyclerView for Robot Information -->
@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="Active Tasks"
+            android:text="@string/active_tasks"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -68,15 +68,15 @@
         <Button
             android:id="@+id/createTaskButton"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="48dp"
             android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/blue_dark"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:text="Create Task"
+            android:text="@string/create_task"
             android:textColor="@color/white"
-            android:backgroundTint="@color/blue_dark"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/title_robot_tasks"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/title_robot_tasks" />
 
         <!-- RecyclerView for Tasks -->
