@@ -1,10 +1,15 @@
 package com.robonav.app.models;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Task {
@@ -19,6 +24,10 @@ public class Task {
 
     private final String end;
 
+    List<String> instructions;
+
+    private final int instructionIndex;
+
     // Constructor to initialize from JSON object
     public Task(JSONObject jsonObject) throws JSONException {
         this.id = jsonObject.getString("id");          // Retrieve task ID
@@ -29,6 +38,22 @@ public class Task {
         this.dateCreated = jsonObject.getString("dateCreated"); // Retrieve dateCreated
         this.state = jsonObject.getString("state");
         this.end = jsonObject.getString("dateCompleted");
+        this.instructionIndex = jsonObject.getInt("instruction_index");
+        // Parse instructions list
+        this.instructions = new ArrayList<>();
+        // Get the instructions field as a string
+        String instructionsString = jsonObject.getString("instructions");
+        // Parse the string as a JSON array (since it looks like a string formatted as an array)
+        try {
+            // Remove any unwanted characters and parse it
+            JSONArray instructionsArray = new JSONArray(instructionsString);
+
+            for (int i = 0; i < instructionsArray.length(); i++) {
+                this.instructions.add(instructionsArray.getString(i));
+            }
+        } catch (JSONException e) {
+        }
+
 
     }
 
@@ -57,6 +82,8 @@ public class Task {
     public String getDateCreated() {
         return dateCreated;
     }
+    public List<String> getInstructions() { return instructions; }
+    public int getInstructionIndex() { return instructionIndex; }
 
     // Override toString for better debug output
     @NonNull
