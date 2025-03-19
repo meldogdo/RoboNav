@@ -105,10 +105,6 @@ public class NavigationFragment extends Fragment {
         taskAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         taskDropdown.setAdapter(taskAdapter);
 
-        //Fetching and storing tasks
-        fetchAndStoreRobotTasks(requireContext());
-        fetchAndPopulateInstructionSpinner(requireContext());
-
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -263,6 +259,8 @@ public class NavigationFragment extends Fragment {
     public void onResume() {
         super.onResume();
         fetchAndStoreRobotTasks(requireContext());
+        fetchAndPopulateInstructionSpinner(requireContext());
+        fetchAndPopulateLocationSpinner(requireContext(),null);
     }
     public static void fetchAndStoreRobotTasks(Context context) {
         CompletableFuture<HashMap<String, Pair<String, String>>> future = loadRobotTasks(context);
