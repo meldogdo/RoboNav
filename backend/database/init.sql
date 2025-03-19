@@ -443,7 +443,7 @@ CREATE TABLE `task` (
 
 LOCK TABLES `task` WRITE;
 /*!40000 ALTER TABLE `task` DISABLE KEYS */;
-INSERT INTO `task` VALUES (1,'task1',6,0,'[\"navigation:startNavigation:frontendTest_1\"]',NULL,'2023-03-16 08:45:21',NULL,'2025-03-16 19:09:02',0),(2,'task2',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\"]',NULL,'2025-02-20 13:35:07','','2025-03-16 19:09:02',0),(3,'task3',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\",\"navigation:startNavigation:frontendTest_1\"]',NULL,'2025-02-20 13:35:07',NULL,'2025-03-16 19:09:02',0);
+INSERT INTO `task` VALUES (1,'task1',6,0,'[\"navigation:startNavigation:frontendTest_1\"]',NULL,'2023-03-16 08:45:21',NULL,'2025-03-16 19:09:02',0),(2,'task2',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\"]',NULL,'2025-02-20 13:35:07',NULL,'2025-03-16 19:09:02',0),(3,'task3',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\",\"navigation:startNavigation:frontendTest_1\"]',NULL,'2025-02-20 13:35:07',NULL,'2025-03-16 19:09:02',0);
 /*!40000 ALTER TABLE `task` ENABLE KEYS */;
 UNLOCK TABLES;
 

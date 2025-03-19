@@ -644,7 +644,9 @@ const getRobotTasks = (req, res) => {
             createdBy: 'n/a',
             dateCreated: task.start,
             state: task.state,
-            dateCompleted: task.end
+            dateCompleted: task.end,
+            instructions: task.instruction_list,
+            instruction_index: task.current_instruction_index
         }));
 
         logger.info(`Successfully retrieved ${tasks.length} tasks.`);
