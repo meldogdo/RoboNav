@@ -1,11 +1,12 @@
-const db = require('../config/db'); // Database connection
-const logger = require('../utils/logger'); // Logger for error tracking
-const { format } = require('date-fns'); // Date formatting utility
+const db = require('../config/db');
+const logger = require('../utils/logger');
+const { format } = require('date-fns');
 
 // Get the last known position of a robot
 const getRobotPosition = (req, res) => {
     const { robotId } = req.params;
-
+    
+    // Input validation
     if (!robotId) {
         return res.status(400).json({ message: 'Robot ID is required' });
     }
@@ -17,7 +18,7 @@ const getRobotPosition = (req, res) => {
         ORDER BY timestamp DESC 
         LIMIT 1;
     `;
-
+    
     db.query(sql, [robotId], (err, results) => {
         if (err) {
             logger.error(`Error fetching live coordinates for robot ${robotId}:`, err);
@@ -979,4 +980,23 @@ const saveCurrentRobotPosition = (req, res) => {
 };
 
 // Export the controller functions
-module.exports = { getLocationsByRobotId, saveCurrentRobotPosition, resumeTask, stopTask, startTask, getAllLocations, getCoordinatesByLocation, removeRobotLocationById, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };
+module.exports = {
+    getLocationsByRobotId,
+    saveCurrentRobotPosition,
+    resumeTask,
+    stopTask,
+    startTask,
+    getAllLocations,
+    getCoordinatesByLocation,
+    removeRobotLocationById,
+    getRobotPosition,
+    deleteTask,
+    getRobotTasks,
+    getAllRobots,
+    getRobotLocation,
+    getRobotCallbacks,
+    addInstructionToTask,
+    createRobot,
+    deleteRobot,
+    createTask
+  };  
