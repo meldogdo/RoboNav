@@ -1,6 +1,6 @@
-const db = require('../config/db');
-const logger = require('../utils/logger');
-const { format } = require('date-fns');
+const db = require('../config/db'); // Database connection
+const logger = require('../utils/logger'); // Logger for error tracking
+const { format } = require('date-fns'); // Date formatting utility
 
 // Get the last known position of a robot
 const getRobotPosition = (req, res) => {
@@ -32,6 +32,7 @@ const getRobotPosition = (req, res) => {
     });
 };
 
+// Get all locations for a specific robot
 const getLocationsByRobotId = (req, res) => {
     const { robotId } = req.params;
 
@@ -57,6 +58,7 @@ const getLocationsByRobotId = (req, res) => {
     });
 };
 
+// Remove a specific location by ID
 const removeRobotLocationById = (req, res) => {
     const { locId } = req.params;
 
@@ -82,6 +84,7 @@ const removeRobotLocationById = (req, res) => {
     });
 };
 
+// Get the coordinates of a specific location
 const getCoordinatesByLocation = (req, res) => {
     const { locId } = req.params;
 
@@ -114,7 +117,7 @@ const getCoordinatesByLocation = (req, res) => {
     });
 };
 
-
+// Get all locations
 const getAllLocations = (req, res) => {
     const sql = `
         SELECT loc_id, robot_id, name, x, y, z, theta 
@@ -195,6 +198,7 @@ const deleteTask = (req, res) => {
     });
 };
 
+// Start a task by ID
 const startTask = (req, res) => {
     const { taskId } = req.params;
 
@@ -273,6 +277,8 @@ const startTask = (req, res) => {
         });
     });
 };
+
+// Queue instructions for a task by ID
 
 const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
     const processNextInstruction = (taskId, robotId, instructions, index) => {
@@ -365,6 +371,7 @@ const queueTaskInstructions = (taskId, robotId, instructions, index = 0) => {
     processNextInstruction(taskId, robotId, instructions, index);
 };
 
+// Wait for an instruction to complete before moving to the next one
 const waitForInstructionCompletion = (insId, taskId, robotId, callback) => {
     const checkStatusSQL = `SELECT status FROM ins_send WHERE ins_id = ?`;
     const checkTaskStateSQL = `SELECT state FROM task WHERE task_id = ?`;
@@ -469,6 +476,7 @@ const createTask = (req, res) => {
     });
 };
 
+// Stop a task by ID
 const stopTask = (req, res) => {
     const { taskId } = req.params;
 
@@ -845,6 +853,7 @@ const addInstructionToTask = (req, res) => {
     });
 };
 
+// Resume a stopped task by ID
 const resumeTask = (req, res) => {
     const { taskId } = req.params;
 
@@ -923,7 +932,7 @@ const resumeTask = (req, res) => {
         });
     });
 };
-
+// Save the current position of a robot to a location
 const saveCurrentRobotPosition = (req, res) => {
     const { robotId, locationName } = req.body;
 
@@ -969,4 +978,5 @@ const saveCurrentRobotPosition = (req, res) => {
     });
 };
 
+// Export the controller functions
 module.exports = { getLocationsByRobotId, saveCurrentRobotPosition, resumeTask, stopTask, startTask, getAllLocations, getCoordinatesByLocation, removeRobotLocationById, getRobotPosition, deleteTask, getRobotTasks, getAllRobots, getRobotLocation, getRobotCallbacks, addInstructionToTask, createRobot, deleteRobot, createTask };
