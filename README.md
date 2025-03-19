@@ -1,16 +1,17 @@
 # **RoboNav: Intelligent Robot Navigation & Task Automation**
 
 ## **Overview**  
-RoboNav is an **intelligent task execution and navigation system** designed to enhance the efficiency of **autonomous service robots** used in **hospitality, retail, and logistics**. The project builds upon an **existing infrastructure** of **commercial robots** (e.g., **OrionStar and similar platforms**) that feature **built-in Android-based control systems**, communicating with a **Flask/JavaScript web application** hosted on a shared external server.  
+RoboNav is an **intelligent task execution and navigation system** designed to enhance the efficiency of **autonomous service robots** used in **hospitality, retail, and logistics**. The project builds upon an **existing infrastructure** where **commercial robots** (e.g., **OrionStar and other service robots**) feature **built-in Android-based control systems** that communicate with an **existing Flask-based web application** hosted on an external server with a **database backend**.  
 
-To extend and improve this ecosystem, RoboNav introduces:  
+To **extend and optimize this ecosystem**, RoboNav introduces:  
 - A **mobile application** for assigning tasks, queuing navigation requests, and monitoring robot activity.  
-- A **backend service** that facilitates seamless communication between the **mobile app and the existing system**, ensuring real-time updates and secure task execution.  
-- **Automated task execution and multi-robot coordination** for optimizing navigation and workload distribution in high-traffic environments.  
+- A **dedicated Node.js backend service** that acts as a bridge between the **mobile app and the Flask-based system**, ensuring **real-time synchronization, secure task execution, and seamless data flow**.  
+- **Automated task execution and multi-robot coordination** for optimized navigation and workload distribution in high-traffic environments.  
 
-By integrating with the **Flask/JS-based server**, RoboNav ensures **efficient communication** between the **mobile app, robots, and web-based control interface**, improving overall **operational efficiency**.  
+By integrating with the **Flask-based server**, RoboNav ensures **efficient communication** between the **mobile app, robots, and web-based control interface**, improving overall **operational efficiency** across multiple locations.  
 
 This project is developed under the supervision of **Professor Yili Tang**.  
+
 
 ---
 
