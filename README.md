@@ -8,12 +8,14 @@ This repository contains the complete **RoboNav** system, including both the **f
 ## Technologies Used
 
 ### **Backend:**
-- **Server:** Node.js, Express.js
-- **Database:** MySQL
-- **Authentication:** JWT (JSON Web Token), bcrypt
-- **Email Services:** Nodemailer
-- **Logging:** Winston
-- **Deployment & Monitoring:** Nodemon, Kill-Port
+- **Server:** `Node.js` with `Express.js` for handling API requests.  
+- **Database:** `MySQL` for data storage, managed with `mysql2`.  
+- **Authentication:** `JWT (JSON Web Token)` for secure user authentication, with password hashing via `bcrypt`.  
+- **Email Services:** `Nodemailer` for sending registration confirmation and password reset emails.  
+- **Logging:** `Winston` for structured logging and error tracking.  
+- **Development Tools:**  
+  - `Nodemon` for live server reloading during development.  
+  - `Kill-Port` for freeing up ports before restarting the server.  
 
 ### **Frontend:**
 - **Framework:** Android (Java, XML)
@@ -28,36 +30,36 @@ This repository contains the complete **RoboNav** system, including both the **f
 ```
 │── /backend
 │   │── /config
-│   │   │── auth.js         # OAuth2 and JWT setup
-│   │   │── db.js           # Database connection setup
+│   │   │── auth.js         # OAuth2 and JWT configuration  
+│   │   │── db.js           # MySQL database connection setup  
 │   │
 │   │── /controllers
-│   │   │── authController.js   # Authentication logic (register, login, reset password)
-│   │   │── robotController.js  # Handles robot-related operations
+│   │   │── authController.js   # Handles user authentication (register, login, password reset)  
+│   │   │── robotController.js  # Manages robot tasks, locations, and instructions  
 │   │
 │   │── /database
-│   │   │── backup.sql         # Backup database provided by professor
-│   │   │── init.sql           # Updated database schema
+│   │   │── backup.sql         # Backup database provided by professor  
+│   │   │── init.sql           # Initial database schema and setup script  
 │   │
 │   │── /logs
-│   │   │── app.log            # Server logs (generated automatically)
+│   │   │── app.log            # Application logs (generated automatically)  
 │   │
 │   │── /middleware
-│   │   │── authMiddleware.js   # JWT authentication middleware
+│   │   │── authMiddleware.js   # Middleware for JWT authentication  
 │   │
 │   │── /routes
-│   │   │── authRoutes.js       # Routes for authentication
-│   │   │── robotRoutes.js      # Routes for robot operations
+│   │   │── authRoutes.js       # Defines routes for authentication endpoints  
+│   │   │── robotRoutes.js      # Defines routes for robot management and tasks  
 │   │
 │   │── /utils
-│   │   │── logger.js       # Winston logger setup
+│   │   │── logger.js       # Winston logger configuration for structured logging  
 │   │
-│   │── .env                # Environment variables
-│   │── .gitignore          # Files to ignore in version control
-│   │── app.js              # Express application setup
-│   │── index.js            # Main server entry point
-│   │── nodemon.json        # Nodemon configuration (auto-restart and kill port)
-│   │── package.json        # Dependencies and scripts
+│   │── .env                # Environment variables for sensitive configurations  
+│   │── .gitignore          # Specifies files to exclude from version control  
+│   │── app.js              # Express application setup and middleware configuration  
+│   │── index.js            # Main server entry point  
+│   │── nodemon.json        # Nodemon settings for auto-restart and port cleanup  
+│   │── package.json        # Project dependencies and scripts  
 │
 │── /frontend
 │   │── /app/src/main/java/com/robonav/app
@@ -100,29 +102,30 @@ Or use:
 ```sh
 npm run prestart
 ```
-Which will automatically install dependencies before starting the server.
+This will automatically install dependencies before starting the server.
 
 ### **3. Set Up Environment Variables**
 Create a `.env` file in the `/backend` directory and configure:
 ```env
 # Database Configuration
-DB_HOST=
-DB_PORT=
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
+DB_HOST=             # Database hostname or IP (default: localhost)
+DB_PORT=             # Database port (default: 3306 for MySQL)
+DB_USER=             # Database username
+DB_PASSWORD=         # Database password
+DB_NAME=             # Name of the database
 
 # Server Configuration
-SERVER_HOST=
-SERVER_PORT=
+SERVER_HOST=         # Server host (default: 127.0.0.1 for local)
+SERVER_PORT=         # Port for the backend server (default: 8080)
 
 # Authentication Configuration
-JWT_SECRET=
+JWT_SECRET=         # Secret key for signing JWT tokens
 
 # Email Configuration
-EMAIL_USER=
-CLIENT_SECRET=
-REFRESH_TOKEN=
+EMAIL_USER=         # Email used for sending registration & password reset emails
+CLIENT_ID=          # OAuth2 Client ID from Google Cloud Console
+CLIENT_SECRET=      # OAuth2 Client Secret from Google Cloud Console
+REFRESH_TOKEN=      # OAuth2 Refresh Token from Google OAuth Playground (for Gmail API)
 ```
 
 ### **4. Start the Backend Server**
@@ -135,28 +138,56 @@ npm run dev
 npm start
 ```
 
-## API Endpoints
+## **API Endpoints**
 
 ### **Authentication Routes**
-- `POST /api/open/users/register` → Register a new user
-- `GET /api/open/users/confirm-email` → Confirm user email
-- `POST /api/open/users/login` → User login
-- `POST /api/open/users/request-reset` → Request password reset
-- `POST /api/open/users/verify-reset` → Verify password reset
-- `POST /api/protected/users/reset-password` → Reset password (JWT protected)
-- `POST /api/protected/users/change-password` → Change password (JWT protected)
+- `POST /api/open/users/register` → Register a new user  
+- `GET /api/open/users/confirm-email` → Confirm user email via token  
+- `POST /api/open/users/login` → Authenticate user and return JWT  
+- `POST /api/open/users/request-reset` → Request a password reset email  
+- `POST /api/open/users/verify-reset` → Verify reset code before setting a new password  
+- `POST /api/protected/users/reset-password` → Reset password (JWT required)  
+- `POST /api/protected/users/change-password` → Change password (JWT required)  
 
 ### **Robot Routes (Protected)**
-- `GET /api/protected/robot/tasks` → Retrieve robot tasks
-- `GET /api/protected/robot/robots` → List all robots
-- `GET /api/protected/robot/:robotId/location` → Get robot location
-- `GET /api/protected/robot/callbacks` → Get robot callbacks
-- `POST /api/protected/robot/instruction` → Send robot instructions
+- `GET /api/protected/robot/tasks` → Retrieve all robot tasks  
+- `POST /api/protected/robot/task/create` → Create a new robot task  
+- `DELETE /api/protected/robot/task/:taskId/delete` → Delete a robot task  
+- `POST /api/protected/robot/task/:taskId/start` → Start a robot task  
+- `POST /api/protected/robot/task/:taskId/stop` → Stop a running robot task  
+- `POST /api/protected/robot/task/:taskId/resume` → Resume a stopped robot task  
+- `POST /api/protected/robot/task/instruction` → Add an instruction to a task  
 
-## Logging
-The project uses **Winston** for structured logging.
-- Logs are stored in `/backend/logs/app.log`.
-- Console and file logging are enabled.
+### **Robot Management Routes (Protected)**
+- `GET /api/protected/robot/robots` → List all registered robots  
+- `POST /api/protected/robot/create` → Register a new robot  
+- `DELETE /api/protected/robot/:robotId/delete` → Remove a robot from the system  
+- `GET /api/protected/robot/:robotId/location` → Retrieve the latest location of a robot  
+
+### **Location & Position Routes (Protected)**
+- `GET /api/protected/robot/:robotId/position` → Retrieve the last recorded position of a robot  
+- `POST /api/protected/robot/save-current-position` → Save the robot’s current position  
+- `DELETE /api/protected/location/:locId` → Remove a saved location by ID  
+- `GET /api/protected/robot/location/:locId` → Get coordinates by location ID  
+- `GET /api/protected/robot/:robotId/locations` → List all locations assigned to a robot  
+- `GET /api/protected/robot/locations` → Retrieve all saved locations  
+
+### **Robot Callback Routes (Protected)**
+- `GET /api/protected/robot/callbacks` → Retrieve callback events from robots  
+
+## **Logging & Error Handling**
+The project uses **Winston** for structured logging to track application events and errors.  
+- Logs are stored in `/backend/logs/app.log`.  
+- Both **console logging** and **file logging** are enabled.  
+- Errors and important events are recorded for debugging and monitoring.  
+
+## **Error Handling**
+The backend includes structured error handling to ensure stability and meaningful API responses:  
+- **Consistent Error Responses:** API errors follow a standardized format with HTTP status codes.  
+- **Database & Query Errors:** Logged and handled gracefully to avoid system crashes.  
+- **Unhandled Exceptions:** Caught by a global error handler to prevent app failures.  
+- **Authentication Errors:** Unauthorized requests return proper `401` or `403` responses.  
+
 
 ---
 
