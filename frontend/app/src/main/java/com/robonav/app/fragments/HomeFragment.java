@@ -51,17 +51,13 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
             swipeRefreshLayout.setRefreshing(true);
             loadData();
         }
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == getActivity().RESULT_OK) {
-            onUpdate(); // Refresh HomeFragment when a robot is created
-        }
-        if (requestCode == 2 && resultCode == getActivity().RESULT_OK) {
-            onUpdate(); // Refresh HomeFragment when a task is created
+        if ((requestCode == 1 || requestCode == 2) && resultCode == getActivity().RESULT_OK) {
+            onUpdate();
         }
     }
 
@@ -77,13 +73,12 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
         createRobotButton = rootView.findViewById(R.id.createRobotButton);
         createTaskButton = rootView.findViewById(R.id.createTaskButton);
 
-        // Click listener for Create Robot button
+        // Click listeners for Create Robot and Create Task buttons
         createRobotButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CreateRobotActivity.class);
             startActivityForResult(intent, 1);
         });
 
-        // Click listener for Create Task button
         createTaskButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CreateTaskActivity.class);
             startActivityForResult(intent, 2);
@@ -113,37 +108,31 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
     }
 
     private void loadData() {
-        // Clear the lists before loading new data
-        robotList.clear();
-        taskList.clear();
-
-        // Notify adapters that the data is being cleared
-        robotAdapter.notifyDataSetChanged();
-        taskAdapter.notifyDataSetChanged();
-
         String robotUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/robots";
+        String taskUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/tasks";
+
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
-        // Load robot data first
+        // Load robots first
         JsonArrayRequest robotRequest = new JsonArrayRequest(Request.Method.GET, robotUrl, null,
                 response -> {
+                    robotList.clear(); // Clear existing robots
                     try {
                         for (int i = 0; i < response.length(); i++) {
                             Robot robot = new Robot(response.getJSONObject(i));
                             robotList.add(robot);
                         }
-                        // After loading robots, load tasks
-                        loadTasks();
+                        robotAdapter.notifyDataSetChanged();
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        swipeRefreshLayout.setRefreshing(false);
                     }
+                    // After loading robots, load tasks
+                    loadTasks(queue, taskUrl);
                 },
                 error -> {
                     error.printStackTrace();
                     swipeRefreshLayout.setRefreshing(false);
-                }
-        ) {
+                }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -156,28 +145,28 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
         swipeRefreshLayout.setRefreshing(true);
     }
 
-    private void loadTasks() {
-        String taskUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/tasks";
+    // Separate task loading method to ensure robots persist even when tasks are empty
+    private void loadTasks(RequestQueue queue, String taskUrl) {
         JsonArrayRequest taskRequest = new JsonArrayRequest(Request.Method.GET, taskUrl, null,
                 response -> {
+                    taskList.clear(); // Clear existing tasks
                     try {
                         for (int i = 0; i < response.length(); i++) {
                             Task task = new Task(response.getJSONObject(i));
                             taskList.add(task);
                         }
-                        taskAdapter.notifyDataSetChanged();
-                        robotAdapter.notifyDataSetChanged();
-                        swipeRefreshLayout.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        swipeRefreshLayout.setRefreshing(false);
                     }
+                    // Ensure UI updates even when tasks are empty
+                    taskAdapter.notifyDataSetChanged();
+                    robotAdapter.notifyDataSetChanged();
+                    swipeRefreshLayout.setRefreshing(false);
                 },
                 error -> {
                     error.printStackTrace();
                     swipeRefreshLayout.setRefreshing(false);
-                }
-        ) {
+                }) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -186,13 +175,12 @@ public class HomeFragment extends Fragment implements OnUpdateListener {
             }
         };
 
-        RequestQueue queue = Volley.newRequestQueue(requireContext());
         queue.add(taskRequest);
     }
 
     // Implement the generic update callback
     @Override
     public void onUpdate() {
-        loadData(); // Refresh the entire fragment
+        loadData();
     }
 }

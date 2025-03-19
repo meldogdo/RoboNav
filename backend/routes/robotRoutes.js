@@ -24,8 +24,9 @@ const {
   getAllLocations,
   getLocationsByRobotId,
 
-  // Callback functions
-  getRobotCallbacks
+  // Callback & Instruction functions
+  getRobotCallbacks,
+  getRecentInstructions
 } = require('../controllers/robotController');
 
 const router = express.Router();
@@ -58,5 +59,6 @@ router.get('/protected/robot/locations', getAllLocations);
 
 // Callback Routes
 router.get('/protected/robot/callbacks', getRobotCallbacks);
+router.get('/protected/robot/instructions', getRecentInstructions);
 
 module.exports = router;

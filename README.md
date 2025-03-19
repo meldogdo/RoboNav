@@ -3,15 +3,14 @@
 ## **Overview**  
 RoboNav is an **intelligent task execution and navigation system** designed to enhance the efficiency of **autonomous service robots** used in **hospitality, retail, and logistics**. The project builds upon an **existing infrastructure** where **commercial robots** (e.g., **OrionStar and other service robots**) feature **built-in Android-based control systems** that communicate with an **existing Flask-based web application** hosted on an external server with a **database backend**.  
 
-To **extend and optimize this ecosystem**, RoboNav introduces:  
+As part of our **capstone project at Western University**, RoboNav introduces:  
 - A **mobile application** for assigning tasks, queuing navigation requests, and monitoring robot activity.  
 - A **dedicated Node.js backend service** that acts as a bridge between the **mobile app and the Flask-based system**, ensuring **real-time synchronization, secure task execution, and seamless data flow**.  
 - **Automated task execution and multi-robot coordination** for optimized navigation and workload distribution in high-traffic environments.  
 
 By integrating with the **Flask-based server**, RoboNav ensures **efficient communication** between the **mobile app, robots, and web-based control interface**, improving overall **operational efficiency** across multiple locations.  
 
-This project is developed under the supervision of **Professor Yili Tang**.  
-
+This project is developed under the supervision of **Professor Yili Tang at Western University**.  
 
 ---
 
@@ -209,8 +208,12 @@ npm start
 - `GET /api/protected/robot/:robotId/locations` → List all locations assigned to a robot  
 - `GET /api/protected/robot/locations` → Retrieve all saved locations  
 
-### **Robot Callback Routes (Protected)**
-- `GET /api/protected/robot/callbacks` → Retrieve callback events from robots  
+### **Robot Callback & Instruction Routes (Protected)**
+- `GET /api/protected/robot/callbacks` → Retrieve the 25 most recent callback events from all robots.
+- `GET /api/protected/robot/callbacks?robotId={robotId}` →  Retrieve the 25 most recent callback events for a specific robot (`robotId` is required).
+- `GET /api/protected/robot/instructions` → Retrieve the 25 most recent instructions sent to all robots.
+- `GET /api/protected/robot/instructions?robotId={robotId}` → Retrieve the 25 most recent instructions for a specific robot (`robotId` is required).
+
 
 ## **Logging & Error Handling**
 The project uses **Winston** for structured logging to track application events and errors.  

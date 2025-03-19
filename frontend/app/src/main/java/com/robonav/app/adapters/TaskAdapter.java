@@ -4,6 +4,7 @@ import static com.robonav.app.utilities.FragmentUtils.showMessage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,6 +15,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,6 +34,7 @@ import com.robonav.app.utilities.ConfigManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -239,6 +242,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         Button startButton = popupView.findViewById(R.id.start_task_button);
         Button stopButton = popupView.findViewById(R.id.stop_task_button);
         Button resumeButton = popupView.findViewById(R.id.resume_task_button); // New button for resuming
+        TextView instruction_list = popupView.findViewById(R.id.instructions_pop_up);
+        TextView progress_percent = popupView.findViewById(R.id.progress_percent);
+        ProgressBar progress_bar = popupView.findViewById(R.id.progress_bar);
 
         // Ensure correct button visibility based on task state
         updateTaskPopupUI(task, startButton, stopButton, resumeButton, deleteButton, progressStatus);
@@ -290,6 +296,32 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             else if (task.getState().equals("2")){
                 progressStatus.setText("Complete");
             }
+        }
+
+        List<String> instructions = task.getInstructions(); // Get the list
+        if (instructions != null && !instructions.isEmpty()) {
+            StringBuilder instructionText = new StringBuilder();
+            for (String instruction : instructions) {
+                instructionText.append("• ").append(instruction).append("\n"); // Add bullet points
+            }
+            instruction_list.setText(instructionText.toString().trim()); // Remove trailing newline
+        } else {
+            instruction_list.setText("No instructions available");
+        }
+
+        if (task.getState().equals("2")){
+            progress_percent.setText("100%");
+            progress_bar.setProgress(100);
+        }
+        else{
+            // Get the instruction index and list size
+            int instructionIndex = task.getInstructionIndex(); // This should return the current completed index
+            int totalInstructions = instructions.size(); // Get the total number of instructions
+            // Calculate progress as a percentage
+            int progress = (int) (((double) instructionIndex / totalInstructions) * 100);
+            // Update progress text and progress bar
+            progress_percent.setText(progress + "%");
+            progress_bar.setProgress(progress);
         }
 
         // Handle swipe-down icon click
