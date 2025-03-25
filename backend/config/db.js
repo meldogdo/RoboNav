@@ -11,9 +11,8 @@ const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'your_database_name',
   port: process.env.DB_PORT || 3306,
-  multipleStatements: true, // Allow multiple SQL statements
+  multipleStatements: true,
 });
 
 // Establish connection
@@ -28,8 +27,8 @@ db.connect((err) => {
   initializeDatabase();
 });
 
-// Load and execute SQL dump
 function initializeDatabase() {
+  const dbName = process.env.DB_NAME || 'roboNav_robot_info';
   const sqlDumpPath = path.join(__dirname, '../database/init.sql');
 
   try {
@@ -40,6 +39,15 @@ function initializeDatabase() {
         logger.error('Error executing SQL dump:', err);
       } else {
         logger.info('Database initialized successfully');
+
+        // Switch to the new database
+        db.changeUser({ database: dbName }, (err) => {
+          if (err) {
+            logger.error('Error changing to database:', err);
+          } else {
+            logger.info(`Now using database '${dbName}'`);
+          }
+        });
       }
     });
   } catch (fileErr) {

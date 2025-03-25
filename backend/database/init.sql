@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `roboNav_robot_info` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `roboNav_robot_info`;
+CREATE DATABASE  IF NOT EXISTS `robonav_robot_info` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `robonav_robot_info`;
 -- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: roboNav_robot_info
+-- Host: 127.0.0.1    Database: robonav_robot_info
 -- ------------------------------------------------------
 -- Server version	8.0.41
 
@@ -31,7 +31,7 @@ CREATE TABLE `callback_rec` (
   `callback` varchar(1024) DEFAULT NULL,
   `ctime` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`cb_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10286 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,6 @@ CREATE TABLE `callback_rec` (
 
 LOCK TABLES `callback_rec` WRITE;
 /*!40000 ALTER TABLE `callback_rec` DISABLE KEYS */;
-INSERT INTO `callback_rec` VALUES (4752,NULL,6,'Obstacle avoidance timeout, the destination can not be reached, the timeout time is set through the parameters','2024-10-31 14:40:06'),(4753,NULL,6,'Start to navigation to point 2','2024-10-31 14:40:13'),(4754,NULL,6,'0:Run navigation api: startNavigation','2024-10-31 14:40:13'),(4755,NULL,6,'Navigation success','2024-10-31 14:40:31'),(4756,NULL,16,'-1:Run map api: getPlaceList','2024-11-09 12:52:03'),(4757,NULL,16,'-1:Run map api: getPlaceList','2024-11-10 03:03:30'),(4758,NULL,6,'Start to navigation to point2','2024-11-09 14:46:34'),(4759,NULL,6,'0:Run navigation api: startNavigation','2024-11-09 14:46:34'),(4760,NULL,6,'Navigation destination does not exist','2024-11-09 14:46:34'),(4761,NULL,6,'Start to navigation to point 2','2024-11-09 14:46:35'),(4762,NULL,6,'0:Run navigation api: startNavigation','2024-11-09 14:46:35'),(4763,NULL,6,'The current route is blocked by obstacles','2024-11-09 14:46:41'),(4764,NULL,6,'Obstacles removed','2024-11-09 14:47:03'),(4765,NULL,6,'The current route is blocked by obstacles','2024-11-09 14:47:05'),(4766,NULL,6,'Obstacles removed','2024-11-09 14:47:08'),(4767,NULL,6,'Navigation success','2024-11-09 14:47:13'),(4768,NULL,6,'Start to navigation to point 1','2024-11-09 14:47:13'),(4769,NULL,6,'0:Run navigation api: startNavigation','2024-11-09 14:47:13'),(4770,NULL,6,'Navigation success','2024-11-09 14:47:23'),(4771,NULL,6,'Start to navigation to 1','2024-11-09 14:47:23'),(4772,NULL,6,'0:Run navigation api: startNavigation','2024-11-09 14:47:24'),(4773,NULL,6,'Navigation destination does not exist','2024-11-09 14:47:24'),(4774,NULL,6,'Start to navigation to 2','2024-11-09 14:48:13'),(4775,NULL,6,'0:Run navigation api: startNavigation','2024-11-09 14:48:13'),(4776,NULL,6,'Navigation destination does not exist','2024-11-09 14:48:13'),(4777,NULL,6,'Start to navigation to point 2','2024-11-09 14:48:23'),(4778,NULL,6,'0:Run navigation api: startNavigation','2024-11-09 14:48:23'),(4779,NULL,6,'Navigation success','2024-11-09 14:48:30'),(4780,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:13:17'),(4781,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4782,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4783,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4784,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4785,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4786,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4787,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 05:50:28'),(4788,NULL,16,'-1:Run navigation api: startNavigation','2024-11-10 13:56:30'),(4789,NULL,6,'Start to navigation to 0','2024-11-15 17:40:25'),(4790,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:40:25'),(4791,NULL,6,'Navigation destination does not exist','2024-11-15 17:40:25'),(4792,NULL,6,'Start to navigation to 0','2024-11-15 17:40:26'),(4793,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:40:26'),(4794,NULL,6,'Navigation destination does not exist','2024-11-15 17:40:27'),(4795,NULL,6,'Start to navigation to 0','2024-11-15 17:40:28'),(4796,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:40:28'),(4797,NULL,6,'Navigation destination does not exist','2024-11-15 17:40:28'),(4798,NULL,6,'-1:Cannot classify api type: updateMap','2024-11-15 17:40:29'),(4799,NULL,6,'Start to navigation to point 1','2024-11-15 17:40:30'),(4800,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:40:30'),(4801,NULL,6,'Obstacle avoidance timeout, the destination can not be reached, the timeout time is set through the parameters','2024-11-15 17:41:00'),(4802,NULL,6,'Start to navigation to point 1','2024-11-15 17:41:01'),(4803,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:41:01'),(4804,NULL,6,'Obstacle avoidance timeout, the destination can not be reached, the timeout time is set through the parameters','2024-11-15 17:41:31'),(4805,NULL,6,'Start to navigation to point 2','2024-11-15 17:41:32'),(4806,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:41:32'),(4807,NULL,6,'Obstacle avoidance timeout, the destination can not be reached, the timeout time is set through the parameters','2024-11-15 17:42:02'),(4808,NULL,6,'Start to navigation to 1','2024-11-15 17:42:03'),(4809,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:42:03'),(4810,NULL,6,'Navigation destination does not exist','2024-11-15 17:42:03'),(4811,NULL,6,'Start to navigation to 1','2024-11-15 17:42:04'),(4812,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:42:04'),(4813,NULL,6,'Navigation destination does not exist','2024-11-15 17:42:04'),(4814,NULL,6,'Start to navigation to 2','2024-11-15 17:42:06'),(4815,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:42:06'),(4816,NULL,6,'Navigation destination does not exist','2024-11-15 17:42:06'),(4817,NULL,6,'Start to navigation to 3','2024-11-15 17:42:07'),(4818,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:42:07'),(4819,NULL,6,'Navigation destination does not exist','2024-11-15 17:42:07'),(4820,NULL,6,'Start to navigation to 4','2024-11-15 17:42:08'),(4821,NULL,6,'0:Run navigation api: startNavigation','2024-11-15 17:42:08'),(4822,NULL,6,'Navigation destination does not exist','2024-11-15 17:42:08');
 /*!40000 ALTER TABLE `callback_rec` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -85,7 +84,7 @@ CREATE TABLE `ins_send` (
   `status` varchar(128) DEFAULT NULL,
   `ctime` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ins_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3759 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +93,6 @@ CREATE TABLE `ins_send` (
 
 LOCK TABLES `ins_send` WRITE;
 /*!40000 ALTER TABLE `ins_send` DISABLE KEYS */;
-INSERT INTO `ins_send` VALUES (1800,6,'navigation:startNavigation:Charging Pole','complete','2024-10-31 14:40:06'),(1801,6,'navigation:startNavigation:point 2','complete','2024-10-31 14:40:31'),(1802,11,'navigation:startNavigation:point 1','order','2024-10-31 20:48:52'),(1803,11,'navigation:startNavigation:point 2','order','2024-10-31 20:49:14'),(1804,11,'navigation:startNavigation:point 3','order','2024-10-31 20:49:22'),(1805,4,'map:getPlaceList','order','2024-11-04 08:24:20'),(1806,11,'navigation:startNavigation:point1','order','2024-11-09 20:37:01'),(1807,6,'navigation:startNavigation:point2','complete','2024-11-09 14:46:34'),(1808,6,'navigation:startNavigation:point 2','complete','2024-11-09 14:47:13'),(1809,6,'navigation:startNavigation:point 1','complete','2024-11-09 14:47:23'),(1810,6,'navigation:startNavigation:1','complete','2024-11-09 14:47:24'),(1811,6,'navigation:startNavigation:2','complete','2024-11-09 14:48:13'),(1812,6,'navigation:startNavigation:point 2','complete','2024-11-09 14:48:30'),(1813,16,'navigation:startNavigation:point 1','accept','2024-11-10 05:13:17'),(1814,16,'navigation:startNavigation:point 2','accept','2024-11-10 05:50:28'),(1815,16,'navigation:startNavigation:point 1','accept','2024-11-10 13:56:30'),(1816,16,'navigation:startNavigation:point 2','accept','2024-11-10 15:11:11'),(1817,6,'navigation:startNavigation:0','complete','2024-11-15 17:40:26'),(1819,6,'navigation:startNavigation:0','complete','2024-11-15 17:40:27'),(1821,6,'navigation:startNavigation:0','complete','2024-11-15 17:40:28'),(1824,6,'updateMap:6','complete','2024-11-15 17:40:29'),(1826,6,'navigation:startNavigation:point 1','complete','2024-11-15 17:41:00'),(1830,6,'navigation:startNavigation:point 1','complete','2024-11-15 17:41:31'),(1831,6,'navigation:startNavigation:point 2','complete','2024-11-15 17:42:02'),(1832,6,'navigation:startNavigation:1','complete','2024-11-15 17:42:03'),(1834,6,'navigation:startNavigation:1','complete','2024-11-15 17:42:05'),(1835,6,'navigation:startNavigation:2','complete','2024-11-15 17:42:06'),(1836,6,'navigation:startNavigation:3','complete','2024-11-15 17:42:07'),(1837,6,'navigation:startNavigation:4','complete','2024-11-15 17:42:08');
 /*!40000 ALTER TABLE `ins_send` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,7 +112,7 @@ CREATE TABLE `location` (
   `theta` double DEFAULT NULL,
   `name` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`loc_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=489833 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,7 +121,7 @@ CREATE TABLE `location` (
 
 LOCK TABLES `location` WRITE;
 /*!40000 ALTER TABLE `location` DISABLE KEYS */;
-INSERT INTO `location` VALUES (489779,11,0.52,2.6525000000000003,-99,0.82,'1'),(489780,11,-0.028294880667081166,-0.39899799464162183,-99,86,'Charging Station'),(489781,11,-0.18832019107948447,-0.09982944121660209,-99,92,'Charging Station'),(489782,11,-0.028294880667081166,-0.39899799464162183,2,85.94,'Charging pile'),(489783,11,0.03537797409126446,0.4980654837012203,2,265.94,'Charging pile Docking Point'),(489784,11,5.160000000000001,6.392500000000001,-99,1.71,'door 1'),(489785,11,-6.672500000000001,81.1925,-99,2.94,'door 3'),(489786,11,1.5000000000000002,2.5,2,0,'nav_test_point'),(489787,11,-0.42,4.42,2,3.44,'point 1'),(489788,11,-0.6400000000000001,2.465,2,265.85,'point 2'),(489789,11,-0.5425000000000001,6.02,2,181.63,'point 3'),(489790,11,1.5000000000000002,2.5,2,0,'point 6'),(489791,11,-18.0475,4.2275,-99,-1.44,'room 2'),(489792,11,-2.155,1.1075,-99,-0.04,'stan'),(489793,11,0.23000000000000004,5.232500000000001,2,-1.48,'test'),(489794,11,1.5000000000000002,2.5,2,0,'test_navigation_point'),(489795,11,100,200,2,90,'test_poi_point'),(489796,11,-0.15,-0.15,2,1,'test_poi_point'),(489797,11,-0.15,-0.15,2,1,'test_poi_point2'),(489798,11,-0.15,-0.15,2,1,'test_poi_point2'),(489799,11,-0.15,-0.15,2,1,'test_poi_point3'),(489800,11,0,0,2,1,'test_poi_point4'),(489801,11,0,0,2,1,'test_poi_point4'),(489802,11,0,0,2,1,'test_poi_point5'),(489803,11,0,0,2,1,'test_poi_point6'),(489804,11,0,0,2,0,'test_point_1'),(489805,11,1.5000000000000002,2.5,2,0,'test_point_2'),(489806,11,1.5000000000000002,2.5,2,0,'test_point_3'),(489813,11,1,2,NULL,2,'test_point_dec'),(489814,6,3.1701099472239997,-0.017863878847999448,NULL,2,'test_point_dec'),(489815,6,1.5,2,0,0,'db_test_point'),(489816,8,0.14980546887200008,-0.7164123449039999,NULL,0,'db_test_point'),(489817,11,13416.473172722663,21165.73019671905,NULL,0,'db_test_point'),(489818,6,1,1,NULL,0,'db_batch_1'),(489819,8,1.205443128872,-1.0261681649039998,NULL,0,'db_batch_1'),(489820,11,9207.679365972663,10778.757776719054,NULL,0,'db_batch_1'),(489821,6,2,2,NULL,0,'db_batch_2'),(489822,8,0.06258026487199997,-0.23220611690399995,NULL,0,'db_batch_2'),(489823,11,18413.02090207267,21559.607158019055,NULL,0,'db_batch_2'),(489824,6,1,1,1,1,'frontendTest_1'),(489825,8,1.205443128872,-1.0261681649039998,NULL,1,'frontendTest_1'),(489826,11,9207.679365972663,10778.757776719054,NULL,1,'frontendTest_1'),(489827,6,1,1,1,1,'frontendTest_2'),(489828,8,1.205443128872,-1.0261681649039998,NULL,1,'frontendTest_2'),(489829,11,9207.679365972663,10778.757776719054,NULL,1,'frontendTest_2'),(489830,6,3.744840383529663,-2.6590445041656494,1,1,'frontendTest_3'),(489831,8,1.205443128872,-1.0261681649039998,NULL,1,'frontendTest_3'),(489832,11,9207.679365972663,10778.757776719054,NULL,1,'frontendTest_3');
+INSERT INTO `location` VALUES (1,6,2.32,5.78,-99,1,'p1'),(2,6,7.66,5.65,-99,1,'p2'),(3,6,6.57,5.64,-99,1,'p3'),(4,8,3.32,3.32,-99,1,'p1'),(5,8,7.34,2.23,43,0,'p2'),(6,8,2.11,3.54,9,0,'p3');
 /*!40000 ALTER TABLE `location` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -310,7 +308,7 @@ CREATE TABLE `robot` (
   `site_id` int NOT NULL,
   `is_charging` tinyint DEFAULT '0',
   PRIMARY KEY (`robot_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -319,7 +317,7 @@ CREATE TABLE `robot` (
 
 LOCK TABLES `robot` WRITE;
 /*!40000 ALTER TABLE `robot` DISABLE KEYS */;
-INSERT INTO `robot` VALUES (6,'Mini 6 Western','172.30.116.30',30000,'','2024-09-06 18:39:01',0,50,5,10,1,0);
+INSERT INTO `robot` VALUES (6,'Mini 6 Western','172.30.116.30',30000,'','2024-09-06 18:39:01',0,50,5,10,1,0),(8,'Mini 8 Western','172.30.116.30',30000,'','2024-09-06 18:39:01',0,50,5,10,1,0);
 /*!40000 ALTER TABLE `robot` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -434,7 +432,7 @@ CREATE TABLE `task` (
   `timeStamp` datetime DEFAULT NULL,
   `current_instruction_index` int DEFAULT '0',
   PRIMARY KEY (`task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -443,7 +441,6 @@ CREATE TABLE `task` (
 
 LOCK TABLES `task` WRITE;
 /*!40000 ALTER TABLE `task` DISABLE KEYS */;
-INSERT INTO `task` VALUES (1,'task1',6,0,'[\"navigation:startNavigation:frontendTest_1\"]',NULL,'2023-03-16 08:45:21',NULL,'2025-03-16 19:09:02',0),(2,'task2',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\"]',NULL,'2025-02-20 13:35:07',NULL,'2025-03-16 19:09:02',0),(3,'task3',6,0,'[\"navigation:startNavigation:frontendTest_1\",\"navigation:startNavigation:frontendTest_2\",\"navigation:startNavigation:frontendTest_1\"]',NULL,'2025-02-20 13:35:07',NULL,'2025-03-16 19:09:02',0);
 /*!40000 ALTER TABLE `task` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -472,7 +469,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin','$2b$10$49Avw/OC0.oPCHUr4mGPKex2c3OdS57gN8Npu0vViKzOzzpD.1HDC','admin@gmail.com',1),(2,'testuser','$2b$10$vofg/FFLYxvHS5QG1QXalOaoAcmLOUqxNAKdP7jOwWGmhbSHNNrf6','robonav41@gmail.com',1);
+INSERT INTO `users` VALUES (1,'admin','$2b$10$49Avw/OC0.oPCHUr4mGPKex2c3OdS57gN8Npu0vViKzOzzpD.1HDC','admin@gmail.com',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -485,4 +482,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-16 19:13:16
+-- Dump completed on 2025-03-25 15:06:42
