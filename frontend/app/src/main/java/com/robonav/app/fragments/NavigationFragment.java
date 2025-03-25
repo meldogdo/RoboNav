@@ -384,6 +384,7 @@ public class NavigationFragment extends Fragment {
     }
 
     public static void getAndDisplayRecentInstructions(Context context, String robotId) {
+        outputTextView.setText(""); // Clear previous messages
         fetchRecentInstructions(context, robotId).thenAccept(instructions -> {
             if (instructions.isEmpty()) {
                 showMessage("No recent instructions found.", context);
@@ -399,17 +400,21 @@ public class NavigationFragment extends Fragment {
     }
 
     private static void appendOutputMessage(String message) {
-        outputTextView.setText(""); // Clear previous messages
+        // Get existing text
+        String currentText = outputTextView.getText().toString().trim(); // Trim to avoid trailing newlines
 
-        // Append the new message
-        outputTextView.setText(message);
+        // Append the new message at the bottom, ensuring spacing between messages
+        String updatedText = currentText.isEmpty() ? message : currentText + "\n\n" + message;
+
+        outputTextView.setText(updatedText);
 
         // Ensure UI updates before scrolling
         scrollView.post(() -> {
-            scrollView.fullScroll(View.FOCUS_UP); // Scroll to the top to show the latest message
+            scrollView.fullScroll(View.FOCUS_UP); // Scroll to the bottom to show the latest message
             outputTextView.invalidate(); // Force UI update
         });
     }
+
 
 
     public static void fetchAndPopulateInstructionSpinner(Context context) {
