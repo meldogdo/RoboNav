@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -166,10 +167,6 @@ public class UtilitiesFragment extends Fragment {
                         robotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         robotCallbacksSpinner.setAdapter(robotAdapter);
 
-                        // Fetch all robots' callbacks initially
-                        handleRobotSelection("All Robots");
-
-
                         // Set default selection and listener
                         robotCallbacksSpinner.setSelection(0);  // Ensure default is 'All Robots'
                         robotCallbacksSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -191,7 +188,8 @@ public class UtilitiesFragment extends Fragment {
                 },
                 error -> {
                     error.printStackTrace();
-                    showMessage("Failed to fetch robots. Check your connection.", requireContext());
+                    String message = extractVolleyErrorMessage(error);
+                    showMessage(message, requireContext());
                 }
         ) {
             @Override
@@ -271,7 +269,8 @@ public class UtilitiesFragment extends Fragment {
                 },
                 error -> {
                     error.printStackTrace();
-                    showMessage("Failed to fetch callbacks. Check your connection.", requireContext());
+                    String message = extractVolleyErrorMessage(error);
+                    showMessage(message, requireContext());
                 }
         ) {
             @Override
@@ -363,7 +362,8 @@ public class UtilitiesFragment extends Fragment {
                         },
                         error -> {
                             error.printStackTrace();
-                            showMessage("Failed to fetch robots. Check your connection.", requireContext());
+                            String message = extractVolleyErrorMessage(error);
+                            showMessage(message, requireContext());
                         }
                 ) {
                     @Override
@@ -440,7 +440,8 @@ public class UtilitiesFragment extends Fragment {
                             },
                             error -> {
                                 error.printStackTrace();
-                                showMessage("Failed to save location. Please try again.", requireContext());
+                                String message = extractVolleyErrorMessage(error);
+                                showMessage(message, requireContext());
                             }
                     ) {
                         @Override
@@ -499,7 +500,8 @@ public class UtilitiesFragment extends Fragment {
                         },
                         error -> {
                             error.printStackTrace();
-                            showMessage("Failed to fetch robots. Check your connection.", requireContext());
+                            String message = extractVolleyErrorMessage(error);
+                            showMessage(message, requireContext());
                         }
                 ) {
                     @Override
@@ -557,7 +559,8 @@ public class UtilitiesFragment extends Fragment {
                                 },
                                 error -> {
                                     error.printStackTrace();
-                                    showMessage("Failed to fetch locations. Check your connection.", requireContext());
+                                    String message = extractVolleyErrorMessage(error);
+                                    showMessage(message, requireContext());
                                 }
                         ) {
                             @Override
@@ -617,7 +620,8 @@ public class UtilitiesFragment extends Fragment {
                             },
                             error -> {
                                 error.printStackTrace();
-                                showMessage("Failed to remove location. Please try again.", requireContext());
+                                String message = extractVolleyErrorMessage(error);
+                                showMessage(message, requireContext());
                             }
                     ) {
                         @Override
@@ -723,7 +727,8 @@ public class UtilitiesFragment extends Fragment {
                                             },
                                             error -> {
                                                 error.printStackTrace();
-                                                showMessage("Failed to get coordinates. Please try again.", requireContext());
+                                                String message = extractVolleyErrorMessage(error);
+                                                showMessage(message, requireContext());
                                             }
                                     ) {
                                         @Override
@@ -751,7 +756,8 @@ public class UtilitiesFragment extends Fragment {
                         },
                         error -> {
                             error.printStackTrace();
-                            showMessage("Failed to fetch locations. Check your connection.", requireContext());
+                            String message = extractVolleyErrorMessage(error);
+                            showMessage(message, requireContext());
                         }
                 ) {
                     @Override
@@ -788,6 +794,5 @@ public class UtilitiesFragment extends Fragment {
         View view = inflater.inflate(layoutResId, (ViewGroup) dynamicContentContainer, false);
         ((ViewGroup) dynamicContentContainer).addView(view);
     }
-
 
 }

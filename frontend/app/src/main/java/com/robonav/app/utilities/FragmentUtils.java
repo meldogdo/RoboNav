@@ -10,6 +10,7 @@ import androidx.core.widget.NestedScrollView;
 import java.util.function.Consumer;
 
 
+import com.android.volley.VolleyError;
 import com.robonav.app.R;
 import com.robonav.app.activities.CreateTaskActivity;
 import com.robonav.app.models.Robot;
@@ -58,7 +59,20 @@ public class FragmentUtils {
         }
     }
 
-
+    public static String extractVolleyErrorMessage(VolleyError error) {
+        try {
+            if (error.networkResponse != null && error.networkResponse.data != null) {
+                String responseBody = new String(error.networkResponse.data, "utf-8");
+                JSONObject data = new JSONObject(responseBody);
+                if (data.has("message")) {
+                    return data.getString("message");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "An unexpected error occurred. Check your connection.";
+    }
 
     /**
          * Validates a robot model name.

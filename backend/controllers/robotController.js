@@ -975,6 +975,7 @@ const resumeTask = (req, res) => {
         });
     });
 };
+
 // Save the current position of a robot to a location
 const saveCurrentRobotPosition = (req, res) => {
     const { robotId, locationName } = req.body;
@@ -983,40 +984,56 @@ const saveCurrentRobotPosition = (req, res) => {
         return res.status(400).json({ message: 'Robot ID and location name are required' });
     }
 
-    // Fetch the latest position of the robot
-    const fetchPositionSQL = `
-        SELECT x, y, z, theta 
-        FROM robot_location 
-        WHERE robot_id = ? 
-        ORDER BY r_loc_id DESC 
-        LIMIT 1;
+    // Check if location name already exists
+    const checkDuplicateSQL = `
+        SELECT 1 FROM location WHERE name = ? LIMIT 1;
     `;
 
-    db.query(fetchPositionSQL, [robotId], (err, results) => {
+    db.query(checkDuplicateSQL, [locationName], (err, duplicateResults) => {
         if (err) {
-            logger.error(`Error fetching robot ${robotId} position:`, err);
+            logger.error('Error checking location name:', err);
             return res.status(500).json({ message: 'Database error' });
         }
 
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'No recorded position for this robot' });
+        if (duplicateResults.length > 0) {
+            return res.status(409).json({ message: `Location name '${locationName}' already exists.` });
         }
 
-        const { x, y, z, theta } = results[0];
-
-        // Insert the latest position into the location table
-        const insertLocationSQL = `
-            INSERT INTO location (robot_id, x, y, z, theta, name) 
-            VALUES (?, ?, ?, ?, ?, ?);
+        // Fetch the latest position of the robot
+        const fetchPositionSQL = `
+            SELECT x, y, z, theta 
+            FROM robot_location 
+            WHERE robot_id = ? 
+            ORDER BY r_loc_id DESC 
+            LIMIT 1;
         `;
 
-        db.query(insertLocationSQL, [robotId, x, y, z, theta, locationName], (err) => {
+        db.query(fetchPositionSQL, [robotId], (err, results) => {
             if (err) {
-                logger.error(`Error saving location ${locationName} for robot ${robotId}:`, err);
+                logger.error(`Error fetching robot ${robotId} position:`, err);
                 return res.status(500).json({ message: 'Database error' });
             }
 
-            res.status(201).json({ message: `Location '${locationName}' saved successfully.` });
+            if (results.length === 0) {
+                return res.status(404).json({ message: 'No recorded position for this robot' });
+            }
+
+            const { x, y, z, theta } = results[0];
+
+            // Insert the latest position into the location table
+            const insertLocationSQL = `
+                INSERT INTO location (robot_id, x, y, z, theta, name) 
+                VALUES (?, ?, ?, ?, ?, ?);
+            `;
+
+            db.query(insertLocationSQL, [robotId, x, y, z, theta, locationName], (err) => {
+                if (err) {
+                    logger.error(`Error saving location ${locationName} for robot ${robotId}:`, err);
+                    return res.status(500).json({ message: 'Database error' });
+                }
+
+                res.status(201).json({ message: `Location '${locationName}' saved successfully.` });
+            });
         });
     });
 };
