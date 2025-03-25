@@ -1,6 +1,7 @@
 package com.robonav.app.utilities;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.robonav.app.utilities.FragmentUtils.extractVolleyErrorMessage;
 import static com.robonav.app.utilities.FragmentUtils.showMessage;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -84,9 +85,9 @@ public class JsonUtils {
                     future.complete(robotNames);
                 },
                 error -> {
-                    error.printStackTrace();
-                    // If there's an error, complete the future exceptionally
-                    future.completeExceptionally(error);
+                    String mess = extractVolleyErrorMessage(error);
+                    showMessage(mess, context);
+                    future.completeExceptionally(new Exception(error));
                 }
         ) {
             @Override
@@ -130,8 +131,9 @@ public class JsonUtils {
                     future.complete(taskMap);
                 },
                 error -> {
-                    error.printStackTrace();
-                    future.completeExceptionally(error);
+                    String mess = extractVolleyErrorMessage(error);
+                    showMessage(mess, context);
+                    future.completeExceptionally(new Exception(error));
                 }
         ) {
             @Override
@@ -170,21 +172,9 @@ public class JsonUtils {
                     showMessage("Instruction queued successfully.", context);
                 },
                 error -> {
-                    if (error.networkResponse != null) {
-                        int statusCode = error.networkResponse.statusCode;
-                        String responseBody = new String(error.networkResponse.data);
-
-                        String message = "Unexpected error.";
-                        switch (statusCode) {
-                            case 400:
-                                if (responseBody.contains("Task not found or has already started")) {
-                                    message = "Task not found or already started.";
-                                }
-                                break;
-                        }
-                        showMessage(message, context);
-                    }
-                    future.completeExceptionally(new Exception("Failed to send instruction to task."));
+                    String mess = extractVolleyErrorMessage(error);
+                    showMessage(mess, context);
+                    future.completeExceptionally(new Exception(error));
                 }) {
 
             @Override
@@ -240,8 +230,11 @@ public class JsonUtils {
                 },
                 error -> {
                     error.printStackTrace();
-                    future.completeExceptionally(new Exception("Failed to retrieve recent instructions. Check connection.", error));
-                }
+                    String mess = extractVolleyErrorMessage(error);
+                    showMessage(mess, context);
+                    future.completeExceptionally(new Exception(error));
+
+        }
         ) {
             @Override
             public Map<String, String> getHeaders() {
@@ -301,8 +294,9 @@ public class JsonUtils {
                     }
                 },
                 error -> {
-                    Log.e("LocationDetailsError", "Network error", error);
-                    future.completeExceptionally(error);
+                    String mess = extractVolleyErrorMessage(error);
+                    showMessage(mess, context);
+                    future.completeExceptionally(new Exception(error));
                 }
         ) {
             @Override
@@ -319,114 +313,4 @@ public class JsonUtils {
 
         return future;
     }
-
-    public static CompletableFuture<List<String>> loadCallbacks(Context context) {
-        // Initialize the CompletableFuture to return the result
-        CompletableFuture<List<String>> future = new CompletableFuture<>();
-
-        String url = ConfigManager.getBaseUrl() + "/api/protected/robot/callbacks";
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-
-        StringRequest request = new StringRequest(Request.Method.GET, url,
-                response -> {
-                    try {
-                        // Parse the response
-                        JSONObject jsonResponse = new JSONObject(response);
-                        JSONArray data = jsonResponse.getJSONArray("data");
-
-                        List<String> callbackMessages = new ArrayList<>();
-                        for (int i = 0; i < data.length(); i++) {
-                            callbackMessages.add(data.getString(i));
-                        }
-
-                        // Complete the future with the callback messages data
-                        future.complete(callbackMessages);
-
-                    } catch (JSONException e) {
-                        // Handle the exception and complete the future exceptionally
-                        future.completeExceptionally(new Exception("Error parsing callback data.", e));
-                    }
-                },
-                error -> {
-                    // Handle the error and complete the future exceptionally
-                    future.completeExceptionally(new Exception("Failed to fetch callbacks.", error));
-                }) {
-            @Override
-            public java.util.Map<String, String> getHeaders() {
-                // Correct the header map type
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + getTokenFromPrefs(context));
-                return headers;
-            }
-        };
-
-        queue.add(request);
-        return future;  // Return the CompletableFuture with the list of callback messages
-    }
-
-
-
-    // Method to send robot instruction to API
-    public static CompletableFuture<String> sendRobotInstruction(Context context, String robotId, String instruction) {
-        // Initialize the CompletableFuture to return the result
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        // Prepare the request body
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("robot_id", robotId);
-            requestBody.put("instruction", instruction);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            future.completeExceptionally(e);
-            return future;  // Return if there's an error preparing the request
-        }
-
-        // Define the URL for the API endpoint
-        String apiUrl = ConfigManager.getBaseUrl() + "/api/protected/robot/task/instruction";
-        RequestQueue queue = Volley.newRequestQueue(context);
-
-        // Create a JsonObjectRequest for the POST request
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, apiUrl, requestBody,
-                response -> {
-                    try {
-                        // Parse the response to get the message
-                        String message = response.getString("message");
-                        // Complete the future with the success message
-                        future.complete(message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        future.completeExceptionally(e);  // Complete exceptionally if JSON parsing fails
-                    }
-                },
-                error -> {
-                    error.printStackTrace();
-                    // Complete the future exceptionally if there was an error with the request
-                    future.completeExceptionally(error);
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders() {
-                // Provide authorization headers if needed
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + getTokenFromPrefs(context));  // Add token from preferences
-                return headers;
-            }
-        };
-
-        // Add the request to the queue
-        queue.add(request);
-
-        // Return the CompletableFuture that will be completed when the response is received
-        return future;
-    }
-
-
-
-
-
-
-
-
 }

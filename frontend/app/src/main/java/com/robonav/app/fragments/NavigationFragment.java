@@ -64,6 +64,7 @@ public class NavigationFragment extends Fragment {
     private static String currentRobotId;
     private static NestedScrollView scrollView;
     private ImageButton refresh;
+    private boolean isSpinnerInitialized = false;
 
 
     @Override
@@ -140,42 +141,38 @@ public class NavigationFragment extends Fragment {
             }
         });
 
-
         instructionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                // Get the selected instruction name (if needed for logging or any other purpose)
+                if (!isSpinnerInitialized) {
+                    isSpinnerInitialized = true;
+                    return;
+                }
+
                 String selectedInstruction = parentView.getItemAtPosition(position).toString();
                 Log.d("InstructionSelected", "Selected Instruction: " + selectedInstruction);
 
-                // Check if the selected instruction is "All Robots"
-                if(selectedInstruction.equals("All Robots")){
+                if (selectedInstruction.equals("All Robots")) {
                     getAndDisplayRecentInstructions(requireContext(), null);
-                }
-                else {
-                    // Extract the number after the '#' symbol
+                } else {
                     String[] parts = selectedInstruction.split("#");
-
                     if (parts.length > 1) {
-                        String instructionId = parts[1].trim(); // Get the number after '#'
-
+                        String instructionId = parts[1].trim();
                         try {
                             String encodedInstructionId = URLEncoder.encode(instructionId, "UTF-8");
-                            // Call getAndDisplayRecentInstructions with the encoded instruction ID
                             getAndDisplayRecentInstructions(requireContext(), encodedInstructionId);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                             showMessage("Encoding error: Unable to fetch instruction data.", requireContext());
                         }
                     } else {
-                        // Handle case where the instruction format is incorrect
                         showMessage("Invalid instruction format. Please retry.", requireContext());
                     }
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-                // Handle the case when nothing is selected (optional)
                 Log.d("InstructionSelected", "No instruction selected.");
             }
         });
@@ -261,6 +258,8 @@ public class NavigationFragment extends Fragment {
         fetchAndStoreRobotTasks(requireContext());
         fetchAndPopulateInstructionSpinner(requireContext());
         fetchAndPopulateLocationSpinner(requireContext(),null);
+        getAndDisplayRecentInstructions(requireContext(), null);
+
     }
     public static void fetchAndStoreRobotTasks(Context context) {
         CompletableFuture<HashMap<String, Pair<String, String>>> future = loadRobotTasks(context);
@@ -278,10 +277,7 @@ public class NavigationFragment extends Fragment {
                 Log.d("TaskData", "Task Name: " + taskName + ", Task ID: " + taskId + ", Robot ID: " + robotId);
             }
             populateTaskSpinner(storedTasks, context);
-        }).exceptionally(e -> {
-            Log.e("TaskError", "Error fetching tasks", e);
-            return null;
-        });
+        }).exceptionally(e -> null);
     }
     private static void populateTaskSpinner(HashMap<String, Pair<String, String>> storedTasks, Context context) {
         // Clear the existing items in the spinner
@@ -396,10 +392,7 @@ public class NavigationFragment extends Fragment {
                     appendOutputMessage(message);  // Output each instruction message
                 }
             }
-        }).exceptionally(ex -> {
-            showMessage(ex.getMessage(), context);  // Handle any exceptions that occur
-            return null;
-        });
+        }).exceptionally(ex -> null);
     }
 
     private static void appendOutputMessage(String message) {
